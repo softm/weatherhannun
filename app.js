@@ -255,7 +255,7 @@
       if(!daytime)penalty(18,"야간 세차","시야와 주변 안전을 위해 가급적 낮 시간을 선택하세요.");
     }
     if(reasons.length===0)reasons.push({label:"주요 기상 위험 낮음",detail:"선택한 활동에 대해 설정된 기상조건의 큰 위험이 없습니다."});
-    return {score:clamp(Math.round(score),0,100),reasons:reasons};
+    return {score:clamp(Math.round(score),0,activity==="spray"?85:100),reasons:reasons};
   }
   function activityEvalAt(type,index){
     var h=STATE.hourly[index]||{};
