@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1730">
+  <meta name="description" content="오늘 무엇을 하기 좋은 날씨일까? 날씨한눈 — 시간별 날씨, 농작업·산책·빨래·세차 적합 시간, 대기질과 전국 비교.">
+  <meta property="og:title" content="날씨한눈 — 예보를 행동으로">
+  <meta property="og:description" content="날씨를 확인하고, 가장 좋은 시간을 고르세요.">
+  <title>날씨한눈 | 예보를 행동으로</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://api.open-meteo.com">
+  <link rel="preconnect" href="https://air-quality-api.open-meteo.com">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo//kqL4xMVH1x8=" crossorigin="">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="top-inner">
+        <a class="brand" href="./" aria-label="날씨한눈 홈"><span class="brand-symbol" aria-hidden="true">✺</span><span>날씨<span class="brand-accent">한눈</span><small>WEATHER, FOR LIFE</small></span></a>
+        <nav class="desktop-nav" aria-label="주요 메뉴">
+          <button class="nav-button active" data-view="today">오늘</button>
+          <button class="nav-button" data-view="weekly">주간예보</button>
+          <button class="nav-button" data-view="activity">활동 추천</button>
+          <button class="nav-button" data-view="air">대기질</button>
+          <button class="nav-button" data-view="map">전국날씨</button>
+        </nav>
+        <div class="top-actions">
+          <button type="button" id="locationButton" class="location-button" aria-label="지역 검색"><span aria-hidden="true">⌖</span> <span id="locationTitle">서산</span> <span class="small-chevron">⌄</span></button>
+          <button type="button" id="refreshButton" class="icon-button" title="데이터 새로고침" aria-label="새로고침">↻</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="content">
+      <section class="intro content-bound" aria-label="서비스 소개">
+        <div><p class="eyebrow"><span class="live-pulse"></span> LIFE-WEATHER INTELLIGENCE</p><h1>날씨를 넘어, <em>오늘의 선택</em>까지.</h1><p class="intro-desc">비가 올까? 보다 중요한 건, <strong>언제 무엇을 하면 좋을까?</strong></p></div>
+        <div class="intro-side"><span id="todayDate">날짜 확인 중</span><span id="updatedBadge" class="freshness">예보 연결 중</span></div>
+      </section>
+
+      <section id="view-today" class="screen active content-bound" aria-label="오늘 날씨">
+        <div class="hero-grid">
+          <article class="hero-weather glass-card">
+            <div class="hero-head"><div><span class="section-overline">CURRENT WEATHER</span><h2><span id="heroLocation">서산</span>의 지금</h2></div><button id="heroShare" class="ghost-button" aria-label="현재 지역 공유">↗ 공유</button></div>
+            <div class="weather-core"><div class="giant-icon" id="weatherIcon" aria-hidden="true">☀️</div><div class="temperature"><strong id="currentTemp">--</strong><span>°</span></div><div class="condition-block"><b id="weatherSummary">날씨 불러오는 중</b><span id="feelsText">체감 --°</span></div></div>
+            <div class="temperature-range"><span>최고 <b id="maxTemp">--°</b></span><span>최저 <b id="minTemp">--°</b></span><span class="pipe"></span><span id="sunTimes">일출·일몰 확인 중</span></div>
+            <div class="weather-metrics"><div><span>☂</span><p>강수확률</p><b id="rainMetric">--%</b></div><div><span>≋</span><p>풍속</p><b id="windMetric">--</b></div><div><span>◉</span><p>습도</p><b id="humidityMetric">--%</b></div><div><span>◐</span><p>자외선</p><b id="uvMetric">--</b></div></div>
+            <div id="noticeStrip" class="notice-strip">예보 데이터를 연결하고 있습니다.</div>
+          </article>
+
+          <article class="decision-card">
+            <div class="decision-head"><div><span class="section-overline">TODAY'S PICK</span><h2>지금 하기 좋은 일 <span>✦</span></h2></div><span class="decision-mark">AI가 아닌<br>규칙 기반 분석</span></div>
+            <p class="decision-lead" id="decisionLead">날씨를 분석하고 있습니다.</p>
+            <div id="quickActivity" class="quick-activity"><div class="skeleton">날씨 분석 중…</div></div>
+            <div class="decision-foot"><span>시각별 기온·비·바람으로 적합 시간을 계산해요</span><button class="text-link" data-view="activity">자세히 보기 →</button></div>
+          </article>
+        </div>
+
+        <div class="section-title"><div><span class="section-overline">NEXT 36 HOURS</span><h2>시간별 날씨</h2></div><span class="section-note">← 좌우로 스크롤 →</span></div>
+        <section class="glass-card hourly-panel" aria-label="시간별 예보">
+          <div class="chart-head"><span>기온 흐름</span><div class="legend"><span><i class="legend-dot temp-dot"></i>기온</span><span><i class="legend-dot rain-dot"></i>비 확률</span></div></div>
+          <div class="hourly-scroll" id="hourlyScroll"><div id="hourlyChart" class="hourly-chart" aria-label="시간별 기온 그래프"><div class="empty-state">시간별 예보를 불러오는 중…</div></div><div id="hourlyItems" class="hourly-items"></div></div>
+          <div class="chart-caption">기온: °C · 강수확률: % · 풍속: km/h · 예보값은 변할 수 있습니다</div>
+        </section>
+
+        <div class="section-title compact-gap"><div><span class="section-overline">PLAN AHEAD</span><h2>앞으로 7일</h2></div><button class="text-link" data-view="weekly">주간예보 전체 보기 →</button></div>
+        <div id="weekPreview" class="weekly-strip"></div>
+      </section>
+
+      <section id="view-weekly" class="screen content-bound" aria-label="주간예보">
+        <div class="page-header"><div><span class="section-overline">7-DAY OUTLOOK</span><h2>이번 주, 한눈에</h2><p>한 주의 온도 변화와 비 오는 날을 빠르게 확인하세요.</p></div></div>
+        <div id="weeklyCards" class="week-grid"></div>
+        <div class="glass-card details-card"><h3>이번 주 체크 포인트</h3><div id="weeklyInsight" class="weekly-insight">예보 분석 중…</div></div>
+      </section>
+
+      <section id="view-activity" class="screen content-bound" aria-label="활동 추천">
+        <div class="page-header"><div><span class="section-overline">YOUR WEATHER WINDOW</span><h2>무엇을 할 계획인가요?</h2><p>단순 예보가 아닌, 앞으로 48시간 중 적합한 시간대를 찾아드립니다.</p></div></div>
+        <div class="activity-selector" id="activitySelector" role="group" aria-label="활동 선택">
+          <button data-activity="spray" class="active">🌿 농약 방제</button><button data-activity="harvest">🌾 수확·농작업</button><button data-activity="walk">🚶 산책·외출</button><button data-activity="laundry">👕 빨래</button><button data-activity="carwash">🚗 세차</button>
+        </div>
+        <div class="activity-grid">
+          <article class="glass-card activity-result"><div class="section-overline">ACTIVITY OUTLOOK</div><h3 id="activityTitle">농약 방제</h3><div class="score-wrap"><span id="activityScore" class="score-number">--</span><span class="score-max">/100 <b id="activityGrade">분석 중</b></span></div><div class="score-track"><div id="activityProgress"></div></div><p id="activityDetail">데이터를 연결하고 있습니다.</p><div class="best-window"><span>추천 시간대</span><strong id="activityBest">계산 중…</strong></div></article>
+          <article class="glass-card activity-explain"><span class="section-overline">WHY THIS SCORE?</span><h3>판단 근거</h3><div id="activityReasons"></div><p class="disclaimer">이 점수는 안내용 참고값이며 공식 기상특보·현장 상황·농약 표시기준을 대체하지 않습니다. 농약 비산·살포 안전은 별도로 확인하세요.</p></article>
+        </div>
+        <div class="section-title"><div><span class="section-overline">BEST HOURS</span><h2>시간대별 적합도</h2></div></div>
+        <div class="glass-card suitability-panel" id="activityHours"><div class="empty-state">분석 중…</div></div>
+      </section>
+
+      <section id="view-air" class="screen content-bound" aria-label="대기질">
+        <div class="page-header"><div><span class="section-overline">AIR QUALITY MODEL</span><h2>오늘 숨 쉬기 좋은 날일까?</h2><p>대기질 모델의 예측값입니다. 환경부 측정소 실측값과 다를 수 있습니다.</p></div></div>
+        <div class="air-grid"><article class="glass-card air-main"><span class="section-overline">FINE PARTICULATE MATTER</span><div id="airGrade" class="air-grade">데이터 연결 중…</div><p id="airStatement">미세먼지 예측 정보를 불러옵니다.</p><span id="airTime" class="muted-text"></span></article><article class="glass-card air-details"><h3>대기질 예측값</h3><div id="airMetrics" class="air-metrics">연결 중…</div><span class="muted-text">단위 μg/m³ · 등급은 참고용 국내 농도구간 간이 분류</span></article></div>
+      </section>
+
+      <section id="view-map" class="screen content-bound" aria-label="전국날씨 지도">
+        <div class="page-header"><div><span class="section-overline">KOREA WEATHER MAP</span><h2>전국 날씨, 지도 한눈에</h2><p>각 도시를 눌러 날씨를 비교하고 바로 해당 지역 예보로 이동하세요.</p></div></div>
+        <div id="mapShell" class="map-shell glass-card">
+          <div class="map-toolbar"><div class="map-toolbar-label"><span class="live-pulse"></span><b>전국 기온 지도</b><small id="mapUpdated">날씨 데이터 연결 중</small></div><div class="map-buttons"><button id="mapTools" title="지도 도구 펼치기" aria-expanded="false">☷ <span>확장</span></button><button id="mapFocus" title="지도 집중모드" aria-pressed="false">⛶ <span>전체지도</span></button><button id="mapClose" title="전체지도 닫기" hidden>✕</button></div></div>
+          <div id="mapExtra" class="map-extra" hidden><button id="mapReset">◎ 전국 맞춤</button><button id="mapCurrent">⌖ 내 위치</button><button id="mapCollapse">↥ 메뉴 접기</button></div>
+          <div id="map" role="application" aria-label="한국 주요 도시 날씨 지도"><div class="map-fallback">지도 라이브러리를 불러오지 못했습니다. 아래 도시 목록으로도 예보를 확인할 수 있습니다.</div></div>
+          <div class="map-hint">도시 마커 선택 → 오늘 예보 확인 · 지도 전체모드 지원</div>
+        </div>
+        <div id="cityGrid" class="city-grid"></div>
+        <p class="map-attribution">지도 © OpenStreetMap contributors · 날씨 데이터 © Open-Meteo.com</p>
+      </section>
+
+      <section class="status-footer content-bound" aria-label="데이터 제공 정보">
+        <div><span class="status-light"></span><b id="dataFooterStatus">예보 갱신 상태 확인 중</b><span id="modelTime">—</span></div><a href="./data-status.html">수집 상태 상세 →</a>
+      </section>
+    </main>
+    <footer class="site-footer"><div class="content-bound"><span>날씨한눈 <b>WEATHERHANNUN</b> · 예보를 행동으로</span><span>날씨·대기질 © <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> · 관측 실측/공식 특보가 아닙니다</span></div></footer>
+    <nav class="mobile-nav" aria-label="모바일 주요 메뉴"><button data-view="today" class="active"><span>☀</span>오늘</button><button data-view="weekly"><span>▦</span>주간</button><button data-view="activity"><span>✦</span>추천</button><button data-view="air"><span>◉</span>대기질</button><button data-view="map"><span>◎</span>지도</button></nav>
+  </div>
+  <dialog id="locationDialog" aria-label="지역 선택"><div class="dialog-head"><div><span class="section-overline">LOCATION</span><h2>어디 날씨가 궁금하세요?</h2></div><button id="dialogClose" aria-label="닫기">✕</button></div><form method="dialog" id="searchForm"><label for="locationSearch">도시·지역 검색</label><div class="search-box"><span>⌕</span><input id="locationSearch" autocomplete="off" placeholder="예: 서산, 서울, 부산, Seosan" /><button type="submit">검색</button></div></form><button id="geoButton" class="geo-option">⌖ 현재 위치로 날씨 보기 <span>권한 필요 →</span></button><p class="dialog-subtitle">빠른 지역 선택</p><div id="presetCities" class="city-presets"></div><p class="dialog-subtitle">검색 결과</p><div id="searchResults" class="search-results"><p class="muted-text">지역을 검색하면 여기에 표시됩니다.</p></div></dialog>
+  <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+</body></html>
