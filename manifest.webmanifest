@@ -1,0 +1,20 @@
+{
+  "name": "날씨한눈 | 예보를 행동으로",
+  "short_name": "날씨한눈",
+  "description": "날씨를 넘어 오늘 무엇을 할지 결정하는 생활 날씨 도구",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#091429",
+  "theme_color": "#0b1730",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ]
+}
