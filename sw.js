@@ -1,7 +1,7 @@
 "use strict";
-const CACHE="weatherhannun-shell-v1";
+const CACHE="weatherhannun-shell-v2";
 const BASE=self.registration.scope;
-const SHELL=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icon.svg","./data-status.html"].map(x=>new URL(x,BASE).href);
+const SHELL=["./","./index.html","./styles.css","./app.js","./forecast-insights.js","./forecast-insights.css","./manifest.webmanifest","./icon.svg","./data-status.html"].map(x=>new URL(x,BASE).href);
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim();});
 self.addEventListener("fetch",event=>{
