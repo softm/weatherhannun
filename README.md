@@ -8,7 +8,7 @@
 - 농작업(방제·수확), 산책, 세차, 빨래별 추천 시간대와 위험요인
 - 미세먼지·초미세먼지 예측값(실측 아님)
 - 국내 주요 도시 지도 비교, 모바일 지도 집중모드 및 메뉴 펼침
-- 지역검색, 현재 위치 권한 요청, 지역 북마크 및 URL 공유
+- 지역검색, 현재 위치 권한 요청, 마지막 선택 지역 저장 및 URL 공유
 - 데이터 갱신 상태/원천 투명성(`data-status.html`)
 - 모바일 우선 접근성, PWA 설치 지원 및 캐시
 
@@ -31,7 +31,11 @@ python3 -m http.server 8080
 
 ## 배포
 
-`softm/weatherhannun`은 독립 소스 저장소입니다. GitHub Pages 또는 정적 호스팅에 연결할 수 있습니다.
+- **프로덕션 웹앱**: https://weatherhannun.vercel.app/
+- **GitHub 원본 코드**: https://github.com/softm/weatherhannun
+- **중앙 프로젝트 경로**: https://softm.github.io/projects/weatherhannun/ (GitHub Pages 게시 반영 후 이용 가능)
+
+Vercel 첫 버전은 API를 통한 수동 프로덕션 배포입니다. GitHub 푸시와 Vercel 배포가 자동 연결된 것은 아닙니다. `.github/workflows/pages.yml`은 독립 GitHub Pages 배포 워크플로를 포함하나 저장소 Settings → Pages에서 Source를 **GitHub Actions**로 활성화해야 합니다.
 
 ## 라이선스
 
