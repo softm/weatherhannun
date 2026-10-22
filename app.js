@@ -59,7 +59,9 @@
   function validLocation(loc) { return loc && typeof loc.name==="string" && loc.name.length<90 && finite(Number(loc.lat)) && finite(Number(loc.lon)) && Math.abs(Number(loc.lat))<=90 && Math.abs(Number(loc.lon))<=180; }
   function applyLocation(loc, updateUrl) {
     if (!validLocation(loc)) return;
+    var changed=STATE.loc.lat!==Number(loc.lat)||STATE.loc.lon!==Number(loc.lon);
     STATE.loc = {name:String(loc.name).slice(0,45),lat:Number(loc.lat),lon:Number(loc.lon)};
+    if(changed){STATE.weather=null;STATE.air=null;STATE.hourly=[];STATE.fetchedAt=null;text("currentTemp","--");text("weatherSummary","새 지역 예보 연결 중");}
     $("locationTitle").textContent=STATE.loc.name;
     $("heroLocation").textContent=STATE.loc.name;
     storeSet("weatherhannun_location",STATE.loc);
@@ -220,7 +222,7 @@
       if(rain>=40||mm>0.2)penalty(42,"강수 위험","강수확률 "+num(rain)+"%, 예상강수 "+num(mm,1)+"mm.");
       else if(rain>=20)penalty(16,"강수 가능성","비 예보를 다시 확인하세요.");
       if(t>=30)penalty(19,"고온 주의","기온 "+num(t)+"°C — 약해 및 작업자 열스트레스 유의.");
-      if(!daytime)penalty(9,"야간 작업","시야 및 작업 안전 확인 필요.");
+      if(!daytime)penalty(42,"야간 작업","방제는 밝은 시간에 현장 안전과 표시사항을 확인하세요.");
     } else if(activity==="harvest") {
       if(rain>=45||mm>=0.4)penalty(44,"비에 의한 작업 위험","강수확률 "+num(rain)+"%.");
       else if(rain>=20)penalty(13,"약한 강수 가능성","당일 강수 예보를 살펴보세요.");
@@ -249,6 +251,7 @@
       else if(futureMax>=20)penalty(24,"강수 변동 위험","이후 6시간 최고 강수확률 "+num(futureMax)+"%.");
       if(wind>=32)penalty(17,"강풍 주의","풍속 "+num(wind)+" km/h.");
       if(t<=1)penalty(38,"결빙 위험","기온 "+num(t)+"°C — 물기 결빙 우려.");
+      if(!daytime)penalty(18,"야간 세차","시야와 주변 안전을 위해 가급적 낮 시간을 선택하세요.");
     }
     if(reasons.length===0)reasons.push({label:"주요 기상 위험 낮음",detail:"선택한 활동에 대해 설정된 기상조건의 큰 위험이 없습니다."});
     return {score:clamp(Math.round(score),0,100),reasons:reasons};
@@ -351,12 +354,10 @@
       var content='<div><span>'+sym.icon+'</span> '+safe(city.name)+' <b>'+num(city.temp)+'°</b></div>';
       var marker=L.marker([city.lat,city.lon],{icon:L.divIcon({className:"weather-map-pin",html:content,iconSize:[105,43],iconAnchor:[53,42]})}).addTo(STATE.map);
       marker.bindPopup('<b>'+safe(city.name)+'</b><p>'+sym.name+' · '+num(city.temp)+'°</p><button class="map-open-city">이 지역 예보 보기 →</button>');
-      marker.on("click",function(){
-        if(window.innerWidth<710)setMapFocus(true);
-        marker.once("popupopen",function(){
-          var pop=marker.getPopup().getElement(),b=pop&&pop.querySelector(".map-open-city");
-          if(b)b.addEventListener("click",function(){chooseCity(i);});
-        });
+      marker.on("click",function(){if(window.innerWidth<710)setMapFocus(true);});
+      marker.on("popupopen",function(){
+        var pop=marker.getPopup().getElement(),b=pop&&pop.querySelector(".map-open-city");
+        if(b)b.addEventListener("click",function(){chooseCity(i);},{once:true});
       });
       STATE.markers.push(marker);
     });
