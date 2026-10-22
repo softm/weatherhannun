@@ -114,7 +114,7 @@
     var current=w.current&&w.current.time ? w.current.time.slice(0,13) : new Date().toISOString().slice(0,13);
     var index=h.time.findIndex(function(t){return t.slice(0,13)>=current;});
     if(index<0) index=0;
-    return h.time.slice(index,index+48).map(function(time,i){
+    return h.time.slice(index,index+168).map(function(time,i){
       var k=index+i;
       return {time:time,temp:h.temperature_2m?.[k],rain:h.precipitation_probability?.[k],mm:h.precipitation?.[k],code:h.weather_code?.[k],wind:h.wind_speed_10m?.[k],gust:h.wind_gusts_10m?.[k],humidity:h.relative_humidity_2m?.[k],uv:h.uv_index?.[k],isDay:h.is_day?.[k]};
     });
@@ -183,6 +183,7 @@
     renderDecisions();
     renderActivity();
     renderAir();
+    window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:{weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt}}));
   }
   function renderHourly(){
     var h=STATE.hourly.slice(0,36),width=Math.max(36*76,h.length*76);
@@ -262,7 +263,7 @@
   }
   function bestActivity(type){
     var top=null;
-    for(var i=0;i<STATE.hourly.length-2;i++){
+    for(var i=0;i<Math.min(46,STATE.hourly.length-2);i++){
       var group=[i,i+1,i+2];
       var avg=Math.round(group.reduce(function(s,j){return s+activityEvalAt(type,j).score;},0)/3);
       if(!top||avg>top.score)top={score:avg,start:STATE.hourly[i].time,end:STATE.hourly[i+2].time};
