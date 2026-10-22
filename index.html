@@ -13,9 +13,11 @@
   <link rel="preconnect" href="https://api.open-meteo.com">
   <link rel="preconnect" href="https://air-quality-api.open-meteo.com">
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./forecast-insights.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo//kqL4xMVH1x8=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="./app.js"></script>
+  <script defer src="./forecast-insights.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -60,6 +62,32 @@
           </article>
         </div>
 
+        <section class="insight-section" aria-label="비와 맑은 시간 찾기">
+          <div class="section-title"><div><span class="section-overline">WHEN WILL IT RAIN OR CLEAR?</span><h2>언제 비 오고, 언제 맑을까?</h2></div></div>
+          <div class="insight-window glass-card">
+            <div>
+              <div class="insight-intro"><h3>내 일정에 맞춰 날씨 확인</h3><p>예보 기간을 바꾸면 강수 가능성과 맑은 낮 시간을 찾아드립니다.</p></div>
+              <div class="rain-tabs" role="group" aria-label="예보 기간 선택">
+                <button type="button" data-rain-period="48" class="active" aria-pressed="true">48시간</button>
+                <button type="button" data-rain-period="72" aria-pressed="false">3일</button>
+                <button type="button" data-rain-period="168" aria-pressed="false">7일</button>
+                <button type="button" data-rain-period="custom" aria-pressed="false">날짜 지정</button>
+              </div>
+              <div class="rain-dates"><label for="rainDateStart">시작일</label><input id="rainDateStart" type="date" aria-label="시작일"><label for="rainDateEnd">종료일</label><input id="rainDateEnd" type="date" aria-label="종료일"><button id="applyRainDates" type="button">적용</button></div>
+              <p class="section-note" id="windowCaption" aria-live="polite">예보 연결 중…</p>
+              <div class="rain-headline" id="windowResults" aria-live="polite">기간별 강수 예보 분석 중…</div>
+              <p class="farm-small">비 가능성: 강수확률 50% 이상 또는 시간별 강수량 0.3mm 이상을 기준으로 표시합니다. 실제 강수 여부와 다를 수 있습니다.</p>
+            </div>
+            <div class="forecast-rows">
+              <div class="forecast-spans"><h3>☂ 비 가능성이 높은 시간</h3><div id="rainEvents"><p class="muted-text">예보 분석 중…</p></div></div>
+              <div class="forecast-spans"><h3>☀ 맑을 가능성이 높은 낮 시간</h3><div id="sunEvents"><p class="muted-text">예보 분석 중…</p></div></div>
+            </div>
+            <div id="forecastDayGrid" class="forecast-day-grid" aria-label="일별 비 및 맑은 시간 비율"></div>
+            <p class="insight-footnote">기상 모델 예보를 기반으로 계산한 시간대입니다. 단기 소나기·국지성 강수·안개는 실제 현장과 차이가 날 수 있습니다.</p>
+          </div>
+          <div class="official-warning"><span>⚠️ 대설·강풍·한파 등 공식 기상특보는 예보 점수와 별개로 반드시 확인하세요. 이 앱에는 특보 실시간 API가 아직 연결되지 않았습니다.</span><a target="_blank" rel="noopener noreferrer" href="https://www.weather.go.kr/w/special-report/overall.do">기상청 특보 현황 ↗</a></div>
+        </section>
+
         <div class="section-title"><div><span class="section-overline">NEXT 36 HOURS</span><h2>시간별 날씨</h2></div><span class="section-note">← 좌우로 스크롤 →</span></div>
         <section class="glass-card hourly-panel" aria-label="시간별 예보">
           <div class="chart-head"><span>기온 흐름</span><div class="legend"><span><i class="legend-dot temp-dot"></i>기온</span><span><i class="legend-dot rain-dot"></i>비 확률</span></div></div>
@@ -86,6 +114,21 @@
           <article class="glass-card activity-result"><div class="section-overline">ACTIVITY OUTLOOK</div><h3 id="activityTitle">농약 방제</h3><div class="score-wrap"><span id="activityScore" class="score-number">--</span><span class="score-max">/100 <b id="activityGrade">분석 중</b></span></div><div class="score-track"><div id="activityProgress"></div></div><p id="activityDetail">데이터를 연결하고 있습니다.</p><div class="best-window"><span>추천 시간대</span><strong id="activityBest">계산 중…</strong></div></article>
           <article class="glass-card activity-explain"><span class="section-overline">WHY THIS SCORE?</span><h3>판단 근거</h3><div id="activityReasons"></div><p class="disclaimer">이 점수는 안내용 참고값이며 공식 기상특보·현장 상황·농약 표시기준을 대체하지 않습니다. 농약 비산·살포 안전은 별도로 확인하세요.</p></article>
         </div>
+        <section class="farm-overview glass-card" aria-label="농업 날씨 인사이트">
+          <span class="section-overline">FARM WEATHER · 48 HOURS</span><h3>🌱 농작업 날씨 판단</h3>
+          <p class="farm-lead" id="farmSummary">강수·돌풍·저온 위험을 종합하는 중…</p>
+          <div id="farmSignals" class="farm-signals" aria-live="polite"></div>
+          <div class="official-warning"><span>농약 방제는 등록약제 사용기준 및 현장 풍속·풍향을 우선하세요. 이 정보는 작업 허가나 방제 지시가 아닙니다.</span><a href="https://www.weather.go.kr/w/special-report/overall.do" target="_blank" rel="noopener noreferrer">공식 기상특보 ↗</a></div>
+        </section>
+        <section class="watch-settings glass-card" aria-label="날씨 알림 조건">
+          <span class="section-overline">MY WEATHER ALERTS</span><h3>맞춤 날씨 알림 조건</h3>
+          <p class="watch-intro">앱을 열 때 내 지역에 해당하는 12시간 내 강수, 48시간 내 저온, 24시간 내 돌풍을 확인합니다.</p>
+          <div class="watch-choices"><label><input id="watchRain" type="checkbox">☂ 12시간 내 비 가능성 높음</label><label><input id="watchFrost" type="checkbox">❄ 48시간 내 2°C 이하</label><label><input id="watchWind" type="checkbox">🌬 24시간 내 돌풍 35km/h 이상</label></div>
+          <div class="watch-action"><button type="button" id="saveWatch">알림 조건 저장</button><button type="button" class="alt" id="allowNotify">브라우저 알림 권한 요청</button></div>
+          <div id="alertList" aria-live="polite"></div>
+          <p id="savedAlertStatus" class="watch-note">조건은 내 브라우저에만 저장됩니다.</p>
+          <p id="foregroundNotice" class="watch-note">앱이 열린 상태에서만 확인하는 안내용 알림입니다. 백그라운드 웹푸시는 아직 제공하지 않습니다.</p>
+        </section>
         <div class="section-title"><div><span class="section-overline">BEST HOURS</span><h2>시간대별 적합도</h2></div></div>
         <div class="glass-card suitability-panel" id="activityHours"><div class="empty-state">분석 중…</div></div>
       </section>
