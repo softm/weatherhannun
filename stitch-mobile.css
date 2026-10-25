@@ -236,8 +236,8 @@ body {
 .mobile-nav button .material-symbols-outlined { font-size: 22px; font-variation-settings: "FILL" 0; }
 .mobile-nav button.active { color: #9dcaff; }
 .mobile-nav button.active .material-symbols-outlined { font-variation-settings: "FILL" 1; }
-html[data-stitch-live="true"] .location-button { color: #0f1b2d !important; }
-html[data-stitch-live="true"] .location-button .small-chevron { color: #64748b; }
+html[data-stitch-live="true"] .location-button { color: var(--st-fg) !important; }
+html[data-stitch-live="true"] .location-button .small-chevron { color: var(--st-muted); }
 
 @media (max-width: 710px) {
   .content-bound, #view-map.content-bound, .status-footer.content-bound { width: calc(100% - 32px); }
@@ -926,6 +926,14 @@ html[data-weather-theme="dark"] .mini-score-ring::after {
   background: #112037;
 }
 
+html[data-weather-theme="light"] .map-shell .leaflet-container {
+  background: #dbeaf6 !important;
+}
+
+html[data-weather-theme="dark"] .map-shell .leaflet-container {
+  background: #10263e !important;
+}
+
 @media (max-width: 920px) {
   .content-bound { width: min(760px, calc(100% - 32px)); }
   .hourly-period-dock { grid-template-columns: 1fr; }
@@ -996,8 +1004,9 @@ html[data-weather-theme="dark"] .mini-score-ring::after {
   }
 
   .location-button {
-    background: #fff;
-    border-color: #e2edf8;
+    background: var(--st-surface);
+    color: var(--st-fg);
+    border-color: var(--st-line);
   }
 
   .page-header,

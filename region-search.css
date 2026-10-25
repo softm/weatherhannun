@@ -29,4 +29,74 @@
   .region-result-body b{font-size:12px}
   .region-result-body>span{font-size:10px}
 }
+
+/* The legacy dialog was permanently navy. Bind the complete surface to the
+   active app theme so saved-place rows and search results never mix themes. */
+#locationDialog{
+  width:min(480px,calc(100% - 24px));
+  height:auto;
+  max-height:calc(100dvh - 24px);
+  margin:auto;
+  padding:22px!important;
+  color:var(--st-fg)!important;
+  border:1px solid var(--st-line)!important;
+  border-radius:12px!important;
+  background:var(--st-surface)!important;
+  box-shadow:var(--shadow-raised,var(--shadow))!important;
+}
+#locationDialog::backdrop{background:rgba(5,15,34,.58);backdrop-filter:blur(5px)}
+#locationDialog .dialog-head{margin-bottom:20px}
+#locationDialog .dialog-head h2{color:var(--st-fg)}
+#locationDialog .dialog-head button{
+  color:var(--st-muted);
+  border:1px solid var(--st-line);
+  border-radius:8px;
+  background:var(--panel2);
+}
+#locationDialog #searchForm label,
+#locationDialog .dialog-subtitle,
+#locationDialog .favorite-help{color:var(--st-muted)}
+#locationDialog .search-box{
+  color:var(--st-fg);
+  border:1px solid var(--st-line);
+  border-radius:8px;
+  background:var(--panel2);
+}
+#locationDialog .search-box>span{color:var(--st-accent)}
+#locationDialog .search-box input{
+  color:var(--st-fg);
+  background:transparent;
+  caret-color:var(--st-accent);
+}
+#locationDialog .search-box input::placeholder{color:var(--st-muted);opacity:.82}
+#locationDialog .search-box button{
+  color:#fff;
+  border:1px solid var(--st-accent);
+  border-radius:6px;
+  background:var(--st-accent);
+}
+#locationDialog .geo-option{
+  color:var(--st-fg);
+  border-color:var(--st-line);
+  border-radius:8px;
+  background:var(--panel2);
+}
+#locationDialog .geo-option span{color:var(--st-accent)}
+#locationDialog .favorite-save{
+  color:#08735c;
+  border-color:rgba(16,185,129,.35);
+  background:rgba(16,185,129,.1);
+}
+#locationDialog .city-presets button{
+  color:var(--st-fg);
+  border-color:var(--st-line);
+  background:var(--panel2);
+}
+#locationDialog .city-presets button:hover{color:var(--st-accent);border-color:var(--st-accent)}
+html[data-weather-theme="dark"] #locationDialog .search-box button{color:#10223a}
+html[data-weather-theme="dark"] #locationDialog .favorite-save{color:#8ef2d2;background:rgba(84,220,187,.1)}
+html[data-weather-theme="dark"] #locationDialog::backdrop{background:rgba(1,8,21,.72)}
+@media(max-width:640px){
+  #locationDialog{max-height:calc(100dvh - 16px);padding:18px!important}
+}
 @media(prefers-reduced-motion:reduce){#locationDialog .search-results .region-result{transition:none}}
