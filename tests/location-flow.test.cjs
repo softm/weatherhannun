@@ -8,7 +8,7 @@ const path=require("node:path");
 const core=require("../location-core.js");
 const source=fs.readFileSync(path.join(__dirname,"../location-manager.js"),"utf8");
 const SEOSAN={name:"서산",lat:36.7845,lon:126.4503};
-function boot({permission="prompt",initial={},pos={latitude:37.50122,longitude:126.76442},fail=null,search=""}={}){
+function boot({permission="prompt",initial={},pos={latitude:37.50122,longitude:126.76442},fail=null,search="",reverse=null}={}){
   const store=new Map(Object.entries(initial).map(([k,v])=>[k,typeof v==="string"?v:JSON.stringify(v)]));
   const localStorage={
     getItem:k=>store.has(k)?store.get(k):null,
@@ -29,7 +29,7 @@ function boot({permission="prompt",initial={},pos={latitude:37.50122,longitude:1
   }
   const callbacks=new Map(),events=[],calls={geo:0,permission:0};
   const window={
-    WeatherLocationCore:core,isSecureContext:true,
+    WeatherLocationCore:core,WeatherReverseGeocoder:reverse,isSecureContext:true,
     addEventListener(type,fn){callbacks.set(type,fn);},
     dispatchEvent(e){
       events.push(e);
@@ -120,4 +120,35 @@ test("shared location query suppresses auto GPS override",async()=>{
  await t.settle();
  assert.equal(t.calls.geo,0);
  assert.equal(t.node("weatherLocationWelcome").open,false);
+});
+
+test("GPS coordinates resolve to approximate Korean address in header, quick bar and saved state",async()=>{
+ const t=boot({reverse:{resolve:async()=>({
+  name:"부천시 소사구 옥길동",
+  administrative:"경기도 부천시 소사구 옥길동",
+  address:"경기도 부천시 소사구 옥길동 · 옥길로 인근",
+  approximate:true
+ })}});
+ await t.settle();
+ await t.window.WeatherLocationManager.requestCurrentPosition(true);
+ await t.settle();
+ const last=t.events.at(-1)?.detail;
+ assert.equal(last?.name,"부천시 소사구 옥길동");
+ assert.equal(last?.address,"경기도 부천시 소사구 옥길동 · 옥길로 인근");
+ assert.equal(last?.source,"gps");
+ assert.match(t.node("locationQuickBar").innerHTML,/GPS 기준 추정주소/);
+ assert.match(t.node("locationQuickBar").innerHTML,/옥길로 인근/);
+ assert.equal(JSON.parse(t.localStorage.getItem("weatherhannun_location")).address,last.address);
+});
+test("a pending address lookup cannot override a newly selected manual place",async()=>{
+ let complete;
+ const pending=new Promise(ok=>{complete=ok;});
+ const t=boot({reverse:{resolve:()=>pending}});
+ await t.settle();
+ await t.window.WeatherLocationManager.requestCurrentPosition(true);
+ // When user switches to another region, app broadcasts the new active selection.
+ t.window.dispatchEvent({type:"weatherhannun:location-applied",detail:{name:"서울",lat:37.56,lon:126.98,source:"manual"}});
+ complete({name:"부천시 옥길동",address:"경기도 부천시 옥길동"});
+ await t.settle();
+ assert.equal(t.events.filter(e=>e.type==="weatherhannun:change-location").length,1);
 });
