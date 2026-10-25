@@ -84,3 +84,16 @@ node --check location-manager.js
 - 통신 장애·주소 미수집 시 GPS 좌표와 기존 날씨 조회 유지. 지역 전환 중 오래된 주소 응답 무시.
 - 주소 데이터 및 출처 © OpenStreetMap contributors, ODbL. 제3자 위치 좌표 전송은 `privacy.html`에 안내.
 - `tests/reverse-geocode.test.cjs`, `tests/location-flow.test.cjs`에서 검증.
+
+## 6차: 토지이용한눈 방식 읍·면·동·리 검색 (2026-10-26)
+
+- `data/korea-regions-202602.json`: 행정안전부 2026.02 법정동 코드 및 브이월드 경계 중심점에서 파생된 전국 19,574개 시도/시군구/읍면동/리 정적 데이터.
+- `region-search-core.js`: 계층 주소 구성, 중복 행정동명 구분, 한국어 시도 약칭과 부분검색 및 적합도 정렬.
+- `region-search-ui.js`: 입력 즉시 로컬 검색, 상위 행정구역과 결과 유형 표시, 결과 선택 시 기존 날씨앱 지역 변경 이벤트 발생.
+- `region-search.css`: 모바일 우선 결과 카드, 전체주소·유형 구분, 키보드/접근성 지원.
+- 예: `옥길동`은 광명·부천 후보 구분, `부천 소사구 옥길동`은 부천 선택, `서산 화곡리`는 서산시 대산읍 화곡리 선택.
+- 번지 및 건물의 정확한 지오코딩은 아님. 지역의 대표 좌표로 날씨를 조회하며, 정확한 필지·도로명 위치와 차이가 있을 수 있습니다.
+- 저장한 지역은 `regionCenter` 플래그와 전체주소가 함께 보관되어 GPS 추정주소와 구분됩니다.
+- 정적 2026.02 기준 이후 법정동 신설·개편 시 데이터 갱신이 필요합니다. 출처·이용 조건은 `data/README.md` 참조.
+- `reverse-geocode.js`는 GPS 좌표→주변 주소 변환으로 별도이며, 사용자가 직접 동/리 검색할 때 제3자 주소 API로 검색어를 보내지 않습니다.
+- 테스트: `tests/region-search.test.cjs`, `tests/region-ui.test.cjs`; 기존 위치관리/GPS 테스트와 함께 실행합니다.
