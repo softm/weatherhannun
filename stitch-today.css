@@ -31,7 +31,7 @@
 #stitch-live-dashboard .stitch-hour-current{
   color:#fff!important;
   border-color:#1765d3!important;
-  background:linear-gradient(145deg,#2589f5 0%,#1d75f0 70%,#1765d3 100%)!important;
+  background:linear-gradient(145deg,#1765d3 0%,#1559b3 70%,#0f478f 100%)!important;
   box-shadow:0 8px 18px rgba(29,117,240,.24)!important;
 }
 #stitch-live-dashboard .stitch-hour-current>.font-label-sm,
@@ -46,7 +46,7 @@
 }
 #stitch-live-dashboard .stitch-hour-current.stitch-hour-selected{
   color:#fff!important;
-  background:linear-gradient(145deg,#2589f5 0%,#1d75f0 70%,#1765d3 100%)!important;
+  background:linear-gradient(145deg,#1765d3 0%,#1559b3 70%,#0f478f 100%)!important;
 }
 #stitch-live-dashboard .stitch-hour-context{background:#eaf4ff;border:1px solid #c2defc;color:#17467d;padding:10px 12px;border-radius:8px;font-size:12px}
 #stitch-live-dashboard .stitch-action-card{cursor:pointer}
@@ -94,10 +94,13 @@ html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-slate-500"]
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-slate-400"],
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-slate-300"]{color:var(--st-muted)!important}
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-primary"],
+html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-blue-500"],
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-blue-600"],
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-blue-700"]{color:#9dcaff!important}
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-emerald-600"],
-html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-emerald-700"]{color:#6ee7c7!important}
+html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-emerald-700"],
+html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-teal-600"]{color:#6ee7c7!important}
+html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-amber-500"],
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-amber-600"],
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-amber-700"],
 html[data-weather-theme="dark"] #stitch-live-dashboard [class~="text-orange-600"]{color:#fcd38a!important}
@@ -112,5 +115,27 @@ html[data-weather-theme="dark"] #stitch-live-dashboard .shadow-xs{box-shadow:0 8
 html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-hour-context{background:var(--panel2);border-color:var(--st-line);color:var(--st-fg)}
 html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-source-note{color:var(--st-muted)}
 html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-hour-cell{color:var(--st-fg);border-color:var(--st-line);background:var(--st-surface)}
-html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-hour-current{color:#fff!important;border-color:#72adf4!important;background:linear-gradient(145deg,#1765d3,#2589f5)!important}
+html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-hour-current{color:#fff!important;border-color:#72adf4!important;background:linear-gradient(145deg,#1765d3,#0f478f)!important}
 html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-hour-selected:not(.stitch-hour-current){color:var(--st-fg)!important;border-color:#9dcaff!important;background:#17375c!important}
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-slate-300"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-slate-400"]{color:#52657b!important}
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-primary"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-blue-500"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-blue-600"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-blue-700"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-sky-500"]{color:#1559b3!important}
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-emerald-600"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-emerald-700"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-teal-600"]{color:#08735c!important}
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-amber-200"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-amber-300"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-amber-500"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-amber-600"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-amber-700"]{color:#8a5200!important}
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-orange-500"],
+html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-orange-600"]{color:#a53e08!important}
+html[data-weather-theme="light"] #stitch-live-dashboard .stitch-hour-current>.font-label-sm,
+html[data-weather-theme="light"] #stitch-live-dashboard .stitch-hour-current .font-tabular-metric,
+html[data-weather-theme="light"] #stitch-live-dashboard .stitch-hour-current div .font-label-sm{color:#fff!important}
+html[data-weather-theme="light"] #stitch-live-dashboard .stitch-hour-current .material-symbols-outlined{color:#ffe08a!important}
+#stitch-live-dashboard [class~="bg-primary"]{background-color:#1765d3!important}

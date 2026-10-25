@@ -1,8 +1,8 @@
 /* Stitch 10523118221126758140: all-weather-view visual system.
    Original Stitch light/dark tokens + preserved live weather components. */
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
-:root{color-scheme:light;--bg:#f0f6fc;--panel:#fff;--panel2:#f4f8fd;--line:#e2edf8;--muted:#64748b;--text:#0f1b2d;--sun:#f59e0b;--mint:#10b981;--blue:#2589f5;--danger:#ef4444;--primary:#2589f5;--shadow:0 8px 24px rgba(29,78,135,.06);--shadow-raised:0 12px 32px rgba(29,78,135,.09);--radius-card:8px;--radius-panel:12px;--radius-control:6px;--st-bg:linear-gradient(180deg,#f0f6fc 0%,#ebf3fa 100%);--st-surface:#fff;--st-fg:#0f1b2d;--st-muted:#64748b;--st-accent:#2589f5;--st-line:#e2edf8;--st-sky:linear-gradient(125deg,#e7f4ff,#f7fbff 68%,#fff);--st-header:rgba(255,255,255,.96);font-family:"DM Sans",Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif}
-html[data-weather-theme="dark"]{color-scheme:dark;--bg:#04132a;--panel:#112037;--panel2:#172943;--line:#27354d;--muted:#adc7fd;--text:#d7e3ff;--sun:#ffcf6a;--mint:#54dcbb;--blue:#9dcaff;--danger:#ffdad6;--primary:#9dcaff;--shadow:0 18px 48px rgba(0,0,0,.25);--st-bg:#04132a;--st-surface:#112037;--st-fg:#d7e3ff;--st-muted:#adc7fd;--st-accent:#9dcaff;--st-line:#27354d;--st-sky:linear-gradient(130deg,#1b3b64,#091b35 74%,#081629);--st-header:rgba(9,24,47,.96)}
+:root{color-scheme:light;--bg:#f0f6fc;--panel:#fff;--panel2:#f4f8fd;--line:#e2edf8;--muted:#64748b;--text:#0f1b2d;--sun:#f59e0b;--mint:#10b981;--blue:#1765d3;--danger:#ef4444;--primary:#1765d3;--shadow:0 8px 24px rgba(29,78,135,.06);--shadow-raised:0 12px 32px rgba(29,78,135,.09);--radius-card:8px;--radius-panel:12px;--radius-control:6px;--st-bg:linear-gradient(180deg,#f0f6fc 0%,#ebf3fa 100%);--st-surface:#fff;--st-fg:#0f1b2d;--st-muted:#64748b;--st-subtle-ink:#52657b;--st-accent:#1765d3;--st-accent-ink:#1559b3;--st-green-ink:#08735c;--st-amber-ink:#8a5200;--st-danger-ink:#a12d2d;--st-line:#e2edf8;--st-sky:linear-gradient(125deg,#e7f4ff,#f7fbff 68%,#fff);--st-header:rgba(255,255,255,.96);font-family:"DM Sans",Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif}
+html[data-weather-theme="dark"]{color-scheme:dark;--bg:#04132a;--panel:#112037;--panel2:#172943;--line:#27354d;--muted:#adc7fd;--text:#d7e3ff;--sun:#ffcf6a;--mint:#54dcbb;--blue:#9dcaff;--danger:#ffdad6;--primary:#9dcaff;--shadow:0 18px 48px rgba(0,0,0,.25);--st-bg:#04132a;--st-surface:#112037;--st-fg:#d7e3ff;--st-muted:#adc7fd;--st-subtle-ink:#c7d7ea;--st-accent:#9dcaff;--st-accent-ink:#9dcaff;--st-green-ink:#6ee7c7;--st-amber-ink:#f6c967;--st-danger-ink:#ffb3ae;--st-line:#27354d;--st-sky:linear-gradient(130deg,#1b3b64,#091b35 74%,#081629);--st-header:rgba(9,24,47,.96)}
 body{background:var(--st-bg)!important;background-attachment:fixed!important;color:var(--st-fg);font:15px/1.55 "DM Sans",Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;transition:background-color .2s ease,color .2s ease}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--st-accent);outline-offset:3px}
 .content-bound{width:min(880px,calc(100% - 42px))}
@@ -24,7 +24,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .intro h1{font-family:"Space Grotesk","DM Sans",sans-serif;font-size:clamp(28px,3.4vw,38px);font-weight:600;letter-spacing:-1px;color:var(--st-fg)}
 .intro h1 em{color:var(--st-accent)}
 .intro-desc,.intro-side,.page-header p,.section-note,.chart-caption,.muted-text{color:var(--st-muted)}
-.eyebrow,.section-overline{color:var(--st-accent);letter-spacing:1.6px}
+.eyebrow,.section-overline{color:var(--st-green-ink);letter-spacing:1.6px}
 .live-pulse,.status-light{background:var(--mint);box-shadow:0 0 0 4px rgba(16,185,129,.12)}
 html[data-weather-view]:not([data-weather-view="today"]) .intro{display:none}
 .screen{animation:stitch-appear .24s ease both}
