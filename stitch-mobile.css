@@ -1,24 +1,24 @@
 /* Stitch project 10523118221126758140 — functional mobile layout overrides. */
 :root {
-  --bg: #04132a;
-  --panel: #112037;
-  --panel2: #1c2a42;
-  --line: rgba(192, 199, 211, .14);
-  --muted: #c0c7d3;
-  --text: #d7e3ff;
-  --sun: #f6b84b;
-  --mint: #21b99a;
-  --blue: #9dcaff;
-  --sky: #4ba9ff;
-  --danger: #e96161;
-  --heat: #ff9852;
-  --shadow: 0 10px 28px rgba(0, 0, 0, .24);
+  --bg: #f0f6fc;
+  --panel: #ffffff;
+  --panel2: #f4f8fd;
+  --line: #e2edf8;
+  --muted: #64748b;
+  --text: #0f1b2d;
+  --sun: #f59e0b;
+  --mint: #10b981;
+  --blue: #2589f5;
+  --sky: #2589f5;
+  --danger: #ef4444;
+  --heat: #f97316;
+  --shadow: 0 8px 24px rgba(29, 78, 135, .06);
 }
 
 body {
-  background: #04132a;
+  background: var(--st-bg, linear-gradient(180deg, #f0f6fc 0%, #ebf3fa 100%));
   color: var(--text);
-  font-family: Inter, Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  font-family: "DM Sans", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   overscroll-behavior-y: none;
 }
 
@@ -38,22 +38,22 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.content-bound { width: min(760px, calc(100% - 32px)); }
+.content-bound { width: min(880px, calc(100% - 40px)); }
 #view-map.content-bound, .status-footer.content-bound { width: min(1180px, calc(100% - 44px)); }
-.topbar { background: rgba(1, 14, 37, .82); box-shadow: 0 1px 8px rgba(0, 0, 0, .25); }
-.nav-button:hover, .nav-button.active { background: #27354d; color: #9dcaff; }
-.location-button, .icon-button { background: rgba(255,255,255,.05); border-color: transparent; }
+.topbar { background: var(--st-header, rgba(255, 255, 255, .96)); box-shadow: 0 2px 16px rgba(29, 78, 135, .04); }
+.nav-button:hover, .nav-button.active { background: rgba(37, 137, 245, .09); color: var(--st-accent, #2589f5); }
+.location-button, .icon-button { background: var(--st-surface, #fff); border-color: var(--st-line, #e2edf8); }
 .location-button { min-height: 44px; }
 .material-button { display: grid; place-items: center; }
 .glass-card, .stitch-card {
-  background: rgba(17, 32, 55, .88);
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 12px;
+  background: var(--st-surface, rgba(255, 255, 255, .96));
+  border: 1px solid var(--st-line, #e2edf8);
+  border-radius: 8px;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(12px);
 }
 
-.intro { width: min(760px, calc(100% - 32px)); padding: 32px 0 22px; }
+.intro { width: min(880px, calc(100% - 40px)); padding: 32px 0 22px; }
 .intro h1 { font-size: 30px; font-weight: 600; }
 .intro h1 em, .brand-accent { color: #9dcaff; }
 .section-overline, .eyebrow { color: #54dcbb; letter-spacing: .08em; }
@@ -374,4 +374,718 @@ html[data-weather-theme="light"] .activity-filters button.active { background: #
 
 @media (prefers-reduced-motion: reduce) {
   .week-chevron { transition: none; }
+}
+
+/* Stitch LIGHT fidelity pass: shared rhythm, hierarchy, and newly structured views. */
+html[data-weather-theme="light"] {
+  --bg: #f0f6fc;
+  --panel: #ffffff;
+  --panel2: #f4f8fd;
+  --line: #e2edf8;
+  --muted: #64748b;
+  --text: #0f1b2d;
+  --blue: #2589f5;
+  --sky: #2589f5;
+  --mint: #10b981;
+  --shadow: 0 8px 24px rgba(29, 78, 135, .06);
+}
+
+html[data-weather-theme="light"] body {
+  color: var(--text);
+  font-family: "DM Sans", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+}
+
+html[data-weather-theme="light"] h1,
+html[data-weather-theme="light"] h2,
+html[data-weather-theme="light"] h3,
+html[data-weather-theme="light"] .brand,
+html[data-weather-theme="light"] .score-number,
+html[data-weather-theme="light"] .mini-stat strong,
+html[data-weather-theme="light"] .activity-summary b {
+  font-family: "Space Grotesk", "DM Sans", Pretendard, sans-serif;
+}
+
+html[data-weather-theme="light"] .glass-card,
+html[data-weather-theme="light"] .stitch-card,
+html[data-weather-theme="light"] .decision-card,
+html[data-weather-theme="light"] .briefing-main,
+html[data-weather-theme="light"] .briefing-aside,
+html[data-weather-theme="light"] .insight-window,
+html[data-weather-theme="light"] .hourly-panel,
+html[data-weather-theme="light"] .farm-overview,
+html[data-weather-theme="light"] .watch-settings,
+html[data-weather-theme="light"] .map-shell {
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, .97) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.section-overline,
+.eyebrow {
+  color: #10b981;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .09em;
+}
+
+.page-header {
+  margin-bottom: 16px;
+}
+
+.page-header h2 {
+  margin: 5px 0 4px;
+  font-family: "Space Grotesk", "DM Sans", Pretendard, sans-serif;
+  font-size: clamp(27px, 3vw, 32px);
+  line-height: 1.18;
+  letter-spacing: -.025em;
+  font-weight: 600;
+}
+
+.page-header p {
+  max-width: 640px;
+  margin: 0;
+  line-height: 1.55;
+}
+
+#view-weekly .page-header,
+#view-activity .page-header,
+#view-air .page-header,
+#view-map .page-header {
+  border-radius: 12px;
+  padding: 22px 24px;
+}
+
+.card-heading h2 {
+  font-family: "Space Grotesk", "DM Sans", Pretendard, sans-serif;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+/* Hourly: period -> countdown -> insight -> chart -> detail. */
+.hourly-period-dock {
+  display: grid;
+  grid-template-columns: minmax(190px, .8fr) minmax(360px, 1.2fr);
+  align-items: center;
+  gap: 18px 24px;
+  margin: 0 0 14px;
+  padding: 18px 20px;
+}
+
+.hourly-period-dock .insight-intro h3 {
+  margin: 0 0 3px;
+  font-size: 17px;
+}
+
+.hourly-period-dock .insight-intro p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.hourly-period-dock .rain-tabs {
+  align-self: center;
+  min-height: 44px;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.hourly-period-dock .rain-tabs button {
+  min-height: 34px;
+  border-radius: 5px;
+  font-weight: 700;
+}
+
+.hourly-date-picker {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.hourly-date-picker summary {
+  width: max-content;
+  color: #2589f5;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hourly-date-picker:not([open]) .rain-dates {
+  display: none;
+}
+
+.hourly-date-picker .rain-dates {
+  margin-top: 10px;
+}
+
+.hourly-countdown-card {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 14px;
+  padding: 20px 22px;
+  overflow: hidden;
+  color: #fff;
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #2589f5 0%, #1d75f0 70%, #1765d3 100%) !important;
+  box-shadow: 0 12px 30px rgba(37, 137, 245, .2) !important;
+}
+
+html[data-weather-theme="light"] .hourly-countdown-card {
+  color: #fff;
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #2589f5 0%, #1d75f0 70%, #1765d3 100%) !important;
+  box-shadow: 0 12px 30px rgba(37, 137, 245, .2) !important;
+}
+
+.hourly-countdown-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .15);
+  font-size: 34px;
+}
+
+.hourly-countdown-copy .section-overline,
+.hourly-countdown-copy .section-note {
+  color: rgba(255, 255, 255, .78);
+}
+
+.hourly-countdown-copy .rain-headline {
+  margin: 3px 0 2px;
+  min-height: 0;
+  padding: 0;
+  display: block;
+  color: #fff;
+  border: 0;
+  background: transparent;
+  font-family: "Space Grotesk", "DM Sans", Pretendard, sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.hourly-countdown-copy .rain-headline .insight-icon {
+  display: none;
+}
+
+.hourly-countdown-copy .rain-headline strong,
+.hourly-countdown-copy .rain-headline small,
+.hourly-countdown-copy .rain-headline .insight-small {
+  color: inherit;
+}
+
+html[data-weather-theme="light"] .hourly-countdown-copy .rain-headline strong,
+html[data-weather-theme="light"] .hourly-countdown-copy .rain-headline small,
+html[data-weather-theme="light"] .hourly-countdown-copy .rain-headline .insight-small {
+  color: #fff !important;
+}
+
+html[data-weather-theme="light"] .hourly-countdown-copy .rain-headline small,
+html[data-weather-theme="light"] .hourly-countdown-copy .rain-headline .insight-small {
+  color: rgba(255, 255, 255, .78) !important;
+}
+
+html[data-weather-theme="light"] .hourly-countdown-copy .rain-headline {
+  color: #fff;
+  border: 0;
+  background: transparent;
+}
+
+.hourly-countdown-copy .section-note {
+  margin: 0;
+  font-size: 12px;
+}
+
+.insight-window .forecast-rows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* The countdown now lives in its own blue card, so the remaining insight
+   content must use the full desktop panel instead of the old split column. */
+.hourly-insight .insight-window {
+  grid-template-columns: 1fr;
+}
+
+.hourly-insight .insight-window > * {
+  grid-column: 1;
+}
+
+.insight-window .forecast-spans {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f4f8fd;
+}
+
+.insight-window .forecast-spans h3 {
+  margin: 4px 0 8px;
+  font-size: 15px;
+}
+
+.forecast-day-grid {
+  margin-top: 14px;
+}
+
+.hourly-panel {
+  margin: 14px 0;
+}
+
+.hourly-detail-card {
+  margin: 14px 0;
+  padding: 18px;
+}
+
+.hourly-detail-rows {
+  display: grid;
+  gap: 6px;
+}
+
+.hourly-detail-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) minmax(280px, 1.35fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbfe;
+}
+
+.hourly-detail-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.hourly-detail-main .material-symbols-outlined {
+  color: #2589f5;
+}
+
+.hourly-detail-main strong,
+.hourly-detail-main span {
+  display: block;
+}
+
+.hourly-detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.hourly-detail-metrics span {
+  padding: 7px 8px;
+  border-radius: 6px;
+  background: #eef5fc;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+/* Weekly: flatter rows, visible state labels, and a compact circular score. */
+.weekly-insight-banner,
+.week-list-card,
+.weekly-checklist,
+.weekly-alert {
+  margin-bottom: 14px;
+}
+
+html[data-weather-theme="light"] .weekly-insight-banner {
+  border-left: 3px solid #f59e0b !important;
+  background: linear-gradient(120deg, #fffdf7, #fff 58%, #f2f8fe) !important;
+}
+
+.week-list-card {
+  padding: 18px;
+}
+
+.week-grid {
+  gap: 6px;
+}
+
+html[data-weather-theme="light"] .week-row {
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+  background: #fff !important;
+}
+
+.week-row-button {
+  min-height: 66px;
+  padding: 9px 11px;
+}
+
+.week-row-badge {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  margin-top: 3px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(37, 137, 245, .09);
+  color: #1d75f0;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.week-summary-grid {
+  margin: 14px 0;
+}
+
+.mini-stat {
+  min-height: 88px;
+}
+
+.weekend-stat {
+  grid-template-columns: 50px minmax(0, 1fr);
+}
+
+.mini-score-ring {
+  --score: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: conic-gradient(#10b981 calc(var(--score) * 1%), #e2edf8 0);
+  position: relative;
+}
+
+.mini-score-ring::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: inherit;
+  background: #fff;
+}
+
+/* Activity: consistent feed hierarchy and scan-friendly supporting metrics. */
+.activity-filters button {
+  min-height: 38px;
+}
+
+.activity-summary {
+  margin: 12px 0 14px;
+}
+
+html[data-weather-theme="light"] .activity-feed-card {
+  border-radius: 8px;
+  background: #fff !important;
+}
+
+.activity-feed-card {
+  min-height: 94px;
+  align-items: center;
+}
+
+.feed-copy p {
+  margin-top: 6px;
+}
+
+.feed-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.feed-metrics span {
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: #eef5fc;
+  color: #52657b;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.feed-progress {
+  height: 4px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #e2edf8;
+}
+
+.feed-progress > i,
+.feed-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #10b981, #2589f5);
+}
+
+.activity-detail-title {
+  margin-top: 24px;
+}
+
+.activity-grid,
+.farm-overview,
+.watch-settings,
+.suitability-panel {
+  margin-bottom: 14px;
+}
+
+/* Map: keep Leaflet functional while bringing the surrounding UI into the light system. */
+html[data-weather-theme="light"] .map-toolbar,
+html[data-weather-theme="light"] .map-extra,
+html[data-weather-theme="light"] .map-hint {
+  color: #0f1b2d;
+  border-color: #e2edf8;
+  background: #fff !important;
+}
+
+html[data-weather-theme="light"] .map-buttons button,
+html[data-weather-theme="light"] .map-extra button {
+  color: #17467d;
+  border-color: #cbdff3;
+  background: #eef5fc;
+}
+
+html[data-weather-theme="light"] .map-buttons button:hover,
+html[data-weather-theme="light"] .map-extra button:hover {
+  color: #fff;
+  border-color: #2589f5;
+  background: #2589f5;
+}
+
+.map-shell {
+  border-radius: 12px !important;
+}
+
+.city-grid {
+  gap: 12px;
+}
+
+html[data-weather-theme="light"] .city-card {
+  color: #0f1b2d;
+  border-color: #e2edf8;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(29, 78, 135, .05);
+}
+
+html[data-weather-theme="light"] .city-card:hover {
+  color: #0f1b2d;
+  border-color: #b8d5f3;
+  background: #f4f8fd;
+}
+
+html[data-weather-theme="light"] .city-card .city-desc,
+html[data-weather-theme="light"] .map-attribution,
+html[data-weather-theme="light"] .map-toolbar-label small,
+html[data-weather-theme="light"] .map-hint {
+  color: #64748b;
+}
+
+/* Common footer/nav rhythm. */
+.status-footer {
+  margin-top: 42px;
+}
+
+.mobile-nav button {
+  font-family: "DM Sans", Pretendard, sans-serif;
+  font-weight: 600;
+}
+
+html[data-weather-theme="light"] .mobile-nav {
+  background: rgba(255, 255, 255, .96) !important;
+  border-color: #e2edf8 !important;
+  box-shadow: 0 -6px 24px rgba(29, 78, 135, .07) !important;
+}
+
+html[data-weather-theme="light"] .mobile-nav button {
+  color: #7b8ca1 !important;
+}
+
+html[data-weather-theme="light"] .mobile-nav button.active {
+  color: #2589f5 !important;
+}
+
+html[data-weather-theme="dark"] .stitch-card {
+  color: #d7e3ff;
+  border-color: #27354d;
+  background: rgba(17, 32, 55, .94);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .22);
+}
+
+html[data-weather-theme="dark"] .insight-window .forecast-spans,
+html[data-weather-theme="dark"] .hourly-detail-row,
+html[data-weather-theme="dark"] .hourly-detail-metrics span,
+html[data-weather-theme="dark"] .feed-metrics span {
+  color: #c0c7d3;
+  border-color: #27354d;
+  background: #172943;
+}
+
+html[data-weather-theme="dark"] .mini-score-ring::after {
+  background: #112037;
+}
+
+@media (max-width: 920px) {
+  .content-bound { width: min(760px, calc(100% - 32px)); }
+  .hourly-period-dock { grid-template-columns: 1fr; }
+  .hourly-date-picker { grid-column: auto; }
+
+  /* Keep saved places one tap away without letting the switcher dominate
+     the compact Stitch header. The source component remains fully usable
+     from its management dialog. */
+  html[data-stitch-live="true"] #locationQuickBar.location-shortcuts {
+    display: flex !important;
+    align-items: center;
+    gap: 7px;
+    width: calc(100% - 24px);
+    min-height: 48px !important;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    padding: 6px 8px !important;
+    border-radius: 8px;
+  }
+
+  html[data-stitch-live="true"] #locationQuickBar .location-switcher-head {
+    flex: 0 0 auto;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+  }
+
+  html[data-stitch-live="true"] #locationQuickBar .location-switcher-heading {
+    font-size: 10px;
+  }
+
+  html[data-stitch-live="true"] #locationQuickBar .location-current-label,
+  html[data-stitch-live="true"] #locationQuickBar .location-fast-place.active {
+    display: none !important;
+  }
+
+  html[data-stitch-live="true"] #locationQuickBar .location-fast-items {
+    min-width: 0;
+    width: auto;
+    padding: 0;
+    gap: 6px;
+  }
+
+  html[data-stitch-live="true"] #locationQuickBar .location-fast-items button {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 710px) {
+  .content-bound,
+  #view-map.content-bound,
+  .status-footer.content-bound {
+    width: calc(100% - 32px);
+  }
+
+  #content {
+    padding-top: 12px;
+  }
+
+  .topbar {
+    height: 64px;
+  }
+
+  .top-inner {
+    padding: max(5px, env(safe-area-inset-top)) 16px 5px;
+  }
+
+  .location-button {
+    background: #fff;
+    border-color: #e2edf8;
+  }
+
+  .page-header,
+  #view-weekly .page-header,
+  #view-activity .page-header,
+  #view-air .page-header,
+  #view-map .page-header {
+    margin-top: 8px;
+    margin-bottom: 12px;
+    padding: 17px 16px;
+  }
+
+  .page-header h2 {
+    font-size: 27px;
+  }
+
+  .hourly-period-dock {
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 15px;
+  }
+
+  .hourly-countdown-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 13px;
+    padding: 16px;
+  }
+
+  .hourly-countdown-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    font-size: 27px;
+  }
+
+  .hourly-countdown-copy .rain-headline {
+    font-size: 18px;
+  }
+
+  .insight-window .forecast-rows {
+    grid-template-columns: 1fr;
+  }
+
+  .hourly-detail-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .week-list-card,
+  .weekly-checklist,
+  .hourly-detail-card {
+    padding: 15px;
+  }
+
+  .week-row-button {
+    min-height: 62px;
+  }
+
+  .activity-feed-card {
+    min-height: 88px;
+  }
+
+  .status-footer {
+    margin-top: 28px;
+  }
+}
+
+@media (max-width: 390px) {
+  .content-bound,
+  #view-map.content-bound,
+  .status-footer.content-bound {
+    width: calc(100% - 24px);
+  }
+
+  .rain-tabs button {
+    padding-inline: 2px;
+    font-size: 10px;
+  }
+
+  .hourly-detail-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .week-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-feed-card {
+    grid-template-columns: 40px minmax(0, 1fr) 46px;
+  }
 }

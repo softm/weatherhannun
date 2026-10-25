@@ -7,8 +7,7 @@
  var root=document.documentElement,KEY="weatherhannun:stitch-theme:v1";
  var saved="";
  try{saved=localStorage.getItem(KEY)||"";}catch(_){}
- var prefersDark=!!(window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches);
- root.dataset.weatherTheme=(saved==="light"||saved==="dark")?saved:(prefersDark?"dark":"light");
+ root.dataset.weatherTheme=(saved==="light"||saved==="dark")?saved:"light";
  root.dataset.weatherView="today";
  function el(tag,attrs,value){
   var node=document.createElement(tag);

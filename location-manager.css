@@ -72,4 +72,14 @@ html[data-weather-theme="dark"] .rename-actions button[type=submit]{color:#15233
 
 /* Keep saved-region switching one tap away on the exact Stitch Today screen. */
 html[data-stitch-live=true] #locationQuickBar{width:min(670px,calc(100% - 24px));margin-top:10px;margin-bottom:16px}
-@media(max-width:600px){html[data-stitch-live=true] #locationQuickBar{width:calc(100% - 20px);margin-top:8px;margin-bottom:12px}}
+@media(max-width:710px){
+ html[data-stitch-live=true] #locationQuickBar{width:calc(100% - 20px);margin-top:8px;margin-bottom:12px}
+ .location-shortcuts{display:flex;align-items:center;gap:7px;min-height:48px;padding:6px 8px;border-radius:8px}
+ .location-switcher-head{flex:0 0 auto;border:0;padding:0}
+ .location-switcher-heading{font-size:10px}
+ .location-current-label{display:none}
+ .location-fast-items{min-width:0;padding:0;gap:6px}
+ .location-fast-items button{min-height:34px;padding:6px 10px;font-size:11px}
+ .location-fast-items .location-fast-place.active{display:none}
+ .location-fast-place{max-width:118px}
+}
