@@ -317,7 +317,7 @@
     $("airMetrics").innerHTML=values.map(function(v,i){var st=statuses[i];var percent=clamp((v.value||0)/(v.thresholds[2]*1.5)*100,1,100);return '<div><div class="air-row-head"><b>'+v.name+'</b><span>'+st.grade+' <strong>'+num(v.value,1)+'</strong></span></div><div class="air-bar"><div style="width:'+percent+'%"></div></div></div>';}).join("");
   }
   function setView(view){
-    if(!["today","weekly","activity","air","map"].includes(view))return;
+    if(!["today","hourly","weekly","activity","air","map"].includes(view))return;
     if(view!=="map")setMapFocus(false);
     STATE.view=view;
     document.querySelectorAll(".screen").forEach(function(el){el.classList.toggle("active",el.id==="view-"+view);});
