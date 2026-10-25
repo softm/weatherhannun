@@ -12,8 +12,12 @@
     if(!raw||!validNumber(raw.lat)||!validNumber(raw.lon))return null;
     const lat=Number(raw.lat),lon=Number(raw.lon);
     if(lat< -90||lat>90||lon< -180||lon>180)return null;
-    const name=String(raw.name||"").trim().slice(0,42);
-    return {name:name||"선택 지역",lat,lon,source:raw.source==="gps"?"gps":"manual"};
+    const name=String(raw.name||"").trim().slice(0,75);
+    const address=String(raw.address||"").trim().slice(0,170);
+    const admin=String(raw.administrative||"").trim().slice(0,145);
+    return {name:name||"선택 지역",lat,lon,
+      source:raw.source==="gps"?"gps":"manual",
+      address,administrative:admin,approximate:raw.approximate===true};
   }
   function key(place){
     const p=cleanPlace(place);
@@ -26,7 +30,7 @@
       const p=cleanPlace(item),k=key(p);
       if(!p||!k||seen.has(k)||out.length>=limit)return;
       seen.add(k);
-      out.push({id:k,name:p.name,lat:p.lat,lon:p.lon,source:p.source});
+      out.push({id:k,...p});
     });
     return out;
   }
@@ -36,7 +40,7 @@
     const k=key(p);
     if(items.some(x=>x.id===k))return {items,error:"exists"};
     if(items.length>=MAX_SAVED)return {items,error:"full"};
-    return {items:items.concat([{id:k,name:p.name,lat:p.lat,lon:p.lon,source:p.source}]),error:null};
+    return {items:items.concat([{id:k,...p}]),error:null};
   }
   function rename(list,id,newName){
     const name=String(newName||"").trim().replace(/\s+/g," ").slice(0,42);
