@@ -57,5 +57,26 @@ test("map redraws responsively and Leaflet tiles keep absolute positioning", () 
 });
 
 test("service worker version tracks the aligned shell", () => {
-  assert.ok(read("sw.js").includes("weatherhannun-shell-v13-stitch-light-alignment"));
+  const html = read("index.html");
+  const worker = read("sw.js");
+
+  assert.ok(worker.includes("weatherhannun-shell-v14-theme-parity"));
+  for (const asset of ["stitch-today.css?v=14", "stitch-mobile.css?v=14", "region-search.css?v=14"]) {
+    assert.ok(html.includes(asset), `page must request ${asset}`);
+    assert.ok(worker.includes(asset), `service worker must warm ${asset}`);
+  }
+});
+
+test("light and dark themes cover the mobile header, Today template, and location dialog", () => {
+  const today = read("stitch-today.css");
+  const mobile = read("stitch-mobile.css");
+  const search = read("region-search.css");
+
+  assert.match(today, /data-weather-theme="dark"[^\n]*#stitch-live-dashboard/);
+  assert.match(today, /\[class~="bg-white"\][\s\S]*?var\(--st-surface\)/);
+  assert.match(today, /\[class~="text-slate-900"\][\s\S]*?var\(--st-fg\)/);
+  assert.match(mobile, /\.location-button\s*\{[\s\S]*?background:\s*var\(--st-surface\)/);
+  assert.match(mobile, /data-weather-theme="light"[^\n]*\.map-shell \.leaflet-container/);
+  assert.match(search, /#locationDialog\s*\{[\s\S]*?background:var\(--st-surface\)!important/);
+  assert.match(search, /data-weather-theme="dark"[^\n]*#locationDialog \.search-box button/);
 });
