@@ -111,9 +111,18 @@
     q=ROMAN[q]||q;
     if(q.length<2)return [];
     const tokens=splitQuery(q),found=[];
+    const biased=isValidCoord(Number(options.biasLat),Number(options.biasLon));
+    const originLat=Number(options.biasLat),originLon=Number(options.biasLon);
     for(const entry of entries||[]){
       const rank=match(entry,q,tokens);
-      if(rank!==null)found.push({entry,rank});
+      if(rank!==null){
+        let proximity=0;
+        if(biased){
+          const km=Math.hypot((entry.lat-originLat)*111,(entry.lon-originLon)*88);
+          if(km<8)proximity=Math.max(0,30-km*4);
+        }
+        found.push({entry,rank:rank+proximity});
+      }
     }
     found.sort((a,b)=>b.rank-a.rank||a.entry.full.localeCompare(b.entry.full,"ko"));
     return found.slice(0,limit).map(x=>({ ...x.entry,score:x.rank }));
