@@ -64,14 +64,16 @@ python3 -m http.server 8080
 - Open-Meteo 대기질은 관측소 실측과 다를 수 있습니다.
 - 위치는 이용자가 허용할 때만 웹 브라우저에서 사용합니다.
 
-## 배포
+## 배포 — GitHub Pages 단일 운영
 
-- **프로덕션 웹앱(Vercel)**: https://weatherhannun.vercel.app/
-- **GitHub Pages (자동 배포)**: https://softm.github.io/weatherhannun/
-- **GitHub 원본 코드**: https://github.com/softm/weatherhannun
-- **중앙 프로젝트 경로**: https://softm.github.io/projects/weatherhannun/ (GitHub Pages 게시 반영 후 이용 가능)
+- **공식 웹앱(GitHub Pages)**: https://softm.github.io/weatherhannun/
+- **원본·유일한 배포 소스 저장소**: https://github.com/softm/weatherhannun
+- **GitHub Pages 배포 작업**: https://github.com/softm/weatherhannun/actions/workflows/pages.yml
+- **중앙 프로젝트 목록**: https://softm.github.io/projects/weatherhannun/
 
-**GitHub Pages**는 `main` 변경 시 `.github/workflows/pages.yml`로 자동 배포하며, 2026-10-25 GitHub Actions 실행이 성공했습니다. **Vercel**은 Git 저장소 통합 연결이 아직 되어 있지 않아 수동 API 릴리스 방식입니다. Vercel 운영 배포가 `READY`였다고 해도 각 기능의 브라우저 회귀 검증까지 자동 보증하지는 않습니다.
+**배포 원칙:** 이 프로젝트는 `softm/weatherhannun`의 `main` 브랜치에서 GitHub Actions → GitHub Pages로만 배포합니다. 별도의 호스팅 사이트나 Vercel 프로젝트를 생성·배포하지 않습니다. 프로젝트 삭제가 필요한 이전 Vercel 배포는 GitHub Pages와 별개입니다. **2026-10-26부터 GitHub Pages를 유일한 정식 운영 주소로 사용합니다.**
+
+자동 배포가 성공해도 모바일 위치권한/GPS 등 브라우저 기기별 기능은 별도 점검이 필요합니다.
 
 ## 라이선스
 
