@@ -18,6 +18,7 @@
   const MIN_INTERVAL=1150;
   const ongoing=new Map();
   let lastRequest=0;
+  let requestQueue=Promise.resolve(); // serialize different-coordinate requests per browser tab
   function string(v){return typeof v==="string"?v.trim():"";}
   function validNumber(v){return typeof v==="number"&&Number.isFinite(v);}
   function cleanText(v){return string(v).replace(/[\u0000-\u001f]/g," ").replace(/\s+/g," ").slice(0,90);}
@@ -99,7 +100,7 @@
       if(saved)return {...saved,cache:true};
     }
     if(ongoing.has(key))return ongoing.get(key);
-    const promise=(async()=>{
+    const promise=requestQueue.then(async()=>{
       const box=storage();
       let otherRequest=0;
       try{otherRequest=Number(box?.getItem(RATE_KEY))||0;}catch(_){}
@@ -121,6 +122,7 @@
         return formatted;
       }finally{clearTimeout(timeout);}
     })().catch(()=>null).finally(()=>ongoing.delete(key));
+    requestQueue=promise.then(()=>{},()=>{});
     ongoing.set(key,promise);
     return promise;
   }
