@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - 'briefing-core.js'
+      - 'location-core.js'
+      - 'location-manager.js'
+      - 'location-manager.css'
       - 'briefing-ui.js'
       - 'stitch-layout.js'
       - 'stitch-theme.css'
@@ -14,6 +17,8 @@ on:
     paths:
       - 'briefing-core.js'
       - 'briefing-ui.js'
+      - 'location-core.js'
+      - 'location-manager.js'
       - 'tests/**'
 permissions:
   contents: read
@@ -32,6 +37,8 @@ jobs:
           node --check app.js
           node --check briefing-core.js
           node --check briefing-ui.js
+          node --check location-core.js
+          node --check location-manager.js
           node --check forecast-insights.js
           node --check stitch-layout.js
           node --check sw.js
