@@ -1,0 +1,48 @@
+/* Evidence-based caster briefing & personal favorite destinations */
+.briefing-board{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,.85fr);gap:18px;margin-bottom:20px}
+.briefing-main{background:linear-gradient(120deg,#1b4250,#15324a 72%);padding:25px 27px;border-color:#508a8f6b;position:relative;overflow:hidden}
+.briefing-main:before{content:"";position:absolute;right:-110px;top:-170px;border-radius:50%;height:330px;width:330px;background:radial-gradient(circle,#5baaa631,transparent 65%);pointer-events:none}
+.briefing-top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.briefing-freshness{font-size:11px;color:#d4e7ff;border:1px solid #657b98;background:#28465e;border-radius:99px;padding:5px 11px;white-space:nowrap}
+.briefing-freshness.live{color:#a7ffe4;border-color:#4b947b;background:#1c514a}
+.briefing-freshness.stale{color:#ffd6a9;background:#63432e;border-color:#aa6d39}
+.briefing-main h2{font-size:24px;margin:9px 0 7px;letter-spacing:-.7px}
+.briefing-headline{color:#fce0a2;font-size:15px;font-weight:750;margin-bottom:8px}
+.briefing-main p#briefingText{font-size:clamp(15px,1.8vw,19px);font-weight:520;line-height:1.73;color:#f3f9ff;margin:5px 0 18px}
+.briefing-mode{display:flex;gap:8px;flex-wrap:wrap}
+.briefing-mode button{background:#ffffff12;color:#d3e7f4;border:1px solid #83a6b67c;border-radius:11px;padding:9px 14px;font-size:12px;font-weight:780}
+.briefing-mode button.active{background:#ffdf9e;color:#19334e;border-color:#ffdf9e}
+.briefing-foot{border-top:1px solid #a4c8d338;margin-top:16px;padding-top:13px;color:#a9c5cf;font-size:11px;display:grid;gap:4px}
+.briefing-details{margin-top:16px;border:1px solid #ffffff23;background:#102e40;border-radius:12px;padding:8px 12px}
+.briefing-details summary{font-size:12px;font-weight:750;color:#bff7e5;cursor:pointer;padding:6px}
+.briefing-evidence{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:14px 3px 6px}
+.brief-evidence-pair{margin:0;min-width:0}
+.brief-evidence-pair dt{color:#8fbbce;font-size:10px}
+.brief-evidence-pair dd{margin:3px 0 0;color:#f1f9ff;font-size:12px;font-weight:700;overflow-wrap:anywhere}
+.briefing-aside{border-radius:24px;padding:25px 22px;background:linear-gradient(150deg,#23394f,#142c45);border:1px solid #68839d50}
+.briefing-aside h3{font-size:18px;letter-spacing:-.4px;margin:7px 0 15px}
+.briefing-event{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #ffffff15}
+.briefing-event:last-child{border:0}
+.briefing-event-icon{width:38px;height:38px;background:#ffffff12;border-radius:12px;display:grid;place-items:center;flex-shrink:0;color:#ffdb9d;font-size:22px}
+.briefing-event b{display:block;font-size:13px;margin:0 0 3px}
+.briefing-event small{display:block;font-size:11px;color:#b5ccdf}
+.briefing-event div>span{font-size:11px;color:#a6deeb}
+.briefing-no-event{font-size:13px;color:#d7e5f1;line-height:1.5;padding:13px;border:1px dashed #678093;border-radius:12px}
+.briefing-no-event small{display:block;color:#a8bed2;margin-top:7px}
+.briefing-caution{margin-top:15px;font-size:11px;color:#a6bdcc;line-height:1.6}
+.favorite-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.favorite-save{border:1px solid #739d9c;background:#1e464a;border-radius:99px;padding:7px 11px;font-size:11px;font-weight:700;color:#bbffe3}
+.favorite-save:disabled{opacity:.68}
+.favorite-list{display:flex;flex-wrap:wrap;gap:8px}
+.favorite-row{display:flex;align-items:center;border-radius:12px;border:1px solid #4e7589;background:#213e55;overflow:hidden}
+.favorite-choice,.favorite-delete{background:transparent;color:#d9f1fd;border:0}
+.favorite-choice{font-size:13px;padding:9px 11px}
+.favorite-choice.selected{color:#ffdfa1;font-weight:800}
+.favorite-delete{font-size:11px;border-left:1px solid #536d85;padding:9px;color:#adc8d9}
+.favorite-help{font-size:11px;color:#91b4c6;margin:8px 0}
+#favoriteMessage{min-height:19px;font-size:11px;color:#9fdec9}
+.quick-activity .quick-item{width:100%;font:inherit;text-align:left;color:inherit;cursor:pointer}
+.quick-activity .quick-item:hover{background:#ffffff17;border-color:#95c7c350}
+@media(max-width:900px){.briefing-board{grid-template-columns:1fr}.briefing-aside{padding:21px}}
+@media(max-width:710px){.briefing-board{gap:11px;margin-bottom:15px}.briefing-main,.briefing-aside{padding:19px;border-radius:19px}.briefing-main h2{font-size:21px}.briefing-main p#briefingText{font-size:16px}.briefing-evidence{gap:13px}.briefing-mode button{flex:1}.briefing-aside{padding:18px}.briefing-aside h3{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.briefing-board *{animation:none!important;transition:none!important}}
