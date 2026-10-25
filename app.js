@@ -61,12 +61,16 @@
     if(!validLocation(loc))return;
     var previous=STATE.loc,changed=Number(previous.lat)!==Number(loc.lat)||Number(previous.lon)!==Number(loc.lon);
     var source=loc.source==="gps"?"gps":"manual";
-    STATE.loc={name:String(loc.name).trim().slice(0,45)||"선택 지역",lat:Number(loc.lat),lon:Number(loc.lon),source:source};
+    STATE.loc={name:String(loc.name).trim().slice(0,75)||"선택 지역",lat:Number(loc.lat),lon:Number(loc.lon),source:source,
+      address:typeof loc.address==="string"?loc.address.slice(0,170):"",
+      administrative:typeof loc.administrative==="string"?loc.administrative.slice(0,145):"",
+      approximate:loc.approximate===true};
     if(changed){
       STATE.weather=null;STATE.air=null;STATE.hourly=[];STATE.fetchedAt=null;
       text("currentTemp","--");text("weatherSummary","새 지역 예보 연결 중");
     }
     $("locationTitle").textContent=STATE.loc.name;
+    $("locationTitle").title=STATE.loc.address ? STATE.loc.address+" (GPS 기준 추정주소)" : STATE.loc.name;
     $("heroLocation").textContent=STATE.loc.name;
     storeSet("weatherhannun_location",STATE.loc);
     if(updateUrl){
