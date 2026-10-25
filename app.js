@@ -70,15 +70,12 @@
     $("heroLocation").textContent=STATE.loc.name;
     storeSet("weatherhannun_location",STATE.loc);
     if(updateUrl){
+      // Only the explicit Share action may generate a URL with coordinates.
+      // Selecting a saved/manual place must not silently publish lat/lon in browser history.
       var url=new URL(location.href);
-      if(source==="gps"){
-        // A passive GPS choice must not leak location in the address bar.
-        url.searchParams.delete("lat");url.searchParams.delete("lon");url.searchParams.delete("name");
-      }else{
-        url.searchParams.set("lat",String(STATE.loc.lat));
-        url.searchParams.set("lon",String(STATE.loc.lon));
-        url.searchParams.set("name",STATE.loc.name);
-      }
+      url.searchParams.delete("lat");
+      url.searchParams.delete("lon");
+      url.searchParams.delete("name");
       history.replaceState(null,"",url.pathname+url.search+url.hash);
     }
     window.dispatchEvent(new CustomEvent("weatherhannun:location-applied",{detail:STATE.loc}));
