@@ -60,11 +60,24 @@ test("service worker version tracks the aligned shell", () => {
   const html = read("index.html");
   const worker = read("sw.js");
 
-  assert.ok(worker.includes("weatherhannun-shell-v14-theme-parity"));
-  for (const asset of ["stitch-today.css?v=14", "stitch-mobile.css?v=14", "region-search.css?v=14"]) {
+  assert.ok(worker.includes("weatherhannun-shell-v15-hour-card-contrast"));
+  for (const asset of ["stitch-today.css?v=15", "stitch-today.js?v=15", "stitch-mobile.css?v=14", "region-search.css?v=14"]) {
     assert.ok(html.includes(asset), `page must request ${asset}`);
     assert.ok(worker.includes(asset), `service worker must warm ${asset}`);
   }
+});
+
+test("current hour card has an explicit high-contrast state and descriptive rain label", () => {
+  const today = read("stitch-today.css");
+  const script = read("stitch-today.js");
+  const template = read("stitch-today.template.html");
+
+  assert.match(today, /\.stitch-hour-cell\s*\{[\s\S]*?appearance:none;[\s\S]*?border:1px solid/);
+  assert.match(today, /\.stitch-hour-current\s*\{[\s\S]*?background:linear-gradient[\s\S]*?!important/);
+  assert.ok(script.includes("stitch-hour-current"));
+  assert.ok(script.includes("aria-current','time"));
+  assert.ok(script.includes("textContent='비 "));
+  assert.match(template, /stitch-hour-current[\s\S]*?aria-current="time"[\s\S]*?>현재</);
 });
 
 test("light and dark themes cover the mobile header, Today template, and location dialog", () => {
