@@ -6,6 +6,7 @@ on:
       - 'briefing-core.js'
       - 'location-core.js'
       - 'location-manager.js'
+      - 'reverse-geocode.js'
       - 'location-manager.css'
       - 'briefing-ui.js'
       - 'stitch-layout.js'
@@ -19,6 +20,7 @@ on:
       - 'briefing-ui.js'
       - 'location-core.js'
       - 'location-manager.js'
+      - 'reverse-geocode.js'
       - 'tests/**'
 permissions:
   contents: read
@@ -39,6 +41,7 @@ jobs:
           node --check briefing-ui.js
           node --check location-core.js
           node --check location-manager.js
+          node --check reverse-geocode.js
           node --check forecast-insights.js
           node --check stitch-layout.js
           node --check sw.js
