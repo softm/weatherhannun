@@ -197,13 +197,14 @@
    h.slice(0,12).forEach((item,i)=>{
     var cond=condition(item.code,item.day);
     var b=document.createElement('button');b.type='button';
-    b.className='stitch-hour-cell flex flex-col items-center justify-between min-w-[72px] h-32 py-space-sm rounded-xl shrink-0 shadow-sm '+(i?'bg-white border border-slate-200/80 text-slate-800':'bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-blue-500/20');
-    b.setAttribute('aria-label',short(item.time)+' '+fmt(item.temp)+'도, 비 '+fmt(item.rain)+'퍼센트 상세');
-    var hour=document.createElement('span');hour.className='font-label-sm text-label-sm font-semibold';hour.textContent=i?' '+item.time.slice(11,13)+'시':'지금';
+    b.className='stitch-hour-cell flex flex-col items-center justify-between min-w-[72px] h-32 py-space-sm rounded-xl shrink-0 shadow-sm '+(i?'bg-white border border-slate-200/80 text-slate-800':'stitch-hour-current bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-blue-500/20');
+    b.setAttribute('aria-label',(i?short(item.time):'현재 '+short(item.time))+' 기온 '+fmt(item.temp)+'도, 비 '+fmt(item.rain)+'퍼센트 상세');
+    if(!i)b.setAttribute('aria-current','time');
+    var hour=document.createElement('span');hour.className='font-label-sm text-label-sm font-semibold';hour.textContent=i?' '+item.time.slice(11,13)+'시':'현재';
     var ic=document.createElement('span');ic.className='material-symbols-outlined text-[26px] '+(i?'text-blue-600':'text-amber-200');ic.textContent=cond.icon;
     var num=document.createElement('div');num.className='flex flex-col items-center';
     var temp=document.createElement('span');temp.className='font-tabular-metric text-tabular-metric font-bold';temp.textContent=fmt(item.temp)+'°';
-    var rain=document.createElement('span');rain.className='font-label-sm text-label-sm mt-0.5';rain.textContent=fmt(item.rain)+'%';
+    var rain=document.createElement('span');rain.className='font-label-sm text-label-sm mt-0.5';rain.textContent='비 '+fmt(item.rain)+'%';
     num.append(temp,rain);b.append(hour,ic,num);
     b.addEventListener('click',()=>{
      nodes.track.querySelectorAll('.stitch-hour-selected').forEach(x=>x.classList.remove('stitch-hour-selected'));
