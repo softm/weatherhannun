@@ -105,7 +105,7 @@
     const fullStreet=isStreet(raw);
     let q=removeLot(raw);
     if(fullStreet){
-      q=clean(q.replace(/[가-힣0-9]+(?:대로|로|길)\s*\d+(?:-\d+)?(?:.*)$/,""));
+      q=clean(raw.replace(/[가-힣0-9]+(?:대로|로|길)\s*\d+(?:-\d+)?(?:.*)$/,""));
       if(q.length<2)return [];
     }
     q=ROMAN[q]||q;
