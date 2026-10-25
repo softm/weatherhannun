@@ -121,7 +121,7 @@
         if(formatted)setCached(key,formatted,Date.now());
         return formatted;
       }finally{clearTimeout(timeout);}
-    })().catch(()=>null).finally(()=>ongoing.delete(key));
+    }).catch(()=>null).finally(()=>ongoing.delete(key));
     requestQueue=promise.then(()=>{},()=>{});
     ongoing.set(key,promise);
     return promise;
