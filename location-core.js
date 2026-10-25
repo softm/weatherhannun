@@ -17,7 +17,7 @@
     const admin=String(raw.administrative||"").trim().slice(0,145);
     return {name:name||"선택 지역",lat,lon,
       source:raw.source==="gps"?"gps":"manual",
-      address,administrative:admin,approximate:raw.approximate===true};
+      address,administrative:admin,approximate:raw.approximate===true,regionCenter:raw.regionCenter===true};
   }
   function key(place){
     const p=cleanPlace(place);
