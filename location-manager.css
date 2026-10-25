@@ -1,0 +1,51 @@
+/* Weather Hannun first-entry GPS prompt and multi-place shortcuts.
+   Always use existing Stitch light/dark design tokens. */
+.location-shortcuts{display:flex;align-items:center;gap:12px;min-height:64px;margin:0 auto 19px;padding:8px 12px;border:1px solid var(--st-line);border-radius:17px;background:var(--st-surface);color:var(--st-fg);box-shadow:0 5px 18px rgba(9,36,68,.05)}
+.location-current-label{display:flex;align-items:center;gap:5px;white-space:nowrap;border-right:1px solid var(--st-line);padding:3px 14px 3px 4px;font-size:13px}
+.location-current-label strong{font-size:14px;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+.location-current-label small{font-size:10px;color:var(--st-muted);margin-left:5px}
+.location-fast-items{display:flex;flex:1;align-items:center;gap:7px;overflow-x:auto;scrollbar-width:thin;padding:5px 0}
+.location-fast-items button{flex:0 0 auto;border-radius:100px;background:var(--panel2);border:1px solid var(--st-line);color:var(--st-fg);padding:8px 13px;white-space:nowrap;font-size:12px;font-weight:700}
+.location-fast-items button:focus-visible,.location-place-row button:focus-visible{outline-offset:1px}
+.location-fast-items .location-fast-gps{color:var(--st-accent);border-color:var(--st-accent)}
+.location-fast-items .location-fast-place.active{background:var(--st-accent);border-color:var(--st-accent);color:#fff}
+html[data-weather-theme="dark"] .location-fast-items .location-fast-place.active{color:#10223a}
+.location-fast-items .location-fast-manage{background:transparent;border-style:dashed;color:var(--st-accent)}
+.location-place-row{display:flex;align-items:center;gap:6px;margin:7px 0;padding:6px;border:1px solid var(--st-line);background:var(--panel2);border-radius:13px}
+.location-place-row.is-active{border-color:var(--st-accent)}
+.location-place-row button{border:0;background:transparent;color:var(--st-fg);cursor:pointer}
+.location-place-select{flex:1;display:flex;align-items:center;gap:7px;text-align:left;min-width:0;padding:8px 4px!important}
+.location-place-symbol{color:var(--st-accent)}
+.location-place-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;font-size:14px}
+.location-place-current{margin-left:auto;background:var(--st-accent);color:#fff;font-weight:700;border-radius:99px;padding:4px 8px;font-size:10px;white-space:nowrap}
+html[data-weather-theme="dark"] .location-place-current{color:#15233d}
+.location-edit-button,.location-delete-button{border:1px solid var(--st-line)!important;border-radius:9px;padding:8px 10px!important;flex:0 0 auto;font-size:12px}
+.location-delete-button{color:#dd6872!important}
+.location-undo{border:0;background:var(--st-accent);color:#fff;border-radius:9px;padding:5px 8px;font-size:12px;font-weight:750;margin-left:5px}
+.location-permission-status{font-size:12px;color:var(--st-muted);margin:7px 0;line-height:1.45}
+.location-empty{width:100%;padding:10px 0}
+.location-onboarding,.location-rename-dialog{background:var(--st-surface)!important;color:var(--st-fg)!important;border:1px solid var(--st-line)!important;box-shadow:0 24px 90px rgba(7,24,51,.33)!important;max-width:440px;padding:28px!important;text-align:center}
+.location-onboarding::backdrop,.location-rename-dialog::backdrop{background:rgba(5,15,34,.65);backdrop-filter:blur(5px)}
+.onboard-illustration{display:grid;place-items:center;margin:0 auto 13px;width:86px;height:86px;background:var(--panel2);border:1px solid var(--st-line);border-radius:25px;font-size:43px}
+.location-onboarding h2{font-size:clamp(23px,5vw,29px);letter-spacing:-.9px;line-height:1.4;margin:8px 0 13px}
+.location-onboarding p{color:var(--st-muted);font-size:13px;line-height:1.7}
+.location-onboarding .onboard-note{font-size:12px;padding:11px 13px;margin:15px 0;background:var(--panel2);border:1px solid var(--st-line);border-radius:12px}
+.location-onboarding button{width:100%;padding:13px;margin:5px 0;border-radius:13px;font-size:14px;font-weight:800}
+.location-onboarding .onboard-primary{background:var(--st-accent);border:1px solid var(--st-accent);color:#fff}
+html[data-weather-theme="dark"] .location-onboarding .onboard-primary{color:#15233d}
+.location-onboarding .onboard-secondary{background:var(--panel2);border:1px solid var(--st-line);color:var(--st-fg)}
+.location-onboarding .onboard-later{border:0;background:transparent;color:var(--st-muted);font-weight:500}
+.location-onboarding .onboard-privacy{font-size:10px;margin:13px 0 0}
+.location-onboarding .onboard-privacy a{color:var(--st-accent)}
+.location-rename-dialog{text-align:left}
+.location-rename-dialog h2{font-size:21px;letter-spacing:-.5px}
+.location-rename-dialog label{display:block;font-size:12px;color:var(--st-muted);margin:17px 0 6px}
+.location-rename-dialog input{width:100%;padding:12px;border-radius:11px;border:1px solid var(--st-line);color:var(--st-fg);background:var(--panel2);box-sizing:border-box}
+.location-rename-dialog .location-validation{color:#d35a5a;min-height:21px;font-size:11px}
+.rename-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:12px}
+.rename-actions button{border-radius:10px;border:1px solid var(--st-line);padding:10px 15px;color:var(--st-fg);background:var(--panel2);font-weight:700}
+.rename-actions button[type=submit]{background:var(--st-accent);border-color:var(--st-accent);color:#fff}
+html[data-weather-theme="dark"] .rename-actions button[type=submit]{color:#15233d}
+@media(max-width:850px){.location-shortcuts{flex-wrap:wrap;gap:3px}.location-current-label{width:100%;border-right:0;border-bottom:1px solid var(--st-line);padding:3px 3px 9px;justify-content:start}.location-fast-items{width:100%;flex-basis:100%}}
+@media(max-width:640px){.location-shortcuts{margin-bottom:11px;border-radius:14px;min-height:0;padding:8px 10px}.location-current-label{font-size:12px}.location-current-label strong{font-size:14px}.location-fast-items button{padding:7px 11px;font-size:12px}.location-onboarding,.location-rename-dialog{padding:21px!important;max-height:calc(100dvh - 30px)}.location-place-row{gap:3px}.location-edit-button,.location-delete-button{padding:7px 8px!important}}
+@media(prefers-reduced-motion:reduce){.location-shortcuts *,.location-onboarding *{transition:none!important;animation:none!important}}
