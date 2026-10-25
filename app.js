@@ -24,7 +24,7 @@
     carwash: { title: "세차", icon: "🚗", hint: "당장뿐 아니라 다음 6시간의 강수 가능성도 확인합니다." }
   };
   var STATE = {
-    loc: CITY_LIST[0], weather: null, air: null, activity: "spray",
+    loc: CITY_LIST[0], weather: null, air: null, activity: "walk", dataStatus: "loading",
     view: "today", hourly: [], fetchedAt: null, cityData: null,
     map: null, markers: [], loading: false, ticket: 0, mapBusy: false
   };
@@ -128,7 +128,7 @@
     var loc=STATE.loc;
     var cache=storeGet("weatherhannun_last");
     if (!force && cache && cache.loc && cache.loc.lat===loc.lat && cache.loc.lon===loc.lon && cache.weather) {
-      STATE.weather=cache.weather;STATE.air=cache.air||null;STATE.fetchedAt=cache.at||null;STATE.hourly=makeHours(STATE.weather);renderAll();
+      STATE.weather=cache.weather;STATE.air=cache.air||null;STATE.fetchedAt=cache.at||null;STATE.hourly=makeHours(STATE.weather);STATE.dataStatus="cached";renderAll();
     }
     try {
       var results=await Promise.allSettled([getJson(forecastUrl(loc,false)),getJson(airUrl(loc))]);
@@ -138,6 +138,7 @@
       if(!weather || !weather.current || !weather.daily || !weather.hourly) throw new Error("날씨 데이터를 불러오지 못했습니다.");
       STATE.weather=weather;
       STATE.air=air;
+      STATE.dataStatus="live";
       STATE.fetchedAt=new Date().toISOString();
       STATE.hourly=makeHours(weather);
       storeSet("weatherhannun_last",{loc:loc,at:STATE.fetchedAt,weather:weather,air:air});
@@ -146,8 +147,10 @@
       if(!air) toast("대기질 API 연결이 불안정합니다. 날씨는 정상 표시됩니다.");
     }catch(e) {
       if(ticket!==STATE.ticket)return;
-      $("updatedBadge").textContent=STATE.weather?"저장된 예보 표시 중":"데이터 연결 오류";
-      $("dataFooterStatus").textContent=STATE.weather?"이전 예보 표시 중":"예보 연결 실패";
+      STATE.dataStatus=STATE.weather?"cached-error":"error";
+      $("updatedBadge").textContent=STATE.weather?"저장된 예보 · 연결 실패":"데이터 연결 오류";
+      $("dataFooterStatus").textContent=STATE.weather?"저장된 예보 · 갱신 실패":"예보 연결 실패";
+      if(STATE.weather)renderAll();
       toast(e.message+" 네트워크 상태를 확인해 주세요.");
       if(!STATE.weather) $("weatherSummary").textContent="날씨 연결 실패";
     } finally {
@@ -174,16 +177,19 @@
     var cold=STATE.hourly.slice(0,36).some(function(x){return finite(x.temp)&&x.temp<=3;});
     var note=nextRain?whenLabel(nextRain.time)+"경 비 올 가능성 "+num(nextRain.rain)+"%":cold?"48시간 이내 저온 구간이 있습니다. 작물 냉해와 결빙에 유의하세요.":"현재 예보에서 가까운 시간의 뚜렷한 강수 위험이 낮습니다.";
     text("noticeStrip",note);
-    var at=STATE.fetchedAt?new Date(STATE.fetchedAt).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"}):"저장 데이터";
-    text("updatedBadge","최종 갱신 "+at);
-    text("modelTime","예보 기준 "+c.time.replace("T"," ")+" (KST)");
-    text("dataFooterStatus","날씨 API 갱신 완료"+(STATE.air?" · 대기질 연결":" · 대기질 확인 필요"));
+    var at=STATE.fetchedAt?new Date(STATE.fetchedAt).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"}):"조회 시각 없음";
+    var last=STATE.fetchedAt?Date.parse(STATE.fetchedAt):NaN;
+    var old=Number.isFinite(last)&&Date.now()-last>180*60000;
+    var label=old?"오래된 저장 예보 · 재조회 필요":STATE.dataStatus==="live"?"API 조회 "+at:STATE.dataStatus==="cached-error"?"연결 오류 · 저장 예보":"저장된 예보 "+at;
+    text("updatedBadge",label);
+    text("modelTime","예보 유효시각 "+(c.time||"정보 없음").replace("T"," ")+" (KST) · 모델 산출시각 별도 미제공");
+    text("dataFooterStatus",(STATE.dataStatus==="live"?"모델 예보 조회 성공":STATE.dataStatus==="cached-error"?"API 연결 실패 · 저장 예보":old?"오래된 저장 예보":"저장된 모델 예보")+(STATE.air?" · 대기질 예측 조회":" · 대기질 정보 없음"));
     renderHourly();
     renderWeek();
     renderDecisions();
     renderActivity();
     renderAir();
-    window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:{weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt}}));
+    window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:{weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt,status:STATE.dataStatus}}));
   }
   function renderHourly(){
     var h=STATE.hourly.slice(0,36),width=Math.max(36*76,h.length*76);
@@ -276,7 +282,7 @@
     var rank=Object.keys(ACTIVITIES).map(function(k){return {key:k,info:ACTIVITIES[k],data:activityEvalAt(k,0),best:bestActivity(k)};}).sort(function(a,b){return b.data.score-a.data.score;});
     var top=rank.slice(0,3);
     text("decisionLead",top[0]&&top[0].data.score>=60?"오늘은 "+top[0].info.title+"에 비교적 유리한 날씨예요.":"현재 날씨는 활동을 신중하게 선택할 시간이에요.");
-    $("quickActivity").innerHTML=top.map(function(x){return '<div class="quick-item"><div class="quick-icon">'+x.info.icon+'</div><div class="quick-main"><b>'+x.info.title+'</b><small>'+(x.best?"추천 "+whenLabel(x.best.start):"조건 확인 필요")+'</small></div><span class="quick-badge '+scoreClass(x.data.score)+'">'+grade(x.data.score)+' '+x.data.score+'</span></div>';}).join("");
+    $("quickActivity").innerHTML=top.map(function(x){return '<button type="button" class="quick-item" data-quick-activity="'+x.key+'"><div class="quick-icon">'+x.info.icon+'</div><div class="quick-main"><b>'+x.info.title+'</b><small>'+(x.best?"추천 "+whenLabel(x.best.start):"조건 확인 필요")+'</small></div><span class="quick-badge '+scoreClass(x.data.score)+'">'+grade(x.data.score)+' '+x.data.score+'</span></button>';}).join("");
   }
   function renderActivity(){
     var key=STATE.activity,info=ACTIVITIES[key],now=activityEvalAt(key,0),best=bestActivity(key);
@@ -427,12 +433,26 @@
     if(p.has("lat")&&p.has("lon"))l={name:p.get("name")||"선택 지역",lat:Number(p.get("lat")),lon:Number(p.get("lon"))};
     if(!validLocation(l))l=storeGet("weatherhannun_location");
     if(!validLocation(l))l=CITY_LIST[0];
+    var remembered=storeGet("weatherhannun_activity_v1");
+    if(typeof remembered==="string"&&ACTIVITIES[remembered])STATE.activity=remembered;
+    document.querySelectorAll("[data-activity]").forEach(function(b){b.classList.toggle("active",b.dataset.activity===STATE.activity);});
+    window.addEventListener("weatherhannun:change-location",function(ev){if(validLocation(ev.detail))applyLocation(ev.detail,true);});
     document.querySelectorAll("[data-view]").forEach(function(btn){btn.addEventListener("click",function(){setView(btn.dataset.view);});});
     document.querySelectorAll("[data-activity]").forEach(function(btn){btn.addEventListener("click",function(){
       STATE.activity=btn.dataset.activity;
+      storeSet("weatherhannun_activity_v1",STATE.activity);
       document.querySelectorAll("[data-activity]").forEach(function(b){b.classList.toggle("active",b.dataset.activity===STATE.activity);});
       if(STATE.weather)renderActivity();
     });});
+    $("quickActivity").addEventListener("click",function(event){
+      var target=event.target.closest("[data-quick-activity]");
+      if(!target||!ACTIVITIES[target.dataset.quickActivity])return;
+      STATE.activity=target.dataset.quickActivity;
+      storeSet("weatherhannun_activity_v1",STATE.activity);
+      document.querySelectorAll("[data-activity]").forEach(function(b){b.classList.toggle("active",b.dataset.activity===STATE.activity);});
+      if(STATE.weather)renderActivity();
+      setView("activity");
+    });
     $("locationButton").addEventListener("click",searchDialogOpen);
     $("dialogClose").addEventListener("click",function(){$("locationDialog").close();});
     $("searchForm").addEventListener("submit",function(e){e.preventDefault();searchCities();});
