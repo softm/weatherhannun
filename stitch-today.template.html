@@ -1,0 +1,353 @@
+<div class="flex flex-col w-full px-margin gap-space-lg select-none">
+<!-- Top Atmospheric Visual & Primary Temperature Display -->
+<section class="relative w-full rounded-2xl bg-gradient-to-b from-white via-white/95 to-sky-50/70 p-space-lg border border-slate-200/70 shadow-[0_8px_24px_rgba(29,117,240,0.06)] overflow-hidden">
+<!-- Ambient Sun Glow Backdrop -->
+<div class="absolute -top-10 -right-8 w-48 h-48 rounded-full bg-amber-200/35 blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/3 -left-12 w-52 h-52 rounded-full bg-blue-200/30 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<!-- Location & Updated Chip -->
+<div class="flex items-center gap-space-xs px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 mb-space-sm shadow-xs">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-slate-600 font-medium">기상 모델 예보 연결</span>
+<span class="text-slate-300 text-[10px]">|</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">조회 중</span>
+</div>
+<!-- Weather Icon Illustration (Bright Daytime Sun & Soft Cloud) -->
+<div class="relative w-28 h-24 my-1 flex items-center justify-center">
+<!-- Vibrant Warm Sun -->
+<div class="absolute w-16 h-16 rounded-full bg-gradient-to-tr from-amber-400 to-orange-400 shadow-[0_0_24px_rgba(251,191,36,0.65)] animate-pulse"></div>
+<!-- Soft Crisp Cloud -->
+<svg class="relative -bottom-2 -right-2 w-20 h-14 drop-shadow-[0_4px_10px_rgba(30,64,175,0.18)]" fill="none" viewbox="0 0 100 65">
+<path d="M22 55h58a18 18 0 0 0 4-35.5A24 24 0 0 0 38 14a22 22 0 0 0-21 16A16 16 0 0 0 22 55z" fill="#FFFFFF"></path>
+<path d="M22 55h58a18 18 0 0 0 4-35.5A24 24 0 0 0 38 14a22 22 0 0 0-21 16A16 16 0 0 0 22 55z" fill="url(#cloudGrad)" opacity="0.3"></path>
+<defs>
+<lineargradient id="cloudGrad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0%" stop-color="#93C5FD"></stop>
+<stop offset="100%" stop-color="#3B82F6"></stop>
+</lineargradient>
+</defs>
+</svg>
+</div>
+<!-- Temperature Display & Conditions -->
+<div class="flex items-start justify-center text-slate-900 tracking-tighter">
+<span class="font-display-mobile text-display-mobile font-bold text-slate-900">22</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary mt-1 font-bold">°</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-slate-800 mt-0.5 flex items-center gap-space-xs justify-center font-semibold">
+<span>대체로 맑음</span>
+<span class="text-slate-300">•</span>
+<span class="font-body-md text-body-md text-slate-500 font-medium">체감 23.5°</span>
+</div>
+<!-- High / Low Range Pill -->
+<div class="mt-space-sm inline-flex items-center gap-space-md px-3.5 py-1.5 rounded-full bg-slate-100/90 text-slate-700 font-label-lg text-label-lg border border-slate-200/80 shadow-xs">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-orange-600 text-[16px] font-bold">arrow_upward</span>
+<span class="text-slate-800 font-semibold">최고 25°</span>
+</div>
+<span class="text-slate-300">|</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-blue-600 text-[16px] font-bold">arrow_downward</span>
+<span class="text-slate-800 font-semibold">최저 14°</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Ambient Air Quality Summary Badge -->
+<section class="w-full flex items-center justify-between p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined text-[19px]">eco</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-slate-500">통합 대기질 지수</div>
+<div class="font-title-md text-title-md text-slate-900 font-semibold">공기 쾌적 및 활동 최적</div>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/80 text-emerald-700 font-label-sm text-label-sm text-center">
+        미세 <span class="font-bold">좋음</span> 18㎍
+      </div>
+<div class="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-700 font-label-sm text-label-sm text-center">
+        초미세 <span class="font-bold">보통</span> 16㎍
+      </div>
+</div>
+</section>
+<!-- [★핵심] Weather Caster One-Line Live Briefing Card -->
+<section class="relative w-full rounded-xl bg-white p-space-lg border border-slate-200/70 shadow-sm overflow-hidden">
+<!-- Soft Warm Accent Rim -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-sky-400 to-emerald-400"></div>
+<div class="flex items-start gap-space-md">
+<!-- Caster Avatar with Live Indicator -->
+<div class="relative shrink-0">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-slate-100 ring-2 ring-blue-100 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Warm and professional Korean female weather caster smiling gently at camera, dressed in light mint blazer against clean soft studio lighting with subtle weather graphics on monitor background, crisp cinematic portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTmYXNBNC6uyFFHnwLSo0IEbjCEEFy4xvyRq0-te938ax4p0Wv7XDtQOttOwkWjo0CUZ5t-vsvraAQhtr9uyhXYMRF15zMibXufFvq79F6X_L3q2JIHc9Wf61UJ6P9_Rj_RIM3hapSppRIwvPPA8n6MFwldslUbHRn4450p5FW_ZZeFXaYTD2fKOIJAlRfpSKf75B5JQaqpsW1M2XunZ5hTy4xNZTd9r5Tah4Vk8EsfebZdgnpdDla1Q"/>
+</div>
+<span class="absolute -bottom-1 -right-1 flex h-4 w-4">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-4 w-4 bg-primary text-[9px] text-white font-bold items-center justify-center shadow-xs">AI</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-md text-title-md text-slate-900 font-semibold">삼청동 기상브리핑</span>
+<span class="px-2 py-0.5 rounded-full bg-blue-50 text-primary border border-blue-100 font-label-sm text-label-sm font-semibold">기상 데이터 해설</span>
+</div>
+<span class="material-symbols-outlined text-blue-600 text-[18px]">verified</span>
+</div>
+<p class="font-body-md text-body-md text-slate-700 leading-relaxed mt-space-xs">
+          "오전에는 쾌청하지만 <span class="text-amber-600 font-bold">오후 4시부터 국지성 소나기</span> 가능성이 높아집니다. 야외 일정과 세차는 <span class="text-emerald-600 font-bold">오후 3시 이전</span>에 마치시는 것을 권장합니다."
+        </p>
+</div>
+</div>
+</section>
+<!-- [★핵심] Immediate Action Recommendations (3 Cards Grid) -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">recommend</span>
+<h2 class="font-title-md text-title-md text-slate-900 font-semibold">오늘의 즉시 행동 추천</h2>
+</div>
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">삼청동 기준</span>
+</div>
+<div class="grid grid-cols-1 gap-space-sm">
+<!-- 1. Walk / Outdoor Activity Card -->
+<article class="p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm flex items-center justify-between gap-space-md transition-all active:scale-[0.99] hover:border-slate-300">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[24px]">directions_walk</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-md text-title-md text-slate-900 font-semibold">산책하기 좋은 시간</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-label-sm text-label-sm font-semibold">--점</span>
+</div>
+<p class="font-body-sm text-body-sm text-slate-500 truncate mt-0.5 font-medium">
+              적합한 시간 계산 중
+            </p>
+</div>
+</div>
+<button class="shrink-0 w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</article>
+<!-- 2. Laundry / Drying Card -->
+<article class="p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm flex items-center justify-between gap-space-md transition-all active:scale-[0.99] hover:border-slate-300">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[24px]">local_laundry_service</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-md text-title-md text-slate-900 font-semibold">빨래 &amp; 실외건조</span>
+<span class="px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-label-sm text-label-sm font-semibold">최적</span>
+</div>
+<p class="font-body-sm text-body-sm text-slate-500 truncate mt-0.5 font-medium">
+              적합한 시간 계산 중
+            </p>
+</div>
+</div>
+<button class="shrink-0 w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</article>
+<!-- 3. Agricultural & Greenhouse Alert Card -->
+<article class="p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm flex items-center justify-between gap-space-md transition-all active:scale-[0.99] hover:border-slate-300">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-11 h-11 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[24px]">agriculture</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-md text-title-md text-slate-900 font-semibold">농작업 시설 주의</span>
+<span class="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-label-sm text-label-sm font-semibold">돌풍 대비</span>
+</div>
+<p class="font-body-sm text-body-sm text-slate-500 truncate mt-0.5 font-medium">
+              풍속·강수 위험 확인 중
+            </p>
+</div>
+</div>
+<button class="shrink-0 w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</article>
+</div>
+</section>
+<!-- Hourly Forecast Preview (Synchronized Horizontal Track) -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">schedule</span>
+<h2 class="font-title-md text-title-md text-slate-900 font-semibold">시간별 예보</h2>
+</div>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-blue-600 font-semibold">
+<span>강수 예보 확인 중</span>
+<span class="material-symbols-outlined text-[15px]">water_drop</span>
+</div>
+</div>
+<!-- Horizontal Scroller with Luminous White Tiles -->
+<div id="stitchHourlyTrack" class="flex items-center gap-space-sm overflow-x-auto pb-space-xs pt-1 -mx-margin px-margin">
+<!-- Now (Active Highlight Card) -->
+<div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20 shrink-0">
+<span class="font-label-sm text-label-sm text-white/95 font-semibold">지금</span>
+<span class="material-symbols-outlined text-amber-300 text-[26px]">wb_sunny</span>
+<div class="flex flex-col items-center">
+<span class="font-tabular-metric text-tabular-metric text-white font-bold">22°</span>
+<span class="font-label-sm text-label-sm text-blue-100 font-medium mt-0.5">20%</span>
+</div>
+</div>
+<!-- 10시 -->
+<div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">10시</span>
+<span class="material-symbols-outlined text-amber-500 text-[26px]">wb_sunny</span>
+<div class="flex flex-col items-center">
+<span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">22°</span>
+<span class="font-label-sm text-label-sm text-slate-400 mt-0.5">10%</span>
+</div>
+</div>
+<!-- 11시 -->
+<div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">11시</span>
+<span class="material-symbols-outlined text-sky-500 text-[26px]">partly_cloudy_day</span>
+<div class="flex flex-col items-center">
+<span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">23°</span>
+<span class="font-label-sm text-label-sm text-slate-400 mt-0.5">20%</span>
+</div>
+</div>
+<!-- 13시 (Peak Warmth) -->
+<div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">13시</span>
+<span class="material-symbols-outlined text-orange-500 text-[26px]">wb_sunny</span>
+<div class="flex flex-col items-center">
+<span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">25°</span>
+<span class="font-label-sm text-label-sm text-slate-400 mt-0.5">15%</span>
+</div>
+</div>
+<!-- 14시 -->
+<div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">14시</span>
+<span class="material-symbols-outlined text-slate-400 text-[26px]">cloud</span>
+<div class="flex flex-col items-center">
+<span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">24°</span>
+<span class="font-label-sm text-label-sm text-blue-600 font-semibold mt-0.5">40%</span>
+</div>
+</div>
+<!-- 16시 (Rain Alert Card) -->
+<div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-blue-50/80 border border-blue-200/90 shrink-0 shadow-sm">
+<span class="font-label-sm text-label-sm text-amber-700 font-bold">16시</span>
+<span class="material-symbols-outlined text-blue-600 text-[26px] animate-bounce">rainy</span>
+<div class="flex flex-col items-center">
+<span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">21°</span>
+<span class="font-label-sm text-label-sm text-blue-600 font-bold mt-0.5">85%</span>
+</div>
+</div>
+<!-- 18시 -->
+<div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">18시</span>
+<span class="material-symbols-outlined text-blue-500 text-[26px]">water_drop</span>
+<div class="flex flex-col items-center">
+<span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">20°</span>
+<span class="font-label-sm text-label-sm text-blue-600 font-medium mt-0.5">60%</span>
+</div>
+</div>
+<!-- 20시 -->
+<div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">20시</span>
+<span class="material-symbols-outlined text-indigo-500 text-[26px]">nights_stay</span>
+<div class="flex flex-col items-center">
+<span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">18°</span>
+<span class="font-label-sm text-label-sm text-slate-400 mt-0.5">10%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Weather Vital Metric Matrix (2x2 Grid + Sunset Span) -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-space-xs">
+<h2 class="font-title-md text-title-md text-slate-900 font-semibold">기상 핵심 지표</h2>
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">기상 모델 예측 지표</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- 1. Precipitation Probability -->
+<div class="p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm flex flex-col justify-between h-28">
+<div class="flex items-center justify-between text-slate-500">
+<span class="font-label-sm text-label-sm flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-blue-500 text-[18px]">umbrella</span>
+            강수 확률
+          </span>
+<span class="font-label-sm text-label-sm text-emerald-600 font-semibold">안정</span>
+</div>
+<div>
+<div class="font-tabular-metric text-tabular-metric text-slate-900">20%</div>
+<p class="font-body-sm text-body-sm text-slate-500 mt-0.5">오후 4시 이후 85% 급증</p>
+</div>
+</div>
+<!-- 2. Humidity -->
+<div class="p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm flex flex-col justify-between h-28">
+<div class="flex items-center justify-between text-slate-500">
+<span class="font-label-sm text-label-sm flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-sky-500 text-[18px]">humidity_mid</span>
+            습도
+          </span>
+<span class="font-label-sm text-label-sm text-emerald-600 font-semibold">적정</span>
+</div>
+<div>
+<div class="font-tabular-metric text-tabular-metric text-slate-900">55%</div>
+<p class="font-body-sm text-body-sm text-slate-500 mt-0.5">이슬점 13° (쾌적)</p>
+</div>
+</div>
+<!-- 3. Wind Velocity -->
+<div class="p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm flex flex-col justify-between h-28">
+<div class="flex items-center justify-between text-slate-500">
+<span class="font-label-sm text-label-sm flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-teal-600 text-[18px]">air</span>
+            풍속
+          </span>
+<span class="font-label-sm text-label-sm text-slate-500 font-medium">남서풍</span>
+</div>
+<div>
+<div class="font-tabular-metric text-tabular-metric text-slate-900">2.1 <span class="font-body-sm text-body-sm font-normal text-slate-500">m/s</span></div>
+<p class="font-body-sm text-body-sm text-slate-500 mt-0.5">오후 순간돌풍 7m/s</p>
+</div>
+</div>
+<!-- 4. UV Index -->
+<div class="p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm flex flex-col justify-between h-28">
+<div class="flex items-center justify-between text-slate-500">
+<span class="font-label-sm text-label-sm flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-amber-500 text-[18px]">light_mode</span>
+            자외선
+          </span>
+<span class="font-label-sm text-label-sm text-amber-600 font-semibold">보통 (4)</span>
+</div>
+<div>
+<div class="font-tabular-metric text-tabular-metric text-slate-900">4 <span class="font-body-sm text-body-sm font-normal text-slate-500">UV</span></div>
+<p class="font-body-sm text-body-sm text-slate-500 mt-0.5">외출 시 자외선차단제</p>
+</div>
+</div>
+</div>
+<!-- Sunset Horizon Strip -->
+<div class="p-space-md rounded-xl bg-white border border-slate-200/70 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 text-orange-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">wb_twilight</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-slate-500">오늘 일몰 예정 시각</span>
+<div class="font-headline-sm text-headline-sm text-slate-900 font-semibold">오후 7시 28분 (19:28)</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-sm text-label-sm text-slate-500">남은 일조 시간</div>
+<div class="font-title-md text-title-md text-blue-600 font-semibold">9시간 47분</div>
+</div>
+</div>
+</section>
+<!-- Community Activity Sparkle -->
+<section class="p-space-md rounded-xl bg-white/70 border border-slate-200/70 backdrop-blur-md flex items-center justify-between text-slate-600 mb-space-xs shadow-xs">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-blue-600 text-[20px]">notifications_active</span>
+<span class="font-body-sm text-body-sm text-slate-700">내 관심 기상 조건을 설정하여 알림을 확인하세요.</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-slate-400">tune</span>
+</section>
+</div>
