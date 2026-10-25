@@ -37,6 +37,25 @@
   function textAliases(path){
     return path.map(n=>ALIASES[n]||n).join(" ");
   }
+  function localParts(value){
+    const word=compact(value);
+    if(!word)return {word:"",stem:"",family:""};
+    const suffix=word.match(/(?:특별자치도|특별자치시|특별시|광역시|자치도|도|시|군|구|읍|면|동|리)$/u)?.[0]||"";
+    const family=/^(?:특별자치시|특별시|광역시|시)$/.test(suffix)?"si":
+      /^(?:특별자치도|자치도|도)$/.test(suffix)?"do":suffix;
+    return {word,stem:suffix?word.slice(0,-suffix.length):word,family};
+  }
+  function localRelation(entry,token){
+    const query=localParts(token);
+    const entryForms=[localParts(entry.name),localParts(ALIASES[entry.name]||"")].filter(value=>value.word);
+    const sameAdministrativeName=value=>value.stem===query.stem&&
+      (!value.family||!query.family||value.family===query.family);
+    const exact=entryForms.some(value=>value.word===query.word||sameAdministrativeName(value));
+    const compatible=value=>!query.family||!value.family||value.family===query.family;
+    const prefix=!exact&&query.stem.length>=2&&entryForms.some(value=>compatible(value)&&value.stem.startsWith(query.stem));
+    const contained=!exact&&!prefix&&query.stem.length>=2&&entryForms.some(value=>compatible(value)&&value.stem.includes(query.stem));
+    return {exact,prefix,contained,direct:exact||prefix||contained};
+  }
   function isValidCoord(lat,lon){
     return typeof lat==="number"&&typeof lon==="number"&&Number.isFinite(lat)&&Number.isFinite(lon)
       &&lat>=30&&lat<=42&&lon>=123&&lon<=134;
@@ -79,9 +98,10 @@
     const exactFull=search===q||alias===q;
     const exactLocal=local===q;
     const beginning=local.startsWith(q),contained=local.includes(q);
+    const terminal=localRelation(entry,tokens[tokens.length-1]||q);
     const fullMatch=search.includes(q)||alias.includes(q);
     const tokenMatch=tokens.every(t=>search.includes(compact(t))||alias.includes(compact(t)));
-    if(!fullMatch&&!tokenMatch&&!contained)return null;
+    if(!fullMatch&&!tokenMatch&&!contained&&!(tokens.length===1&&terminal.direct))return null;
     const kind=entry.kind;
     let score=SORT[kind]||0;
     if(exactFull)score+=200;
@@ -90,12 +110,18 @@
     else if(contained)score+=38;
     if(fullMatch)score+=64;
     if(tokenMatch)score+=tokens.length>1?70:10;
+    // A query ending in "소사구" describes the gu itself, not every dong
+    // below it. Prefer the deepest administrative name the user actually
+    // typed, including common suffix-free forms such as "부천" → "부천시".
+    if(tokens.length>1&&terminal.exact)score+=190;
+    else if(tokens.length>1&&terminal.prefix)score+=112;
+    else if(tokens.length>1&&terminal.contained)score+=42;
     if(tokens.length>1&&entry.parts.slice(1).some(part=>compact(part)===compact(tokens[tokens.length-1])))score+=44;
     if(tokens.length>1)score+=Math.min(35,tokens.length*7);
     if(kind==="ri"&&/(리)$/.test(q))score+=80;
     if((kind==="dong"||kind==="eup"||kind==="myeon")&&/(동|읍|면)$/.test(q))score+=45;
     // Disambiguation: prefer a precise matching neighborhood over a province/city.
-    return score;
+    return {score,direct:exactFull||terminal.direct};
   }
   function search(entries,input,opts){
     const options=opts||{},limit=Math.max(1,Math.min(50,Number(options.limit)||14));
@@ -114,22 +140,26 @@
     const biased=isValidCoord(Number(options.biasLat),Number(options.biasLon));
     const originLat=Number(options.biasLat),originLon=Number(options.biasLon);
     for(const entry of entries||[]){
-      const rank=match(entry,q,tokens);
-      if(rank!==null){
+      const matched=match(entry,q,tokens);
+      if(matched!==null){
         let proximity=0;
         if(biased){
           const km=Math.hypot((entry.lat-originLat)*111,(entry.lon-originLon)*88);
           if(km<8)proximity=Math.max(0,30-km*4);
         }
-        found.push({entry,rank:rank+proximity});
+        found.push({entry,rank:matched.score+proximity,direct:matched.direct});
       }
     }
-    found.sort((a,b)=>b.rank-a.rank||a.entry.full.localeCompare(b.entry.full,"ko"));
-    return found.slice(0,limit).map(x=>({ ...x.entry,score:x.rank }));
+    // Ancestor-only matches are useful only when there is no result whose own
+    // name matches the final query token. This prevents a gu/city search from
+    // expanding into an arbitrary list of all child dongs or ri.
+    const candidates=found.some(item=>item.direct)?found.filter(item=>item.direct):found;
+    candidates.sort((a,b)=>b.rank-a.rank||a.entry.full.localeCompare(b.entry.full,"ko"));
+    return candidates.slice(0,limit).map((x,index)=>({ ...x.entry,score:x.rank,best:index===0 }));
   }
   function toLocation(entry){
     if(!entry||!isValidCoord(entry.lat,entry.lon))return null;
-    return {name:entry.short,lat:entry.lat,lon:entry.lon,source:"manual",
+    return {name:entry.name,lat:entry.lat,lon:entry.lon,source:"manual",
       administrative:entry.full,address:entry.full,approximate:true,regionCenter:true};
   }
   return Object.freeze({KIND,LABEL,load,search,clean,splitQuery,removeLot,isStreet,toLocation});

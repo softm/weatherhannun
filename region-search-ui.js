@@ -38,15 +38,14 @@
     }).finally(()=>{if(tid!==null)clearTimeout(tid);loading=false;});
     return loadPromise.catch(err=>{loadPromise=null;throw err;});
   }
-  function itemHtml(entry,i,query){
+  function itemHtml(entry,i){
     const kind=entry.label;
     const address=entry.full;
-    const last=entry.name;
     const suffix=entry.kind==="ri"?"리 단위":entry.kind==="dong"?"법정동":entry.kind==="eup"||entry.kind==="myeon"?"읍·면":"행정구역";
-    const qualified=entry.short;
+    const best=i===0?'<em class="region-result-best">가장 적합</em>':"";
     return '<button class="region-result" type="button" role="option" id="regionOption'+i+'" aria-selected="false" data-region-choice="'+i+'">'+
       '<span class="region-result-icon" aria-hidden="true">⌖</span>'+
-      '<span class="region-result-body"><b>'+safe(qualified)+'</b><span>'+safe(address)+'</span><small>지역 대표 좌표 · '+safe(suffix)+'</small></span>'+
+      '<span class="region-result-body"><span class="region-result-heading"><b>'+safe(entry.name)+'</b>'+best+'</span><span>'+safe(address)+'</span><small>'+safe(suffix)+' 대표 좌표 · 정확한 번지 위치 아님</small></span>'+
       '<span class="region-result-kind">'+safe(kind)+'</span></button>';
   }
   function renderResults(entries,rawQuery){
@@ -65,14 +64,14 @@
       return;
     }
     const top=results.slice(0,MAX_RESULTS);
-    area.innerHTML='<p class="region-search-count">지역 검색 결과 '+results.length+'개 · 시·군·구까지 확인해 선택하세요.</p>'+
+    area.innerHTML='<p class="region-search-count">입력에서 확인되는 가장 구체적인 주소를 먼저 표시했어요 · 후보 '+results.length+'개</p>'+
       numericNote+'<div class="region-result-list" role="group" aria-label="지역 검색 결과">'+top.map(itemHtml).join("")+'</div>'+
       '<p class="region-search-note">행정구역의 중심 좌표로 예보를 조회합니다. 도로명주소·건물·필지의 실제 위치와 다를 수 있습니다.</p>';
     $("locationSearch")?.setAttribute("aria-expanded","true");
   }
   async function runSearch(force){
     const field=$("locationSearch"),raw=field?.value?.trim()||"",id=++revision;
-    if(raw.length<2){results=[];renderHint("동·읍·면·리 또는 시·군·구를 두 글자 이상 입력하세요. 예: 옥길동, 서산 대산읍 화곡리");return;}
+    if(raw.length<2){results=[];renderHint("동·읍·면·리 또는 시·군·구 주소를 두 글자 이상 입력하세요. 예: 옥길동, 부천 소사구, 서산 대산읍 화곡리");return;}
     if(!index){
       renderHint("전국 읍·면·동 주소 목록을 준비하고 있습니다…");
       try{await getIndex();}catch(error){
@@ -135,7 +134,7 @@
     resultsBox.addEventListener("click",onSelectClick);
     resultsBox.addEventListener("keydown",onResultKey);
     dialog?.addEventListener("close",()=>{revision++;results=[];});
-    renderHint("동·읍·면·리 또는 시·군·구를 입력하세요. 예: 옥길동, 역삼동, 서산 화곡리");
+    renderHint("동·읍·면·리 또는 시·군·구 주소를 입력하면 가장 알맞은 단계를 먼저 보여드려요.");
   }
   window.WeatherRegionSearch={search:runSearch};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();

@@ -41,13 +41,13 @@
       administrative=dedupe(data.display_name.split(",").slice(0,5).reverse().filter(v=>!/^(대한민국|South Korea|Korea|Republic of Korea|\d{4,6})$/i.test(v.trim())));
     }
     if(!administrative.length)return null;
-    const shortName=administrative.length>=3?administrative.slice(-3).join(" "):administrative.join(" ");
+    const bestName=cleanText(neighborhood||district||city||state)||administrative[administrative.length-1];
     const adminAddress=administrative.join(" ");
     // Coordinate is deliberately reduced to 3 decimal places (~100 m). Do not
     // display house_number or building identity as precise residence information.
     const displayAddress=road&&!administrative.includes(road)?adminAddress+" · "+road+" 인근":adminAddress;
     return {
-      name:shortName.slice(0,70),address:displayAddress.slice(0,160),
+      name:bestName.slice(0,70),address:displayAddress.slice(0,160),
       administrative:adminAddress.slice(0,140),road:road.slice(0,90),
       approximate:true,provider:"OpenStreetMap",attribution:"© OpenStreetMap contributors"
     };
