@@ -4,6 +4,10 @@ on:
     branches: [main]
     paths:
       - 'briefing-core.js'
+      - 'region-search-core.js'
+      - 'region-search-ui.js'
+      - 'region-search.css'
+      - 'data/korea-regions-202602.json'
       - 'location-core.js'
       - 'location-manager.js'
       - 'reverse-geocode.js'
@@ -18,6 +22,10 @@ on:
     paths:
       - 'briefing-core.js'
       - 'briefing-ui.js'
+      - 'region-search-core.js'
+      - 'region-search-ui.js'
+      - 'region-search.css'
+      - 'data/korea-regions-202602.json'
       - 'location-core.js'
       - 'location-manager.js'
       - 'reverse-geocode.js'
@@ -41,6 +49,8 @@ jobs:
           node --check briefing-ui.js
           node --check location-core.js
           node --check location-manager.js
+          node --check region-search-core.js
+          node --check region-search-ui.js
           node --check reverse-geocode.js
           node --check forecast-insights.js
           node --check stitch-layout.js
