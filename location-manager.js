@@ -13,7 +13,7 @@
   const INTRO="weatherhannun_geo_intro_v1";
   const ACTIVE="weatherhannun_location";
   const DEFAULT={name:"서산",lat:36.7845,lon:126.4503,source:"manual"};
-  let active=null,places=[],deleted=null,busy=false,editId=null,initialized=false;
+  let active=null,places=[],deleted=null,busy=false,editId=null,initialized=false,reverseVersion=0;
   const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const stored=(k)=>{try{return JSON.parse(localStorage.getItem(k)||"null");}catch(_){return null;}};
   const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(_){return false;}};
@@ -40,7 +40,7 @@
     if(holder){
       holder.innerHTML=places.length?places.map(p=>{
         const selected=core.same(active,p);
-        return '<div class="location-place-row'+(selected?" is-active":"")+'"><button type="button" data-location-select="'+esc(p.id)+'" class="location-place-select" aria-label="'+esc(p.name)+' 날씨 보기"><span class="location-place-symbol">📍</span><span class="location-place-name">'+esc(p.name)+'</span>'+(selected?'<span class="location-place-current">보는 중</span>':'')+'</button><button type="button" class="location-edit-button" data-location-edit="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 이름 변경" title="이름 변경">수정</button><button type="button" class="location-delete-button" data-location-delete="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 저장 지역 삭제" title="삭제">삭제</button></div>';
+        return '<div class="location-place-row'+(selected?" is-active":"")+'"><button type="button" data-location-select="'+esc(p.id)+'" class="location-place-select" aria-label="'+esc(p.name)+' 날씨 보기"><span class="location-place-symbol">📍</span><span class="location-place-text"><span class="location-place-name">'+esc(p.name)+'</span>'+(p.address&&p.address!==p.name?'<small class="location-place-address">'+esc(p.address)+' (추정)</small>':'')+'</span>'+(selected?'<span class="location-place-current">보는 중</span>':'')+'</button><button type="button" class="location-edit-button" data-location-edit="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 이름 변경" title="이름 변경">수정</button><button type="button" class="location-delete-button" data-location-delete="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 저장 지역 삭제" title="삭제">삭제</button></div>';
       }).join(""):'<p class="muted-text location-empty">저장된 지역이 없습니다. 위에서 지역을 검색하거나 현재 위치를 선택한 뒤 저장할 수 있습니다.</p>';
     }
     const save=$("saveCurrentLocation");
@@ -52,7 +52,10 @@
     const quick=$("locationQuickBar");
     if(quick){
       quick.hidden=false;
-      quick.innerHTML='<span class="location-current-label">📍 <strong>'+esc(currentName())+'</strong> <small id="locationModeLabel">'+(active?.source==="gps"?"GPS로 선택됨":"선택 지역 저장됨")+'</small></span>'+
+      const locationLine=active?.address?
+        active.address+(active.approximate?" · GPS 기준 추정주소":""):
+        active?.source==="gps"?"행정주소 확인 중 · 좌표 약 "+Number(active.lat).toFixed(3)+", "+Number(active.lon).toFixed(3):"";
+      quick.innerHTML='<span class="location-current-label">📍 <span class="location-label-stack"><strong>'+esc(currentName())+'</strong>'+(locationLine?'<span class="location-address-line" title="'+esc(locationLine)+'">'+esc(locationLine)+'</span>':'')+'</span><small id="locationModeLabel">'+(active?.source==="gps"?"GPS로 선택됨":"선택 지역 저장됨")+'</small></span>'+
       '<div class="location-fast-items"><button type="button" class="location-fast-gps" data-geo-quick>⌖ 현위치</button>'+
       places.map(p=>'<button type="button" class="location-fast-place'+(core.same(p,active)?" active":"")+'" data-location-select="'+esc(p.id)+'" aria-pressed="'+String(core.same(p,active))+'">'+esc(p.name)+'</button>').join("")+
       '<button type="button" class="location-fast-manage" data-location-manage aria-label="지역 관리 및 추가">+ 지역관리</button></div>';
@@ -62,6 +65,7 @@
     const p=core.cleanPlace(raw);
     if(!p)return status("선택한 지역 정보를 확인할 수 없습니다.");
     finishIntro();
+    reverseVersion++; // Invalidate address lookups for a location switched away from.
     const loc={...p,source};
     active=loc;render();
     const chooser=$("locationDialog");
@@ -146,6 +150,38 @@
     if(!window.isSecureContext){status("위치 조회는 HTTPS 보안 연결이 필요합니다. 지역 검색을 이용해 주세요.");return false;}
     return true;
   }
+  async function resolveGPSAddress(position){
+    const geocoder=window.WeatherReverseGeocoder;
+    const requestedVersion=reverseVersion;
+    if(!geocoder?.resolve){
+      status("현재 위치는 확인했지만 주소 변환 기능이 연결되지 않았습니다.");
+      return;
+    }
+    status("GPS 위치 확인 완료 · 현재 위치의 행정주소를 조회 중입니다…");
+    const found=await geocoder.resolve(position.lat,position.lon);
+    // Switching to another place while lookup was running must never overwrite it.
+    if(requestedVersion!==reverseVersion || active?.source!=="gps" || !core.same(active,position))return;
+    if(!found?.address){
+      const coords=Number(position.lat).toFixed(3)+", "+Number(position.lon).toFixed(3);
+      status("GPS 위치는 확인했습니다. 주소 조회가 지연되어 좌표("+coords+")로 표시합니다. 지역을 직접 검색해도 됩니다.");
+      const line=$("locationQuickBar")?.querySelector(".location-address-line");
+      if(line)line.textContent="주소 조회 실패 · 위도/경도 "+coords;
+      return;
+    }
+    const next={...active,name:found.name||active.name,address:found.address,
+      administrative:found.administrative||"",approximate:true,source:"gps"};
+    // Existing user labels such as '집' are preserved, but old generic labels are refreshed.
+    let listChanged=false;
+    places=places.map(item=>{
+      if(!core.same(item,next))return item;
+      listChanged=true;
+      return {...item,address:found.address,administrative:found.administrative||"",approximate:true,
+        name:item.name==="내 현재 위치"?next.name:item.name};
+    });
+    if(listChanged)persist();
+    choose(next,"gps");
+    status("현재 위치의 추정 주소: "+found.address+" · 지도 데이터 기준이므로 실제 주소와 차이가 있을 수 있습니다.");
+  }
   function requestCurrentPosition(explicit=true){
     if(busy||!canUse())return Promise.resolve(false);
     setBusy(true);
@@ -159,7 +195,9 @@
         const loc={name:"내 현재 위치",lat:Number(la.toFixed(3)),lon:Number(lo.toFixed(3)),source:"gps"};
         finishIntro();choose(loc,"gps");
         if($("locationDialog")?.open)$("locationDialog").close();
-        status("현재 위치로 날씨를 표시합니다. 이 위치는 기기에 자동 저장됩니다.");
+        status("GPS 위치를 저장했습니다. 주변 행정주소를 확인 중입니다…");
+        // Weather loads immediately; address lookup is independent and asynchronous.
+        resolveGPSAddress(loc).catch(()=>status("GPS 위치는 저장했지만 주변 주소를 확인하지 못했습니다."));
         resolve(true);
       },function(error){
         setBusy(false);
@@ -189,6 +227,10 @@
       // User selected a static saved region: do not override it.
       if(!saved||saved.source==="gps")requestCurrentPosition(false);
       return;
+    }
+    if(saved?.source==="gps"&&!saved.address&&introDone()){
+      // Upgrade old GPS selections that previously displayed only '내 현재 위치'.
+      resolveGPSAddress(active).catch(()=>{});
     }
     if(permission==="denied"){
       // Never nag on every visit. Allow a manual retry from quick actions.
@@ -232,6 +274,7 @@
     const p=core.cleanPlace(ev.detail);
     if(!p)return;
     active={...p,source:ev.detail?.source==="gps"?"gps":"manual"};
+    if(active.source!=="gps")reverseVersion++; // Cancel stale GPS address response.
     render();
   });
   window.WeatherLocationManager={requestCurrentPosition};
