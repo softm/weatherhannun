@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <path d="M19 44h26a11 11 0 0 0 2-21.82 14.5 14.5 0 0 0-27.5-3.48A12 12 0 0 0 19 44z" fill="url(#cloud-dark)" />
+  <path d="M19 44h26a11 11 0 0 0 2-21.82 14.5 14.5 0 0 0-27.5-3.48A12 12 0 0 0 19 44z" stroke="#94A3B8" stroke-width="2.2" stroke-linejoin="round"/>
+  <!-- Rain drops -->
+  <line x1="22" y1="50" x2="19" y2="57" stroke="#2589F5" stroke-width="3" stroke-linecap="round"/>
+  <line x1="32" y1="50" x2="29" y2="57" stroke="#2589F5" stroke-width="3" stroke-linecap="round"/>
+  <line x1="42" y1="50" x2="39" y2="57" stroke="#2589F5" stroke-width="3" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="cloud-dark" x1="20" y1="18" x2="46" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CBDCF1"/>
+      <stop offset="1" stop-color="#94A3B8"/>
+    </linearGradient>
+  </defs>
+</svg>
