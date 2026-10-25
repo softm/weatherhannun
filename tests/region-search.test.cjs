@@ -76,3 +76,9 @@ test("romanized major-city lookup remains available from the old weather search"
  assert.equal(core.search(index,"Seosan")[0].full,"충청남도 서산시");
  assert.equal(core.search(index,"Seoul")[0].full,"서울특별시");
 });
+
+test("ambiguous dong search prioritizes the nearest match when a current region is available",()=>{
+ const found=core.search(index,"옥길동",{biasLat:37.4678,biasLon:126.823,limit:5});
+ assert.equal(found[0].full,"경기도 부천시 소사구 옥길동");
+ assert.ok(found.some(x=>x.full==="경기도 광명시 옥길동"));
+});
