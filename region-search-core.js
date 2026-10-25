@@ -19,6 +19,9 @@
     "전라북도":"전북", "전라남도":"전남", "경상북도":"경북",
     "경상남도":"경남", "제주특별자치도":"제주", "제주도":"제주"
   };
+  const ROMAN={seoul:"서울",busan:"부산",incheon:"인천",daegu:"대구",daejeon:"대전",
+    gwangju:"광주",ulsan:"울산",sejong:"세종",bucheon:"부천시",seosan:"서산시",pyeongtaek:"평택시",
+    gangneung:"강릉시",jeju:"제주시",suwon:"수원시",paju:"파주시"};
   const SORT={dong:58,eup:55,myeon:55,ri:30,gu:26,gun:25,si:23,sido:9};
   function clean(value){
     return String(value||"").normalize("NFKC").toLowerCase().replace(/[()()[\],.·<>]/g," ")
@@ -96,9 +99,17 @@
   }
   function search(entries,input,opts){
     const options=opts||{},limit=Math.max(1,Math.min(50,Number(options.limit)||14));
-    const raw=clean(input),q=removeLot(raw);
+    const raw=clean(input);
+    // If full road+number is supplied, fall back only to explicitly typed
+    // administrative prefix; never pretend the centroid is a house geocode.
+    const fullStreet=isStreet(raw);
+    let q=removeLot(raw);
+    if(fullStreet){
+      q=clean(q.replace(/[가-힣0-9]+(?:대로|로|길)\s*\d+(?:-\d+)?(?:.*)$/,""));
+      if(q.length<2)return [];
+    }
+    q=ROMAN[q]||q;
     if(q.length<2)return [];
-    if(isStreet(raw))return []; // a road/building number is not a legal-dong centroid
     const tokens=splitQuery(q),found=[];
     for(const entry of entries||[]){
       const rank=match(entry,q,tokens);
