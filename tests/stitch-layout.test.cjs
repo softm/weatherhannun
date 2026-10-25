@@ -25,3 +25,9 @@ test("navigation supports hourly and preserves existing views",()=>{
  assert.ok(read("index.html").includes('id="view-today"'));
  assert.ok(read("index.html").includes('id="view-weekly"'));
 });
+
+test("Stitch today keeps the saved-region switcher visible",()=>{
+ const todayCss=read("stitch-today.css"),locationCss=read("location-manager.css");
+ assert.doesNotMatch(todayCss,/data-weather-view=today[^\n]*locationQuickBar[^\n]*display\s*:\s*none/);
+ assert.match(locationCss,/data-stitch-live=true[^\n]*#locationQuickBar/);
+});

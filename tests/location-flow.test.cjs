@@ -115,6 +115,37 @@ test("old favorites migrate once to the new key and remain de-duplicated",async(
  assert.equal(JSON.parse(t.localStorage.getItem("weatherhannun_places_v2")).length,2);
  assert.equal(t.localStorage.getItem("weatherhannun_favorite_locations_v1"),null);
 });
+test("saved regions stay visible as one-tap chips and put the current region first",async()=>{
+ const SEOUL={name:"서울",lat:37.56,lon:126.98,source:"manual"};
+ const t=boot({initial:{
+  weatherhannun_location:SEOUL,
+  weatherhannun_places_v2:[SEOSAN,SEOUL]
+ }});
+ await t.settle();
+ const html=t.node("locationQuickBar").innerHTML;
+ assert.match(html,/등록 지역 <b>2<\/b>/);
+ assert.match(html,/aria-label="등록한 지역 선택"/);
+ assert.match(html,/aria-current="location"/);
+ assert.ok(html.indexOf(">서울<")<html.indexOf(">서산<"));
+ const seosanId=core.key(SEOSAN);
+ const button={
+  hasAttribute:name=>name==="data-location-select",
+  getAttribute:name=>name==="data-location-select"?seosanId:null
+ };
+ t.node("locationQuickBar").handlers.get("click")({target:{closest:()=>button}});
+ assert.equal(t.events.at(-1).detail.name,"서산");
+});
+test("an unsaved active region exposes a direct register action",async()=>{
+ const t=boot({initial:{weatherhannun_location:{...SEOSAN,source:"manual"}}});
+ await t.settle();
+ assert.match(t.node("locationQuickBar").innerHTML,/data-location-save-current/);
+ const button={hasAttribute:name=>name==="data-location-save-current",getAttribute:()=>null};
+ t.node("locationQuickBar").handlers.get("click")({target:{closest:()=>button}});
+ const saved=JSON.parse(t.localStorage.getItem("weatherhannun_places_v2"));
+ assert.equal(saved.length,1);
+ assert.equal(saved[0].name,"서산");
+ assert.doesNotMatch(t.node("locationQuickBar").innerHTML,/data-location-save-current/);
+});
 test("shared location query suppresses auto GPS override",async()=>{
  const t=boot({permission:"granted",search:"?lat=37.5&lon=127&name=%EC%84%9C%EC%9A%B8"});
  await t.settle();
