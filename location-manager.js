@@ -36,6 +36,7 @@
   function render(){
     if(!initialized)return;
     updateHeader();
+    const activeSaved=places.some(p=>core.same(p,active));
     const holder=$("favoriteLocations");
     if(holder){
       holder.innerHTML=places.length?places.map(p=>{
@@ -45,9 +46,8 @@
     }
     const save=$("saveCurrentLocation");
     if(save){
-      const saved=places.some(p=>core.same(p,active));
-      save.disabled=saved||!active;
-      save.textContent=saved?"★ 이미 저장됨":"☆ 이 지역 저장";
+      save.disabled=activeSaved||!active;
+      save.textContent=activeSaved?"★ 이미 저장됨":"☆ 이 지역 저장";
     }
     const quick=$("locationQuickBar");
     if(quick){
@@ -55,10 +55,18 @@
       const locationLine=active?.address?
         active.address+(active.regionCenter?" · 행정구역 대표 좌표":active.source==="gps"&&active.approximate?" · GPS 기준 추정주소":""):
         active?.source==="gps"?"행정주소 확인 중 · 좌표 약 "+Number(active.lat).toFixed(3)+", "+Number(active.lon).toFixed(3):"";
-      quick.innerHTML='<span class="location-current-label">📍 <span class="location-label-stack"><strong>'+esc(currentName())+'</strong>'+(locationLine?'<span class="location-address-line" title="'+esc(locationLine)+'">'+esc(locationLine)+'</span>':'')+'</span><small id="locationModeLabel">'+(active?.source==="gps"?"GPS로 선택됨":"선택 지역 저장됨")+'</small></span>'+
-      '<div class="location-fast-items"><button type="button" class="location-fast-gps" data-geo-quick>⌖ 현위치</button>'+
-      places.map(p=>'<button type="button" class="location-fast-place'+(core.same(p,active)?" active":"")+'" data-location-select="'+esc(p.id)+'" aria-pressed="'+String(core.same(p,active))+'">'+esc(p.name)+'</button>').join("")+
-      '<button type="button" class="location-fast-manage" data-location-manage aria-label="지역 관리 및 추가">+ 지역관리</button></div>';
+      const orderedPlaces=[...places].sort((a,b)=>Number(core.same(b,active))-Number(core.same(a,active)));
+      const placeButtons=orderedPlaces.map(p=>{
+        const selected=core.same(p,active);
+        const detail=p.address&&p.address!==p.name?p.address+(p.regionCenter?" · 지역 대표 좌표":" · 추정주소"):p.name+" 날씨 보기";
+        return '<button type="button" class="location-fast-place'+(selected?" active":"")+'" data-location-select="'+esc(p.id)+'" aria-pressed="'+String(selected)+'" aria-current="'+(selected?"location":"false")+'" title="'+esc(detail)+'"><span class="location-fast-check" aria-hidden="true">✓</span><span class="location-fast-name">'+esc(p.name)+'</span></button>';
+      }).join("");
+      quick.innerHTML='<div class="location-switcher-head"><span class="location-switcher-heading">등록 지역 <b>'+places.length+'</b></span><span class="location-current-label"><span aria-hidden="true">📍</span><span class="location-label-stack"><strong>'+esc(currentName())+'</strong>'+(locationLine?'<span class="location-address-line" title="'+esc(locationLine)+'">'+esc(locationLine)+'</span>':'')+'</span><small id="locationModeLabel">'+(active?.source==="gps"?"GPS 선택":"현재 선택")+'</small></span></div>'+
+      '<div class="location-fast-items" role="group" aria-label="등록한 지역 선택">'+
+      (placeButtons||'<span class="location-fast-empty">아직 등록한 지역이 없습니다.</span>')+
+      (!activeSaved&&active?'<button type="button" class="location-fast-save" data-location-save-current>☆ 현재 지역 등록</button>':'')+
+      '<button type="button" class="location-fast-gps" data-geo-quick>⌖ 현위치</button>'+
+      '<button type="button" class="location-fast-manage" data-location-manage aria-label="지역 추가 및 관리">+ 지역 추가·관리</button></div>';
     }
   }
   function choose(raw,source="manual",keepDialogOpen=false){
@@ -137,6 +145,7 @@
     if(target.hasAttribute("data-location-select"))return chooseSaved(target.getAttribute("data-location-select"));
     if(target.hasAttribute("data-location-delete"))return deleteSaved(target.getAttribute("data-location-delete"));
     if(target.hasAttribute("data-location-edit"))return editSaved(target.getAttribute("data-location-edit"));
+    if(target.hasAttribute("data-location-save-current"))return saveCurrent();
     if(target.hasAttribute("data-geo-quick"))return requestCurrentPosition(true);
     if(target.hasAttribute("data-location-manage"))return $("locationButton")?.click();
   }

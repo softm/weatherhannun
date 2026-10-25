@@ -21,7 +21,6 @@
 #stitch-live-dashboard .stitch-weather-icon{width:116px;height:94px;margin:0 auto;object-fit:contain}
 #stitch-live-dashboard .stitch-state-error{color:#b91c1c!important}
 html[data-stitch-live=true] .intro{display:none!important}
-html[data-stitch-live=true][data-weather-view=today] #locationQuickBar{display:none!important}
 html[data-stitch-live=true][data-weather-view=today] #view-today{width:min(1180px,calc(100% - 32px));padding:0}
 html[data-stitch-live=true] #stitchLegacyToday{display:none!important}
 html[data-stitch-live=true] .topbar,html[data-stitch-live=true] .top-inner{height:68px}

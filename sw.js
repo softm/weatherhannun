@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v9-stitch-functional";
+const CACHE="weatherhannun-shell-v10-saved-location-switcher";
 const BASE=self.registration.scope;
 const SHELL=["./","./index.html","./styles.css","./stitch-theme.css","./stitch-mobile.css","./stitch-layout.js","./stitch-today.template.html","./stitch-today.js","./stitch-today.css","./stitch-today.utilities.css","./assets/stitch/today-presenter.jpg","./assets/stitch/sun.svg","./assets/stitch/partly-cloudy.svg","./assets/stitch/storm.svg","./assets/stitch/snow.svg","./assets/stitch/rain.svg","./assets/stitch/wind.svg","./assets/stitch/humidity.svg","./data/korea-regions-202602.json","./region-search-core.js","./region-search-ui.js","./region-search.css","./location-core.js","./reverse-geocode.js","./location-manager.js","./location-manager.css","./briefing-core.js","./briefing-ui.js","./briefing-ui.css","./app.js","./forecast-insights.js","./forecast-insights.css","./manifest.webmanifest","./icon.svg","./data-status.html"].map(x=>new URL(x,BASE).href);
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
