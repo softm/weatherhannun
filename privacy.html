@@ -24,7 +24,7 @@
       <table>
         <tbody>
           <tr><th>위치정보</th><td>이용자가 위치 기능을 선택·허용하면 브라우저 Geolocation API에서 현재 위치 좌표를 받습니다. 앱은 날씨 조회용으로 소수점 3자리(약 100m 단위)로 줄여 사용·기기 로컬 저장하며, 좌표는 날씨 API 제공 사업자에게 조회 요청 시 전달됩니다. 운영자 계정 서버에 별도로 보관하지 않습니다.</td></tr>
-          <tr><th>선택 지역·설정</th><td>최근 선택한 지역(위치명과 좌표), 최대 10개 관심 지역 및 사용자가 수정한 이름, 위치 사용 안내 확인 상태, 알림 조건 등을 기기 또는 WebView의 로컬 저장소에 저장합니다. 위치 권한을 허용한 경우 마지막 선택 방식이 GPS일 때만 재진입 시 자동 위치 조회를 시도합니다.</td></tr>
+          <tr><th>선택 지역·설정</th><td>최근 선택한 지역(위치명·약 100m로 반올림한 좌표·주변 추정주소), 최대 10개 관심 지역 및 사용자가 수정한 이름, 위치 사용 안내 확인 상태, 역지오코딩 주소 캐시(최대 30일)와 알림 조건 등을 기기 또는 WebView의 로컬 저장소에 저장합니다. 위치 권한을 허용한 경우 마지막 선택 방식이 GPS일 때만 재진입 시 자동 위치 조회를 시도합니다.</td></tr>
           <tr><th>기술 정보</th><td>서비스 제공 과정에서 호스팅·네트워크 사업자가 일반적인 접속 로그, IP 주소, 기기·브라우저 정보를 처리할 수 있습니다.</td></tr>
         </tbody>
       </table>
@@ -33,7 +33,7 @@
       <p>날씨·대기질 및 지도 표시를 위해 다음 외부 서비스를 사용합니다. 날씨 조회 시 선택 지역 또는 위치 좌표가 해당 서비스로 전송될 수 있으며, 각 사업자의 방침이 적용됩니다.</p>
       <ul>
         <li><a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener noreferrer">Open-Meteo</a>: 날씨·대기질·지역 검색 데이터</li>
-        <li><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>: 지도 타일 및 지도 데이터</li>
+        <li><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>: 지도 타일 및 지도 데이터. GPS 주소 표시에 필요한 주변 시·군·구·동과 도로명을 조회하기 위해 좌표 소수점 3자리(약 100m 수준)를 <a href="https://nominatim.openstreetmap.org/" target="_blank" rel="noopener noreferrer">Nominatim 역지오코딩</a>에 전송할 수 있습니다. 반환된 추정 주소를 기기 내에 저장·재사용합니다.</li>
         <li><a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub Pages</a>: 웹 서비스 호스팅</li>
       </ul>
 
