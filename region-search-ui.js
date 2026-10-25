@@ -82,7 +82,10 @@
       }
     }
     if(id!==revision)return;
-    const found=core.search(index,raw,{limit:MAX_RESULTS});
+    let nearby=null;
+    try{nearby=JSON.parse(localStorage.getItem("weatherhannun_location")||"null");}catch(_){}
+    const found=core.search(index,raw,{limit:MAX_RESULTS,
+      biasLat:nearby?.lat,biasLon:nearby?.lon});
     renderResults(found,raw);
   }
   function select(id){
