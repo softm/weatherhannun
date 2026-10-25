@@ -5,6 +5,9 @@ on:
     paths:
       - 'briefing-core.js'
       - 'briefing-ui.js'
+      - 'stitch-layout.js'
+      - 'stitch-theme.css'
+      - 'index.html'
       - 'tests/**'
       - '.github/workflows/verify.yml'
   pull_request:
@@ -23,11 +26,12 @@ jobs:
       - name: Check Node
         run: node --version
       - name: Run weather briefing tests
-        run: node --test tests/briefing-core.test.cjs
+        run: node --test tests/*.test.cjs
       - name: Parse frontend JavaScript
         run: |
           node --check app.js
           node --check briefing-core.js
           node --check briefing-ui.js
           node --check forecast-insights.js
+          node --check stitch-layout.js
           node --check sw.js
