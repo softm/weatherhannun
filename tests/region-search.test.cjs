@@ -65,3 +65,14 @@ test("unknown and empty regions are safe",()=>{
  assert.deepEqual(core.search(index,"@@"),[]);
  assert.equal(core.toLocation(null),null);
 });
+
+test("fully qualified road address falls back to explicit administrative hierarchy",()=>{
+ const matches=core.search(index,"경기도 부천시 소사구 옥길로 38");
+ assert.ok(matches.length>0);
+ assert.equal(matches[0].full,"경기도 부천시 소사구");
+ assert.equal(matches[0].kind,"gu");
+});
+test("romanized major-city lookup remains available from the old weather search",()=>{
+ assert.equal(core.search(index,"Seosan")[0].full,"충청남도 서산시");
+ assert.equal(core.search(index,"Seoul")[0].full,"서울특별시");
+});
