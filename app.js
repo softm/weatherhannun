@@ -3,7 +3,6 @@
   var $ = function (id) { return document.getElementById(id); };
   var BASE = "https://api.open-meteo.com/v1/forecast";
   var AIR_BASE = "https://air-quality-api.open-meteo.com/v1/air-quality";
-  var SEARCH_BASE = "https://geocoding-api.open-meteo.com/v1/search";
   var CITY_LIST = [
     { name: "서산", lat: 36.7845, lon: 126.4503 },
     { name: "서울", lat: 37.5665, lon: 126.978 },
@@ -29,7 +28,6 @@
     map: null, markers: [], loading: false, ticket: 0, mapBusy: false
   };
   var toastTimer;
-  var searchTimer;
   function storeGet(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (_) { return null; } }
   function storeSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (_) {} }
   function finite(n) { return typeof n === "number" && Number.isFinite(n); }
@@ -64,13 +62,13 @@
     STATE.loc={name:String(loc.name).trim().slice(0,75)||"선택 지역",lat:Number(loc.lat),lon:Number(loc.lon),source:source,
       address:typeof loc.address==="string"?loc.address.slice(0,170):"",
       administrative:typeof loc.administrative==="string"?loc.administrative.slice(0,145):"",
-      approximate:loc.approximate===true};
+      approximate:loc.approximate===true,regionCenter:loc.regionCenter===true};
     if(changed){
       STATE.weather=null;STATE.air=null;STATE.hourly=[];STATE.fetchedAt=null;
       text("currentTemp","--");text("weatherSummary","새 지역 예보 연결 중");
     }
     $("locationTitle").textContent=STATE.loc.name;
-    $("locationTitle").title=STATE.loc.address ? STATE.loc.address+" (GPS 기준 추정주소)" : STATE.loc.name;
+    $("locationTitle").title=STATE.loc.address ? STATE.loc.address+(STATE.loc.regionCenter?" (지역 중심 기준 날씨)":STATE.loc.source==="gps"?" (GPS 주변 추정주소)":"") : STATE.loc.name;
     $("heroLocation").textContent=STATE.loc.name;
     storeSet("weatherhannun_location",STATE.loc);
     if(updateUrl){
@@ -406,22 +404,6 @@
     $("presetCities").innerHTML=CITY_LIST.map(function(c,i){return '<button data-preset="'+i+'">'+safe(c.name)+'</button>';}).join("");
     document.querySelectorAll("[data-preset]").forEach(function(btn){btn.addEventListener("click",function(){var c=CITY_LIST[Number(btn.dataset.preset)];$("locationDialog").close();applyLocation(c,true);});});
   }
-  async function searchCities(){
-    var q=$("locationSearch").value.trim();
-    if(q.length<2){text("searchResults","두 글자 이상 입력하세요.");return;}
-    text("searchResults","지역 검색 중…");
-    try{
-      var url=new URL(SEARCH_BASE);url.searchParams.set("name",q);url.searchParams.set("count",20);url.searchParams.set("language","ko");url.searchParams.set("format","json");
-      var d=await getJson(url.href);
-      var results=(d.results||[]).filter(function(x){return x.country_code==="KR" && finite(x.latitude)&&finite(x.longitude);}).slice(0,10);
-      if(!results.length){text("searchResults","한국 내 검색 결과가 없습니다. 영문 지명으로도 검색해 보세요.");return;}
-      $("searchResults").innerHTML=results.map(function(x,i){return '<button data-search="'+i+'"><b>'+safe(x.name)+'</b> <small>'+safe(x.admin1||"대한민국")+' '+safe(x.admin2||"")+'</small></button>';}).join("");
-      document.querySelectorAll("[data-search]").forEach(function(btn){btn.addEventListener("click",function(){
-        var c=results[Number(btn.dataset.search)];
-        $("locationDialog").close();applyLocation({name:c.name,lat:c.latitude,lon:c.longitude},true);
-      });});
-    }catch(e){text("searchResults","지역 검색에 실패했습니다. 잠시 후 다시 시도하세요.");}
-  }
   function getGeo(){
     if(window.WeatherLocationManager?.requestCurrentPosition){
       window.WeatherLocationManager.requestCurrentPosition(true);
@@ -466,8 +448,6 @@
     });
     $("locationButton").addEventListener("click",searchDialogOpen);
     $("dialogClose").addEventListener("click",function(){$("locationDialog").close();});
-    $("searchForm").addEventListener("submit",function(e){e.preventDefault();searchCities();});
-    $("locationSearch").addEventListener("input",function(){clearTimeout(searchTimer);searchTimer=setTimeout(searchCities,450);});
     $("geoButton").addEventListener("click",getGeo);
     $("refreshButton").addEventListener("click",function(){loadWeather(true);if(STATE.view==="map"){STATE.cityData=null;showMap();}});
     $("heroShare").addEventListener("click",share);
