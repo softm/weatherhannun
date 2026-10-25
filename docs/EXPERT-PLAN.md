@@ -1,5 +1,5 @@
 # 날씨한눈 — 가상 전문가 3인 합동 기획 적용안
-2026-10-25 | 대상 저장소: https://github.com/softm/weatherhannun | 서비스: https://weatherhannun.vercel.app/
+2026-10-25 | 대상 저장소: https://github.com/softm/weatherhannun | 서비스: https://softm.github.io/weatherhannun/
 
 > 이 회의는 서비스 기획자, 기상 전문가, 기상캐스터의 **역할을 시뮬레이션한 제품 기획 검토**입니다. 실제 전문가 3명이 회의하거나 외부 검수한 결과가 아닙니다.
 
@@ -56,7 +56,7 @@
 
 ## 4. 기술 구조 및 화면 매핑
 
-정적 프론트엔드(GitHub Pages 또는 Vercel)에서 HTTPS API를 호출한다.
+정적 프론트엔드는 GitHub Pages에서만 운영하며 브라우저가 HTTPS API를 직접 호출한다.
 
 - **app.js**: 데이터 조회, 상태 관리, 지역·활동, 기존 화면과 지도 렌더링.
 - **forecast-insights.js**: 날씨 기회창, 농작업 기상 신호, 현재 앱 열림 상태의 알림 조건.
