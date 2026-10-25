@@ -53,7 +53,9 @@
     const area=$("searchResults");
     if(!area)return;
     const ignoredLot=core.removeLot(rawQuery)!==core.clean(rawQuery);
-    const numericNote=ignoredLot?'<p class="region-search-note">지번 숫자는 적용하지 않고 동·리의 대표 위치로 조회합니다. 특정 필지 위치가 아닙니다.</p>':"";
+    const numericNote=core.isStreet(rawQuery)?
+      '<p class="region-search-note">도로명·건물번호는 반영하지 않았습니다. 입력한 시·군·구까지만 식별된 지역의 대표 좌표로 날씨를 조회합니다.</p>':
+      ignoredLot?'<p class="region-search-note">지번 숫자는 적용하지 않고 동·리의 대표 위치로 조회합니다. 특정 필지 위치가 아닙니다.</p>':"";
     if(!results.length){
       const road=core.isStreet(rawQuery);
       renderHint(road?
