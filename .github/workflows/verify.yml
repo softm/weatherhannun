@@ -1,0 +1,33 @@
+name: Verify weather briefing rules
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'briefing-core.js'
+      - 'briefing-ui.js'
+      - 'tests/**'
+      - '.github/workflows/verify.yml'
+  pull_request:
+    paths:
+      - 'briefing-core.js'
+      - 'briefing-ui.js'
+      - 'tests/**'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check Node
+        run: node --version
+      - name: Run weather briefing tests
+        run: node --test tests/briefing-core.test.cjs
+      - name: Parse frontend JavaScript
+        run: |
+          node --check app.js
+          node --check briefing-core.js
+          node --check briefing-ui.js
+          node --check forecast-insights.js
+          node --check sw.js
