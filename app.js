@@ -58,21 +58,32 @@
   }
   function validLocation(loc) { return loc && typeof loc.name==="string" && loc.name.length<90 && finite(Number(loc.lat)) && finite(Number(loc.lon)) && Math.abs(Number(loc.lat))<=90 && Math.abs(Number(loc.lon))<=180; }
   function applyLocation(loc, updateUrl) {
-    if (!validLocation(loc)) return;
-    var changed=STATE.loc.lat!==Number(loc.lat)||STATE.loc.lon!==Number(loc.lon);
-    STATE.loc = {name:String(loc.name).slice(0,45),lat:Number(loc.lat),lon:Number(loc.lon)};
-    if(changed){STATE.weather=null;STATE.air=null;STATE.hourly=[];STATE.fetchedAt=null;text("currentTemp","--");text("weatherSummary","새 지역 예보 연결 중");}
+    if(!validLocation(loc))return;
+    var previous=STATE.loc,changed=Number(previous.lat)!==Number(loc.lat)||Number(previous.lon)!==Number(loc.lon);
+    var source=loc.source==="gps"?"gps":"manual";
+    STATE.loc={name:String(loc.name).trim().slice(0,45)||"선택 지역",lat:Number(loc.lat),lon:Number(loc.lon),source:source};
+    if(changed){
+      STATE.weather=null;STATE.air=null;STATE.hourly=[];STATE.fetchedAt=null;
+      text("currentTemp","--");text("weatherSummary","새 지역 예보 연결 중");
+    }
     $("locationTitle").textContent=STATE.loc.name;
     $("heroLocation").textContent=STATE.loc.name;
     storeSet("weatherhannun_location",STATE.loc);
-    if (updateUrl) {
+    if(updateUrl){
       var url=new URL(location.href);
-      url.searchParams.set("lat",String(STATE.loc.lat));
-      url.searchParams.set("lon",String(STATE.loc.lon));
-      url.searchParams.set("name",STATE.loc.name);
-      history.replaceState(null,"",url.pathname+url.search);
+      if(source==="gps"){
+        // A passive GPS choice must not leak location in the address bar.
+        url.searchParams.delete("lat");url.searchParams.delete("lon");url.searchParams.delete("name");
+      }else{
+        url.searchParams.set("lat",String(STATE.loc.lat));
+        url.searchParams.set("lon",String(STATE.loc.lon));
+        url.searchParams.set("name",STATE.loc.name);
+      }
+      history.replaceState(null,"",url.pathname+url.search+url.hash);
     }
-    loadWeather();
+    window.dispatchEvent(new CustomEvent("weatherhannun:location-applied",{detail:STATE.loc}));
+    if(changed||!STATE.weather)loadWeather();
+    else renderAll();
   }
   function forecastUrl(loc,short) {
     var url = new URL(BASE);
@@ -411,14 +422,11 @@
     }catch(e){text("searchResults","지역 검색에 실패했습니다. 잠시 후 다시 시도하세요.");}
   }
   function getGeo(){
-    if(!navigator.geolocation){toast("이 브라우저에서는 위치 기능을 사용할 수 없습니다.");return;}
-    toast("현재 위치 사용 권한을 요청합니다.");
-    navigator.geolocation.getCurrentPosition(function(pos){
-      var la=pos.coords.latitude,lo=pos.coords.longitude;
-      if(!finite(la)||!finite(lo))return;
-      $("locationDialog").close();
-      applyLocation({name:"현재 위치",lat:Number(la.toFixed(3)),lon:Number(lo.toFixed(3))},true);
-    },function(err){toast(err.code===1?"위치 권한이 거부되었습니다. 지역 검색을 이용해 주세요.":"위치를 확인하지 못했습니다. 지역을 직접 선택해 주세요.");},{enableHighAccuracy:false,timeout:10000,maximumAge:180000});
+    if(window.WeatherLocationManager?.requestCurrentPosition){
+      window.WeatherLocationManager.requestCurrentPosition(true);
+    }else{
+      toast("위치 관리 기능을 불러오지 못했습니다. 다시 시작해 주세요.");
+    }
   }
   function share(){
     var url=new URL(location.href);url.searchParams.set("lat",String(STATE.loc.lat));url.searchParams.set("lon",String(STATE.loc.lon));url.searchParams.set("name",STATE.loc.name);
@@ -430,13 +438,15 @@
   function init() {
     text("todayDate",new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"long",day:"numeric",weekday:"long"}).format(new Date()));
     var p=new URLSearchParams(location.search),l=null;
-    if(p.has("lat")&&p.has("lon"))l={name:p.get("name")||"선택 지역",lat:Number(p.get("lat")),lon:Number(p.get("lon"))};
+    if(p.has("lat")&&p.has("lon"))l={name:p.get("name")||"선택 지역",lat:Number(p.get("lat")),lon:Number(p.get("lon")),source:"manual"};
     if(!validLocation(l))l=storeGet("weatherhannun_location");
     if(!validLocation(l))l=CITY_LIST[0];
     var remembered=storeGet("weatherhannun_activity_v1");
     if(typeof remembered==="string"&&ACTIVITIES[remembered])STATE.activity=remembered;
     document.querySelectorAll("[data-activity]").forEach(function(b){b.classList.toggle("active",b.dataset.activity===STATE.activity);});
-    window.addEventListener("weatherhannun:change-location",function(ev){if(validLocation(ev.detail))applyLocation(ev.detail,true);});
+    window.addEventListener("weatherhannun:change-location",function(ev){
+      if(validLocation(ev.detail))applyLocation(ev.detail,true);
+    });
     document.querySelectorAll("[data-view]").forEach(function(btn){btn.addEventListener("click",function(){setView(btn.dataset.view);});});
     document.querySelectorAll("[data-activity]").forEach(function(btn){btn.addEventListener("click",function(){
       STATE.activity=btn.dataset.activity;
