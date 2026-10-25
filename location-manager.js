@@ -58,14 +58,14 @@
       '<button type="button" class="location-fast-manage" data-location-manage aria-label="지역 관리 및 추가">+ 지역관리</button></div>';
     }
   }
-  function choose(raw,source="manual"){
+  function choose(raw,source="manual",keepDialogOpen=false){
     const p=core.cleanPlace(raw);
     if(!p)return status("선택한 지역 정보를 확인할 수 없습니다.");
     finishIntro();
     const loc={...p,source};
     active=loc;render();
     const chooser=$("locationDialog");
-    if(chooser?.open)chooser.close();
+    if(chooser?.open&&!keepDialogOpen)chooser.close();
     window.dispatchEvent(new CustomEvent("weatherhannun:change-location",{detail:loc}));
     status(loc.name+" 날씨로 변경했습니다.");
   }
@@ -91,7 +91,7 @@
     persist();render();
     if(core.same(active,removed.removed)){
       const fallback=core.afterDelete(active,removed.removed,places,DEFAULT);
-      choose(fallback,"manual");
+      choose(fallback,"manual",true);
     }
     const info=$("favoriteMessage");
     if(info)info.innerHTML=esc(removed.removed.name)+' 지역을 삭제했습니다. <button type="button" id="undoLocationDelete" class="location-undo">실행 취소</button>';
@@ -215,6 +215,7 @@
     $("saveCurrentLocation")?.addEventListener("click",saveCurrent);
     $("renameLocationForm")?.addEventListener("submit",commitEdit);
     $("renameClose")?.addEventListener("click",()=>{$("renameLocationDialog")?.close();editId=null;});
+    $("weatherLocationWelcome")?.addEventListener("close",finishIntro);
     $("welcomeUseLocation")?.addEventListener("click",()=>requestCurrentPosition(true));
     $("welcomeChooseRegion")?.addEventListener("click",()=>{
       finishIntro();
