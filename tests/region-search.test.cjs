@@ -23,7 +23,7 @@ test("longer city/district query narrows to the right neighborhood",()=>{
  assert.equal(a.length,1);
  assert.equal(a[0].full,"경기도 부천시 소사구 옥길동");
  const loc=core.toLocation(a[0]);
- assert.equal(loc.name,"부천시 소사구 옥길동");
+ assert.equal(loc.name,"옥길동");
  assert.equal(loc.address,"경기도 부천시 소사구 옥길동");
  assert.equal(loc.regionCenter,true);
  assert.equal(loc.source,"manual");
@@ -40,6 +40,20 @@ test("input may be borough-only and should rank exact borough over neighborhoods
  assert.ok(a.length>0);
  assert.equal(a[0].full,"서울특별시 강남구");
  assert.equal(a[0].kind,"gu");
+});
+test("an explicitly entered city or borough is the result instead of arbitrary child neighborhoods",()=>{
+ const city=core.search(index,"부천");
+ assert.deepEqual(city.map(x=>x.full),["경기도 부천시"]);
+ const borough=core.search(index,"부천 소사구");
+ assert.deepEqual(borough.map(x=>x.full),["경기도 부천시 소사구"]);
+ assert.equal(borough[0].name,"소사구");
+ assert.equal(borough[0].best,true);
+});
+test("the deepest address token wins for a town or neighborhood query",()=>{
+ const town=core.search(index,"서산 대산읍");
+ assert.deepEqual(town.map(x=>x.full),["충청남도 서산시 대산읍"]);
+ const neighborhood=core.search(index,"부천 소사구 옥길");
+ assert.deepEqual(neighborhood.map(x=>x.full),["경기도 부천시 소사구 옥길동"]);
 });
 test("town and city names match ordinary short forms, province aliases",()=>{
  assert.equal(core.search(index,"전북 전주시").length>0,true);
@@ -68,7 +82,7 @@ test("unknown and empty regions are safe",()=>{
 
 test("fully qualified road address falls back to explicit administrative hierarchy",()=>{
  const matches=core.search(index,"경기도 부천시 소사구 옥길로 38");
- assert.ok(matches.length>0);
+ assert.equal(matches.length,1);
  assert.equal(matches[0].full,"경기도 부천시 소사구");
  assert.equal(matches[0].kind,"gu");
 });

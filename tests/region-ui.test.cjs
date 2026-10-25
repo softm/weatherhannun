@@ -31,6 +31,7 @@ test("opening and typing a district name renders full legal dong address suggest
  assert.match(h.node("searchResults").innerHTML,/경기도 부천시 소사구 옥길동/);
  assert.match(h.node("searchResults").innerHTML,/경기도 광명시 옥길동/);
  assert.match(h.node("searchResults").innerHTML,/법정동/);
+ assert.match(h.node("searchResults").innerHTML,/<b>옥길동<\/b><em class="region-result-best">가장 적합<\/em>/);
  assert.equal(input.attributes["aria-expanded"],"true");
  assert.equal(h.requests.length,1);
 });
@@ -42,6 +43,7 @@ test("clicking the matching hierarchy row applies correct district's centroid wi
  area.handlers.get("click")({target:{closest:()=>({dataset:{regionChoice:"0"}})}});
  assert.equal(h.events.length,1);
  assert.equal(h.events[0].type,"weatherhannun:change-location");
+ assert.equal(h.events[0].detail.name,"옥길동");
  assert.equal(h.events[0].detail.address,"경기도 부천시 소사구 옥길동");
  assert.equal(h.events[0].detail.regionCenter,true);
  assert.equal(h.node("locationDialog").open,false);
@@ -69,4 +71,15 @@ test("full road address returns only administrative prefix with explicit approxi
  await h.window.WeatherRegionSearch.search();
  assert.match(h.node("searchResults").innerHTML,/경기도 부천시 소사구/);
  assert.match(h.node("searchResults").innerHTML,/도로명·건물번호는 반영하지 않았습니다/);
+});
+
+test("city and borough inputs show their own best matching level, not every child dong",async()=>{
+ const h=createHarness();
+ h.node("locationSearch").value="부천 소사구";
+ await h.window.WeatherRegionSearch.search();
+ const html=h.node("searchResults").innerHTML;
+ assert.match(html,/<b>소사구<\/b>/);
+ assert.match(html,/경기도 부천시 소사구/);
+ assert.doesNotMatch(html,/옥길동/);
+ assert.match(html,/후보 1개/);
 });
