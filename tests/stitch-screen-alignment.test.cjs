@@ -60,11 +60,33 @@ test("service worker version tracks the aligned shell", () => {
   const html = read("index.html");
   const worker = read("sw.js");
 
-  assert.ok(worker.includes("weatherhannun-shell-v15-hour-card-contrast"));
-  for (const asset of ["stitch-today.css?v=15", "stitch-today.js?v=15", "stitch-mobile.css?v=14", "region-search.css?v=14"]) {
+  assert.ok(worker.includes("weatherhannun-shell-v16-contrast-audit"));
+  for (const asset of ["stitch-theme.css?v=16", "stitch-today.css?v=16", "stitch-today.js?v=15", "stitch-mobile.css?v=16", "region-search.css?v=14"]) {
     assert.ok(html.includes(asset), `page must request ${asset}`);
     assert.ok(worker.includes(asset), `service worker must warm ${asset}`);
   }
+});
+
+test("light-theme semantic ink colors meet WCAG AA and suitability values inherit them", () => {
+  const mobile = read("stitch-mobile.css");
+  const theme = read("stitch-theme.css");
+  const luminance = hex => {
+    const channels = hex.match(/[0-9a-f]{2}/gi).map(value => Number.parseInt(value, 16) / 255);
+    const linear = channels.map(value => value <= .03928 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
+    return .2126 * linear[0] + .7152 * linear[1] + .0722 * linear[2];
+  };
+  const contrast = (foreground, background) => {
+    const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+    return (values[0] + .05) / (values[1] + .05);
+  };
+
+  for (const color of ["1559b3", "08735c", "8a5200", "a12d2d", "52657b"]) {
+    assert.ok(contrast(color, "ffffff") >= 4.5, `${color} must remain readable on white`);
+    assert.ok(theme.includes(`#${color}`), `missing semantic ink #${color}`);
+  }
+  assert.match(mobile, /data-weather-theme="light"[^\n]*\.suitability b\s*\{\s*color:\s*#0f1b2d/);
+  assert.match(mobile, /data-weather-theme="light"[^\n]*\.suitability\.mid b\s*\{\s*color:\s*var\(--st-amber-ink\)/);
+  assert.match(mobile, /data-weather-theme="light"[^\n]*\.farm-signal\s*\{[\s\S]*?background:\s*#f4f8fd/);
 });
 
 test("current hour card has an explicit high-contrast state and descriptive rain label", () => {
