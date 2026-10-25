@@ -147,7 +147,7 @@ test("a pending address lookup cannot override a newly selected manual place",as
  await t.settle();
  await t.window.WeatherLocationManager.requestCurrentPosition(true);
  // When user switches to another region, app broadcasts the new active selection.
- t.window.dispatchEvent({type:"weatherhannun:location-applied",detail:{name:"서울",lat:37.56,lon:126.98,source:"manual"}});
+ t.callbacks.get("weatherhannun:location-applied")({detail:{name:"서울",lat:37.56,lon:126.98,source:"manual"}});
  complete({name:"부천시 옥길동",address:"경기도 부천시 옥길동"});
  await t.settle();
  assert.equal(t.events.filter(e=>e.type==="weatherhannun:change-location").length,1);
