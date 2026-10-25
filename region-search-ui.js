@@ -19,7 +19,7 @@
   }
   function showSource(){
     const label=$("regionSearchSource");
-    if(label)label.textContent="전국 법정동·읍·면·리 (2026.02 기준) · 지역 대표 좌표";
+    if(label)label.innerHTML='전국 법정동·읍·면·리 (2026.02 기준) · <a href="https://github.com/swuhalee/korea-regions-with-coords" target="_blank" rel="noopener noreferrer">데이터 출처</a> · 지역 대표 좌표';
   }
   function getIndex(){
     if(index)return Promise.resolve(index);
