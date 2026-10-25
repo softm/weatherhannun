@@ -34,23 +34,28 @@
  function compose(){
   var today=document.getElementById("view-today"),weekly=document.getElementById("view-weekly");
   if(!today||!weekly)return;
-  var hour=el("section",{id:"view-hourly",class:"screen content-bound","aria-label":"시간별 예보 및 강수 분석"});
-  var hero=el("div",{class:"stitch-page-lead"});
-  hero.innerHTML='<div><p class="eyebrow">HOURLY FORECAST</p><h2>언제 비 오고, 언제 맑을까?</h2><p>시간대별 강수와 기온을 살펴보세요.</p></div><img src="./assets/stitch/rain.svg" alt="" loading="lazy">';
-  hour.appendChild(hero);
-  var insight=today.querySelector(".insight-section"),panel=today.querySelector(".hourly-panel");
-  if(insight)hour.appendChild(insight);
-  if(panel){
-   var heading=panel.previousElementSibling;
-   if(heading&&heading.classList.contains("section-title")&&today.contains(heading))hour.appendChild(heading);
-   hour.appendChild(panel);
+  var hour=document.getElementById("view-hourly");
+  if(!hour){
+   hour=el("section",{id:"view-hourly",class:"screen content-bound","aria-label":"시간별 예보 및 강수 분석"});
+   var hero=el("div",{class:"stitch-page-lead"});
+   hero.innerHTML='<div><p class="eyebrow">HOURLY FORECAST</p><h2>언제 비 오고, 언제 맑을까?</h2><p>시간대별 강수와 기온을 살펴보세요.</p></div><img src="./assets/stitch/rain.svg" alt="" loading="lazy">';
+   hour.appendChild(hero);
+   var insight=today.querySelector(".insight-section"),panel=today.querySelector(".hourly-panel");
+   if(insight)hour.appendChild(insight);
+   if(panel){
+    var heading=panel.previousElementSibling;
+    if(heading&&heading.classList.contains("section-title")&&today.contains(heading))hour.appendChild(heading);
+    hour.appendChild(panel);
+   }
+   weekly.parentNode.insertBefore(hour,weekly);
   }
-  weekly.parentNode.insertBefore(hour,weekly);
-  var quick=el("div",{class:"stitch-quicklinks","aria-label":"오늘 더 알아보기"});
-  quick.appendChild(tab("hourly","시간별 비 예보"));
-  quick.appendChild(tab("air","대기질 확인"));
-  quick.appendChild(tab("map","전국 날씨 보기"));
-  var cards=today.querySelector(".hero-grid");if(cards)cards.insertAdjacentElement("afterend",quick);
+  if(!today.querySelector(".stitch-quicklinks")){
+   var quick=el("div",{class:"stitch-quicklinks","aria-label":"오늘 더 알아보기"});
+   quick.appendChild(tab("hourly","시간별 비 예보"));
+   quick.appendChild(tab("air","대기질 확인"));
+   quick.appendChild(tab("map","전국 날씨 보기"));
+   var cards=today.querySelector(".hero-grid");if(cards)cards.insertAdjacentElement("afterend",quick);
+  }
   [
    ["view-weekly","sun.svg"],["view-activity","sprout.svg"],
    ["view-air","humidity.svg"],["view-map","partly-cloudy.svg"]

@@ -25,16 +25,17 @@
     if(index)return Promise.resolve(index);
     if(loadPromise)return loadPromise;
     loading=true;
-    const controller=new AbortController();
-    const tid=setTimeout(()=>controller.abort(),15000);
-    loadPromise=fetch(DATA,{signal:controller.signal,cache:"force-cache"}).then(resp=>{
+    const controller=typeof AbortController==="function"?new AbortController():null;
+    const tid=controller?setTimeout(()=>controller.abort(),15000):null;
+    const options=controller?{signal:controller.signal,cache:"force-cache"}:{cache:"force-cache"};
+    loadPromise=fetch(DATA,options).then(resp=>{
       if(!resp.ok)throw new Error("지역 목록을 가져올 수 없습니다 ("+resp.status+")");
       return resp.json();
     }).then(data=>{
       index=core.load(data);
       showSource();
       return index;
-    }).finally(()=>{clearTimeout(tid);loading=false;});
+    }).finally(()=>{if(tid!==null)clearTimeout(tid);loading=false;});
     return loadPromise.catch(err=>{loadPromise=null;throw err;});
   }
   function itemHtml(entry,i,query){

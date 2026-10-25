@@ -81,7 +81,7 @@
  function favourite(){
   var actions=document.querySelector('.top-actions');
   if(!actions||document.getElementById('stitchFavourite'))return;
-  var button=document.createElement('button');
+  var button=document.getElementById('favoriteButton')||document.createElement('button');
   button.id='stitchFavourite';button.type='button';button.className='stitch-favourite-button';button.textContent='☆';
   function sync(){
    var saved=document.getElementById('saveCurrentLocation')?.disabled;
@@ -95,7 +95,7 @@
    else document.getElementById('locationButton')?.click();
    setTimeout(sync,20);
   };
-  actions.insertBefore(button,document.getElementById('refreshButton'));
+  if(!button.parentNode)actions.insertBefore(button,document.getElementById('refreshButton'));
   var save=document.getElementById('saveCurrentLocation');
   if(save)new MutationObserver(sync).observe(save,{attributes:true,childList:true,subtree:true});
   sync();
