@@ -1,7 +1,7 @@
 "use strict";
-const CACHE="weatherhannun-shell-v4-stitch";
+const CACHE="weatherhannun-shell-v5-geolocation";
 const BASE=self.registration.scope;
-const SHELL=["./","./index.html","./styles.css","./stitch-theme.css","./stitch-layout.js","./assets/stitch/sun.svg","./assets/stitch/partly-cloudy.svg","./assets/stitch/storm.svg","./assets/stitch/snow.svg","./assets/stitch/rain.svg","./briefing-core.js","./briefing-ui.js","./briefing-ui.css","./app.js","./forecast-insights.js","./forecast-insights.css","./manifest.webmanifest","./icon.svg","./data-status.html"].map(x=>new URL(x,BASE).href);
+const SHELL=["./","./index.html","./styles.css","./stitch-theme.css","./stitch-layout.js","./assets/stitch/sun.svg","./assets/stitch/partly-cloudy.svg","./assets/stitch/storm.svg","./assets/stitch/snow.svg","./assets/stitch/rain.svg","./location-core.js","./location-manager.js","./location-manager.css","./briefing-core.js","./briefing-ui.js","./briefing-ui.css","./app.js","./forecast-insights.js","./forecast-insights.css","./manifest.webmanifest","./icon.svg","./data-status.html"].map(x=>new URL(x,BASE).href);
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim();});
 self.addEventListener("fetch",event=>{
