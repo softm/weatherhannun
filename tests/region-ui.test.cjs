@@ -62,3 +62,11 @@ test("road/building address is not falsely geocoded as an exact point",async()=>
  assert.match(h.node("searchResults").innerHTML,/정확한 지점을 판별할 수 없습니다/);
  assert.equal(h.events.length,0);
 });
+
+test("full road address returns only administrative prefix with explicit approximation",async()=>{
+ const h=createHarness();
+ h.node("locationSearch").value="경기도 부천시 소사구 옥길로 38";
+ await h.window.WeatherRegionSearch.search();
+ assert.match(h.node("searchResults").innerHTML,/경기도 부천시 소사구/);
+ assert.match(h.node("searchResults").innerHTML,/도로명·건물번호는 반영하지 않았습니다/);
+});
