@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- Droplet outline -->
+  <path d="M32 10C32 10 16 28 16 39a16 16 0 0 0 32 0C48 28 32 10 32 10z" fill="url(#drop-grad)" stroke="#0284C7" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Highlight reflection -->
+  <path d="M24 37a9 9 0 0 1 8-9" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+  <defs>
+    <linearGradient id="drop-grad" x1="20" y1="16" x2="44" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#0284C7"/>
+    </linearGradient>
+  </defs>
+</svg>
