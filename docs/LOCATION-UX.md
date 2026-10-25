@@ -72,3 +72,15 @@ node --check location-manager.js
 10. PWA 서비스워커 업데이트 후 구버전 JS가 섞이지 않도록 최신 로딩 확인.
 
 기상 특보, 공식 관측 API, 앱 종료 후 푸시 기능과는 독립적인 작업이며 이번 위치관리 변경으로 해당 기능을 완료했다고 표시하지 않는다.
+
+## 5차: GPS 추정주소 표시 (2026-10-26)
+
+- `reverse-geocode.js`: OpenStreetMap Nominatim `/reverse` API, `format=jsonv2`, `zoom=17`, `layer=address`, `accept-language=ko`.
+- 좌표는 소수점 3자리로 줄여 요청하며 건물/번지 번호는 의도적으로 표시하지 않습니다.
+- 시·도/시·군·구/동, 가능한 경우 도로명 **인근** 표시. 정확한 집 주소가 아니라 *GPS 기준 추정주소*입니다.
+- 상단 위치명과 주소 부제, 저장 지역 목록의 추정주소, 지역 버튼 툴팁으로 표시합니다.
+- 결과는 로컬스토리지에 30일 캐시, 메모리 중복 요청 통합 및 1초 이상 간격의 순차 요청.
+- 공용 Nominatim의 전체 요청 제한은 사용자 브라우저 간 보장할 수 없으므로 트래픽 증가 시 유료 지오코더 또는 직접 호스팅 전환이 필요합니다.
+- 통신 장애·주소 미수집 시 GPS 좌표와 기존 날씨 조회 유지. 지역 전환 중 오래된 주소 응답 무시.
+- 주소 데이터 및 출처 © OpenStreetMap contributors, ODbL. 제3자 위치 좌표 전송은 `privacy.html`에 안내.
+- `tests/reverse-geocode.test.cjs`, `tests/location-flow.test.cjs`에서 검증.
