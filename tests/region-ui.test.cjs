@@ -20,7 +20,7 @@ function createHarness(){
   const document={readyState:"complete",getElementById:node};
   const window={WeatherRegionSearchCore:core,dispatchEvent:e=>events.push(e)};
   const fetch=async url=>{requests.push(url);return{ok:true,json:async()=>data};};
-  vm.runInNewContext(source,{window,document,fetch,CustomEvent,URL,setTimeout,clearTimeout,console});
+  vm.runInNewContext(source,{window,document,fetch,CustomEvent,URL,AbortController,setTimeout,clearTimeout,console});
   return {window,node,events,requests};
 }
 test("opening and typing a district name renders full legal dong address suggestions",async()=>{
