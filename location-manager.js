@@ -40,7 +40,7 @@
     if(holder){
       holder.innerHTML=places.length?places.map(p=>{
         const selected=core.same(active,p);
-        return '<div class="location-place-row'+(selected?" is-active":"")+'"><button type="button" data-location-select="'+esc(p.id)+'" class="location-place-select" aria-label="'+esc(p.name)+' 날씨 보기"><span class="location-place-symbol">📍</span><span class="location-place-text"><span class="location-place-name">'+esc(p.name)+'</span>'+(p.address&&p.address!==p.name?'<small class="location-place-address">'+esc(p.address)+' (추정)</small>':'')+'</span>'+(selected?'<span class="location-place-current">보는 중</span>':'')+'</button><button type="button" class="location-edit-button" data-location-edit="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 이름 변경" title="이름 변경">수정</button><button type="button" class="location-delete-button" data-location-delete="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 저장 지역 삭제" title="삭제">삭제</button></div>';
+        return '<div class="location-place-row'+(selected?" is-active":"")+'"><button type="button" data-location-select="'+esc(p.id)+'" class="location-place-select" aria-label="'+esc(p.name)+' 날씨 보기"><span class="location-place-symbol">📍</span><span class="location-place-text"><span class="location-place-name">'+esc(p.name)+'</span>'+(p.address&&p.address!==p.name?'<small class="location-place-address">'+esc(p.address)+(p.regionCenter?" · 지역 대표 좌표":" · 추정주소")+'</small>':'')+'</span>'+(selected?'<span class="location-place-current">보는 중</span>':'')+'</button><button type="button" class="location-edit-button" data-location-edit="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 이름 변경" title="이름 변경">수정</button><button type="button" class="location-delete-button" data-location-delete="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 저장 지역 삭제" title="삭제">삭제</button></div>';
       }).join(""):'<p class="muted-text location-empty">저장된 지역이 없습니다. 위에서 지역을 검색하거나 현재 위치를 선택한 뒤 저장할 수 있습니다.</p>';
     }
     const save=$("saveCurrentLocation");
@@ -53,7 +53,7 @@
     if(quick){
       quick.hidden=false;
       const locationLine=active?.address?
-        active.address+(active.approximate?" · GPS 기준 추정주소":""):
+        active.address+(active.regionCenter?" · 행정구역 대표 좌표":active.source==="gps"&&active.approximate?" · GPS 기준 추정주소":""):
         active?.source==="gps"?"행정주소 확인 중 · 좌표 약 "+Number(active.lat).toFixed(3)+", "+Number(active.lon).toFixed(3):"";
       quick.innerHTML='<span class="location-current-label">📍 <span class="location-label-stack"><strong>'+esc(currentName())+'</strong>'+(locationLine?'<span class="location-address-line" title="'+esc(locationLine)+'">'+esc(locationLine)+'</span>':'')+'</span><small id="locationModeLabel">'+(active?.source==="gps"?"GPS로 선택됨":"선택 지역 저장됨")+'</small></span>'+
       '<div class="location-fast-items"><button type="button" class="location-fast-gps" data-geo-quick>⌖ 현위치</button>'+
