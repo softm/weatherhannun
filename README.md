@@ -53,11 +53,12 @@ python3 -m http.server 8080
 
 ## 배포
 
-- **프로덕션 웹앱**: https://weatherhannun.vercel.app/
+- **프로덕션 웹앱(Vercel)**: https://weatherhannun.vercel.app/
+- **GitHub Pages (자동 배포)**: https://softm.github.io/weatherhannun/
 - **GitHub 원본 코드**: https://github.com/softm/weatherhannun
 - **중앙 프로젝트 경로**: https://softm.github.io/projects/weatherhannun/ (GitHub Pages 게시 반영 후 이용 가능)
 
-Vercel 첫 버전은 API를 통한 수동 프로덕션 배포입니다. GitHub 푸시와 Vercel 배포가 자동 연결된 것은 아닙니다. `.github/workflows/pages.yml`은 독립 GitHub Pages 배포 워크플로를 포함하나 저장소 Settings → Pages에서 Source를 **GitHub Actions**로 활성화해야 합니다.
+**GitHub Pages**는 `main` 변경 시 `.github/workflows/pages.yml`로 자동 배포하며, 2026-10-25 GitHub Actions 실행이 성공했습니다. **Vercel**은 Git 저장소 통합 연결이 아직 되어 있지 않아 수동 API 릴리스 방식입니다. Vercel 운영 배포가 `READY`였다고 해도 각 기능의 브라우저 회귀 검증까지 자동 보증하지는 않습니다.
 
 ## 라이선스
 
