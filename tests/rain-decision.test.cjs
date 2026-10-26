@@ -45,6 +45,12 @@ test('all precipitation data missing is unknown, not no-rain',()=>{
   v.hourly.precipitation=undefined;
   assert.equal(summarise(v).state,'unknown');
 });
+test('one missing low-risk hour is unknown rather than no-rain',()=>{
+  const v=weather();
+  v.hourly.precipitation[4]=null;
+  assert.equal(summarise(v).state,'unknown');
+  assert.match(summarise(v).detail,/완전하지 않아/);
+});
 test('next-day rain uses date, not inaccurate today',()=>{
   const v=summarise(weather({p:{8:90}}));
   assert.match(v.title,/10월 27일 2시경/);
