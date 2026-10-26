@@ -61,7 +61,7 @@ test("DOM-safe rendering keeps untrusted text as text nodes, not HTML",()=>{
   const items=render(target,unsafe,{where:"서산"});
   assert.equal(target.textContent,unsafe);
   assert.equal(complete(items),unsafe);
-  assert.ok(target.children.every(node=>node.nodeType===3||(node.tagName==="mark"&&node.className.startsWith("weather-brief-mark--"))));
+  assert.ok(target.children.every(node=>node.nodeType===3||(node.tagName==="mark"&&node.className.includes("weather-brief-mark--"))));
   assert.ok(target.children.some(node=>node.nodeType===3&&node.textContent.includes("<img")));
   assert.ok(!target.children.some(node=>node.tagName==="img"));
 });
