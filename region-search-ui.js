@@ -11,9 +11,14 @@
   const MAX_RESULTS=16;
   let index=null,loadPromise=null,results=[],revision=0,loading=false;
   function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-  function renderHint(text){
+  function setPanelVisible(visible){
+    const panel=$("regionSearchPanel");
+    if(panel)panel.hidden=!visible;
+  }
+  function renderHint(text,visible=true){
     const target=$("searchResults");
     if(!target)return;
+    setPanelVisible(visible);
     target.innerHTML='<div class="region-search-hint">'+safe(text)+'</div>';
     $("locationSearch")?.setAttribute("aria-expanded","false");
   }
@@ -52,6 +57,7 @@
     results=entries||[];
     const area=$("searchResults");
     if(!area)return;
+    setPanelVisible(true);
     const ignoredLot=core.removeLot(rawQuery)!==core.clean(rawQuery);
     const numericNote=core.isStreet(rawQuery)?
       '<p class="region-search-note">도로명·건물번호는 반영하지 않았습니다. 입력한 시·군·구까지만 식별된 지역의 대표 좌표로 날씨를 조회합니다.</p>':
@@ -71,7 +77,7 @@
   }
   async function runSearch(force){
     const field=$("locationSearch"),raw=field?.value?.trim()||"",id=++revision;
-    if(raw.length<2){results=[];renderHint("동·읍·면·리 또는 시·군·구 주소를 두 글자 이상 입력하세요. 예: 옥길동, 부천 소사구, 서산 대산읍 화곡리");return;}
+    if(raw.length<2){results=[];renderHint("동·읍·면·리 또는 시·군·구 주소를 두 글자 이상 입력하세요. 예: 광명, 옥길동, 부천 소사구",false);return;}
     if(!index){
       renderHint("전국 읍·면·동 주소 목록을 준비하고 있습니다…");
       try{await getIndex();}catch(error){
@@ -104,7 +110,7 @@
     if(event.key==="ArrowDown"&&results.length){
       const first=$("regionOption0");if(first){event.preventDefault();first.focus();}
     }
-    if(event.key==="Escape"&&results.length){results=[];renderHint("검색창에 다른 지역명을 입력하세요.");}
+    if(event.key==="Escape"&&results.length){results=[];renderHint("검색창에 다른 지역명을 입력하세요.",false);}
   }
   function onResultKey(event){
     const el=event.target?.closest?.("[data-region-choice]");
@@ -119,7 +125,7 @@
   function init(){
     const field=$("locationSearch"),form=$("searchForm"),resultsBox=$("searchResults"),dialog=$("locationDialog");
     if(!field||!form||!resultsBox)return;
-    field.placeholder="예: 옥길동, 부천 소사구, 서산 대산읍 화곡리";
+    field.placeholder="예: 광명, 옥길동, 부천 소사구 옥길로 38";
     field.setAttribute("role","combobox");
     field.setAttribute("aria-autocomplete","list");
     field.setAttribute("aria-controls","searchResults");
@@ -133,8 +139,8 @@
     field.addEventListener("keydown",onKey);
     resultsBox.addEventListener("click",onSelectClick);
     resultsBox.addEventListener("keydown",onResultKey);
-    dialog?.addEventListener("close",()=>{revision++;results=[];});
-    renderHint("동·읍·면·리 또는 시·군·구 주소를 입력하면 가장 알맞은 단계를 먼저 보여드려요.");
+    dialog?.addEventListener("close",()=>{revision++;results=[];setPanelVisible(false);});
+    renderHint("지역명을 입력하면 가장 알맞은 주소를 바로 보여드려요.",false);
   }
   window.WeatherRegionSearch={search:runSearch};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();

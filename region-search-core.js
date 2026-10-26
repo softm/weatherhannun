@@ -153,7 +153,17 @@
     // Ancestor-only matches are useful only when there is no result whose own
     // name matches the final query token. This prevents a gu/city search from
     // expanding into an arbitrary list of all child dongs or ri.
-    const candidates=found.some(item=>item.direct)?found.filter(item=>item.direct):found;
+    const finalToken=localParts(tokens[tokens.length-1]||q);
+    const administrativeKinds=new Set(["sido","si","gu","gun"]);
+    const exactNamedArea=tokens.length===1&&!finalToken.family?found.filter(item=>{
+      if(!administrativeKinds.has(item.entry.kind))return false;
+      return localParts(item.entry.name).stem===finalToken.stem;
+    }):[];
+    // A suffix-free city name such as "광명" means 광명시 before similarly
+    // named neighborhoods (광명동/광명리). If no city/district exists, keep
+    // the ordinary neighborhood partial-match behavior (for example 옥길).
+    const candidates=exactNamedArea.length?exactNamedArea:
+      found.some(item=>item.direct)?found.filter(item=>item.direct):found;
     candidates.sort((a,b)=>b.rank-a.rank||a.entry.full.localeCompare(b.entry.full,"ko"));
     return candidates.slice(0,limit).map((x,index)=>({ ...x.entry,score:x.rank,best:index===0 }));
   }
