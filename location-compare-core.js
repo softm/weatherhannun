@@ -81,11 +81,13 @@
   }
 
   function rainSignal(row) {
-    if (!row) return { known: false, triggered: false, probability: null, precipitation: null };
+    if (!row) return { available: false, complete: false, known: false, triggered: false, probability: null, precipitation: null };
     var probability = finite(row.rainProbability) ? row.rainProbability : null;
     var precipitation = finite(row.precipitation) ? row.precipitation : null;
     return {
-      known: probability !== null || precipitation !== null,
+      available: probability !== null || precipitation !== null,
+      complete: probability !== null && precipitation !== null,
+      known: probability !== null && precipitation !== null,
       triggered: (probability !== null && probability >= 50) || (precipitation !== null && precipitation >= 0.3),
       probability: probability,
       precipitation: precipitation

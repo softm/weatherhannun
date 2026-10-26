@@ -122,7 +122,7 @@
   function sideMarkup(side, role) {
     var row = side.row;
     var condition = weatherDescription(row);
-    var rainText = side.rain.known
+    var rainText = side.rain.available
       ? number(side.rain.probability) + "% · " + number(side.rain.precipitation, 1) + " mm/h"
       : "강수 수치 제공 안 됨";
     return '<article class="compare-place-card '+role+'">' +
@@ -160,7 +160,7 @@
         ? "현재 지역에만 비 신호가 있습니다."
         : comparison.destination.rain.triggered && comparison.origin.rain.triggered
           ? "두 지역 모두 비 신호가 있습니다."
-          : comparison.destination.rain.known && comparison.origin.rain.known
+          : comparison.destination.rain.complete && comparison.origin.rain.complete
             ? "두 지역 모두 뚜렷한 비 신호가 낮습니다."
             : "강수 수치가 부족해 비 신호를 단정하지 않습니다.";
     resultNode.innerHTML = '<div class="compare-summary" aria-live="polite"><span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span><div><b>'+escapeHtml(timeLabel(comparison.time))+' 동일 유효시각</b><p>목적지는 현재 지역보다 기온 '+escapeHtml(temperatureSummary)+', 바람 '+escapeHtml(windSummary)+'입니다. '+escapeHtml(rainSummary)+'</p></div></div>'+

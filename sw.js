@@ -9,7 +9,7 @@ const SHELL=[
   "./stitch-today.utilities.css","./rain-decision-core.js?v=31","./rain-decision-ui.js?v=21",
   "./rain-decision.css?v=21","./outfit-decision-core.js?v=31","./outfit-decision-ui.js?v=24",
   "./outfit-decision.css?v=24","./daily-delta-core.js?v=27","./daily-delta-ui.js?v=27",
-  "./location-compare-core.js?v=27","./location-compare-ui.js?v=27","./location-compare.css?v=27",
+  "./location-compare-core.js?v=31","./location-compare-ui.js?v=31","./location-compare.css?v=27",
   "./weather-provider-core.js?v=31","./activity-decision-core.js?v=28","./official-data.css?v=30","./official-data-ui.js?v=30",
   "./assets/stitch/today-presenter.jpg","./assets/stitch/sun.svg",
   "./assets/stitch/partly-cloudy.svg","./assets/stitch/storm.svg","./assets/stitch/snow.svg",
