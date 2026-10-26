@@ -4,6 +4,14 @@ const fs=require("node:fs");
 const path=require("node:path");
 const provider=require("../weather-provider-core.js");
 
+function validPayload(){
+ const hourly={time:["2026-10-27T01:00"]};
+ const daily={time:["2026-10-27"]};
+ for(const field of provider.HOURLY_FIELDS)hourly[field]=[null];
+ for(const field of provider.DAILY_FIELDS)daily[field]=[null];
+ return {current:{time:"2026-10-27T01:00",temperature_2m:14},hourly,daily};
+}
+
 test("WH-D01 builds public model requests without a secret",()=>{
  const forecast=new URL(provider.buildForecastUrl({name:"서울",lat:37.5665,lon:126.978}));
  const air=new URL(provider.buildAirUrl({name:"서울",lat:37.5665,lon:126.978}));
@@ -20,11 +28,20 @@ test("provider payload contract reports missing fields instead of filling them",
  const incomplete={current:{time:"2026-10-27T01:00",temperature_2m:null},hourly:{time:[]},daily:{time:[]}};
  const result=provider.inspectForecastPayload(incomplete);
  assert.equal(result.valid,false);
- assert.deepEqual(result.missingFields,["current.temperature_2m","hourly.time","daily.time"]);
+ for(const field of ["current.temperature_2m","hourly.time","daily.time","hourly.precipitation","daily.precipitation_sum"]){
+  assert.ok(result.missingFields.includes(field),field);
+ }
+});
+
+test("provider contract requires aligned arrays while allowing explicit null cells",()=>{
+ const payload=validPayload();
+ assert.deepEqual(provider.inspectForecastPayload(payload),{valid:true,missingFields:[]});
+ payload.hourly.precipitation=[];
+ assert.deepEqual(provider.inspectForecastPayload(payload).missingFields,["hourly.precipitation"]);
 });
 
 test("source metadata keeps forecast, valid, fetched and observed times distinct",()=>{
- const payload={current:{time:"2026-10-27T01:00",temperature_2m:14},hourly:{time:["2026-10-27T01:00"]},daily:{time:["2026-10-27"]}};
+ const payload=validPayload();
  const record=provider.sourceRecord({payload,fetchedAt:"2026-10-26T16:01:00.000Z"});
  assert.equal(record.kind,"forecast");
  assert.equal(record.validAt,"2026-10-27T01:00");
