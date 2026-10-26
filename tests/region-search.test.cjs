@@ -49,6 +49,12 @@ test("an explicitly entered city or borough is the result instead of arbitrary c
  assert.equal(borough[0].name,"소사구");
  assert.equal(borough[0].best,true);
 });
+test("a suffix-free city name outranks identically named dong and ri results",()=>{
+ const city=core.search(index,"광명");
+ assert.deepEqual(city.map(x=>x.full),["경기도 광명시"]);
+ assert.equal(city[0].name,"광명시");
+ assert.equal(city[0].best,true);
+});
 test("the deepest address token wins for a town or neighborhood query",()=>{
  const town=core.search(index,"서산 대산읍");
  assert.deepEqual(town.map(x=>x.full),["충청남도 서산시 대산읍"]);

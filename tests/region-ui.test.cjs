@@ -4,6 +4,7 @@ const fs=require("node:fs");
 const vm=require("node:vm");
 const path=require("node:path");
 const source=fs.readFileSync(path.join(__dirname,"../region-search-ui.js"),"utf8");
+const page=fs.readFileSync(path.join(__dirname,"../index.html"),"utf8");
 const data=JSON.parse(fs.readFileSync(path.join(__dirname,"../data/korea-regions-202602.json"),"utf8"));
 const core=require("../region-search-core.js");
 function createHarness(){
@@ -34,6 +35,23 @@ test("opening and typing a district name renders full legal dong address suggest
  assert.match(h.node("searchResults").innerHTML,/<b>옥길동<\/b><em class="region-result-best">가장 적합<\/em>/);
  assert.equal(input.attributes["aria-expanded"],"true");
  assert.equal(h.requests.length,1);
+});
+test("the unified results panel is directly below the search field, before saved and quick regions",()=>{
+ const field=page.indexOf('id="locationSearch"');
+ const panel=page.indexOf('id="regionSearchPanel"');
+ const results=page.indexOf('id="searchResults"');
+ const current=page.indexOf('id="geoButton"');
+ const favorites=page.indexOf('id="favoriteLocations"');
+ assert.ok(field>=0&&field<panel);
+ assert.ok(panel<results&&results<current&&current<favorites);
+});
+test("typing a suffix-free city name shows the city immediately in the visible panel",async()=>{
+ const h=createHarness();
+ h.node("locationSearch").value="광명";
+ await h.window.WeatherRegionSearch.search();
+ assert.equal(h.node("regionSearchPanel").hidden,false);
+ assert.match(h.node("searchResults").innerHTML,/<b>광명시<\/b>/);
+ assert.doesNotMatch(h.node("searchResults").innerHTML,/광명동/);
 });
 test("clicking the matching hierarchy row applies correct district's centroid without a new API call",async()=>{
  const h=createHarness();
