@@ -36,10 +36,10 @@
 | 모바일/다크/Stitch, PWA 캐시, 지도 집중모드 | 웹 코드 구현 | 회귀 테스트·반응형 QA |
 | 맞춤 알림 5종·아침/저녁 요약 | Android main 소스 구현 | 15분 JobScheduler·방해금지·중복 방지; 실기기 검증·다음 Play AAB 포함 필요 |
 | Android WebView 및 AdMob/AdFit 단일 하단 슬롯 | 네이티브 코드 구현 | 실광고 기본 차단, 개별 매체 등록 필요 |
-| 홈 위젯·어제 대비·두 지역 동시 비교 | **웹/Android 로컬 소스 구현** | 관측 없는 어제 비교는 비교 불가, 위젯 실기기·Play 검증 전 출시 보류 |
-| 화면 켤 때 날씨 오버레이 | **웹 설정 + Android 로컬 소스 구현** | 기본 OFF·특별 권한·5초/30분·닫기·모델 예보 스냅샷 구현; 실기기·Play 정책 검증 전 출시 보류 |
+| 홈 위젯·어제 대비·두 지역 동시 비교 | **웹/Android main 소스 구현** | 관측 없는 어제 비교는 비교 불가, 위젯 실기기·Play 검증 전 출시 보류 |
+| 화면 켤 때 날씨 오버레이 | **웹 설정 + Android main 소스 구현** | 기본 OFF·특별 권한·5초/30분·닫기·모델 예보 스냅샷 구현; 실기기·Play 정책 검증 전 출시 보류 |
 | 기상청 실황·공식 특보·강수 레이더·실측 공기질 | 정식 연동 전 | 법적 이용조건·정확도·출처 UI 확인 |
-| Plus·농업 Premium | **상품 UI·결제/복원/서버검증·Plus 프리셋/위젯 테마·농업 다지역 계획/리포트 로컬 소스 구현, 판매 OFF** | 데이터 상업권·Play 상품·검증 서버·내부테스트 전 구매·실행 불가; 가격은 검증 전 |
+| Plus·농업 Premium | **상품 UI·결제/복원/서버검증·Plus 프리셋/위젯 테마·농업 다지역 계획/리포트 main 소스 구현, 판매 OFF** | 데이터 상업권·Play 상품·검증 서버·내부테스트 전 구매·실행 불가; 가격은 검증 전 |
 | 성과 계측 | **기본 OFF 기기 내 익명 일별 카운터 구현** | 전송 코드 없음. 사용자 전체 D1/D7/D30·DAU·ARPDAU는 동의·익명화·분석 계약 전 미측정 |
 | 기관용 리포트 | 설계/실험 전 | 실사용 수요와 운영비 검증 후 도입 |
 
@@ -52,12 +52,12 @@
 | 웹 로컬 코드·자동 테스트 | **통과** | `node --test tests/*.test.cjs` 171/171, 루트 JavaScript 전체 `node --check` 통과. 현재 작업트리의 v34 기능 기준 |
 | Android 로컬 코드·빌드 | **통과** | `scripts/validate.py`, `:app:testDebugUnitTest`, `:app:lintDebug`, `:app:assembleDebug` 통과 |
 | Android 14 에뮬레이터 | **부분 통과** | 최종 Debug APK 설치·실행, 패키지 `net.softm.weatherhannun`·`1.0.1 (2)`·targetSdk 36 확인. 실제 런처 위젯 배치·Doze·재부팅·유료 권한은 별도 |
-| 현재 원격 웹 CI/Pages | **기존 main 통과** | `d94050a`의 Pages run 40350647377, verify run 40350647401 성공. 현재 로컬 v34 변경은 아직 이 실행에 포함되지 않음 |
-| 현재 운영 URL | **HTTP 200, 기존 셸 운영 중** | `https://softm.github.io/weatherhannun/`은 확인 시 `app.js?v=31`, `settings.css?v=26`. 현재 로컬 v34 Plus/Premium 변경은 미배포 |
-| 현재 원격 Android CI | **기존 main 통과** | `1e7af73`의 Android CI run 40350648464 성공. 현재 로컬 Billing·유료 위젯 테마 변경은 아직 이 실행에 포함되지 않음 |
+| 현재 원격 웹 CI/Pages | **통과** | 기능 head `cdde1b5`의 Pages run `40358635451`, verify run `40358635537` 성공. 웹 테스트 171/171·JavaScript 구문 검사·Pages 배포 통과 |
+| 현재 운영 URL | **HTTP 200, v34 운영 중** | `https://softm.github.io/weatherhannun/`에서 `app.js?v=34`, `settings.css?v=34`, 화면날씨·Plus·농업 Premium v34 자산과 UI 확인 |
+| 현재 원격 Android CI | **통과** | 기능 head `5f17571`의 Android CI run `40358635125` 성공. 정적 검증·단위 테스트·lint·Debug APK 빌드/아티팩트 업로드 통과 |
 | 실기기·Play·실결제·실광고 | **미완료/차단 유지** | 데이터 상업 이용권, Play 상품·검증 서버, 앱 전용 광고 ID, 라이선스 테스터, 실제 기기·스토어 권한 필요 |
 
-현재 로컬 변경의 원격 CI와 공식 URL 판정은 관련 파일을 커밋·`main` 푸시한 뒤 새 실행과 배포 자산 버전을 확인해야 완료된다. 이 표의 기존 원격 성공을 로컬 미배포 변경의 성공으로 해석하지 않는다.
+2026-10-27 통합 기능 변경은 두 저장소의 `main` 푸시, 원격 CI, GitHub Pages v34 자산 확인까지 완료했다. 이후 변경도 코드·로컬 테스트·원격 CI·운영 URL·실기기·Play 공개를 각각 다시 확인하며, 한 단계의 성공을 다른 단계의 완료로 해석하지 않는다.
 
 ## 2. 경쟁 앱에서 배울 것과 피할 것
 
