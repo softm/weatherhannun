@@ -6,7 +6,7 @@ const path = require("node:path");
 const root = path.join(__dirname, "..");
 const read = (name) => fs.readFileSync(path.join(root, name), "utf8");
 
-test("web favicon, header and PWA keep the v18 brand while the shell includes v19 alerts", () => {
+test("web favicon and header retain the v18 brand while the shell includes v20 highlights and v19 alerts", () => {
   const index = read("index.html");
   const theme = read("stitch-theme.css");
   const manifest = read("manifest.webmanifest");
@@ -17,8 +17,10 @@ test("web favicon, header and PWA keep the v18 brand while the shell includes v1
   assert.match(theme, /url\("\.\/icon\.svg\?v=18"\)/);
   assert.match(manifest, /icon\.svg\?v=18/);
   assert.match(manifest, /weatherhannun-512\.png\?v=18/);
-  assert.match(worker, /weatherhannun-shell-v19-background-alerts/);
+  assert.match(worker, /weatherhannun-shell-v20-briefing-highlights/);
   assert.match(worker, /alert-rules-core\.js\?v=19/);
+  assert.match(worker, /briefing-highlights\.js\?v=20/);
+  assert.match(worker, /briefing-highlights\.css\?v=20/);
 });
 
 test("brand master keeps the fixed high-contrast MZ palette and simple silhouette", () => {
