@@ -19,8 +19,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Test rain decision rules
-        run: node --test tests/rain-decision.test.cjs
+      - name: Run web app tests
+        run: node --test tests/*.test.cjs
+      - name: Parse frontend JavaScript
+        run: |
+          for file in *.js; do
+            node --check "$file"
+          done
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static site

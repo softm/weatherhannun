@@ -1,43 +1,24 @@
-name: Verify weather briefing rules
+name: Verify web app
 on:
   push:
     branches: [main]
     paths:
-      - 'briefing-core.js'
-      - 'briefing-highlights.js'
-      - 'briefing-highlights.css'
-      - 'stitch-today.js'
-      - 'stitch-today.css'
-      - 'region-search-core.js'
-      - 'region-search-ui.js'
-      - 'region-search.css'
-      - 'data/korea-regions-202602.json'
-      - 'location-core.js'
-      - 'location-manager.js'
-      - 'reverse-geocode.js'
-      - 'location-manager.css'
-      - 'briefing-ui.js'
-      - 'stitch-layout.js'
-      - 'stitch-theme.css'
-      - 'index.html'
+      - '**/*.js'
+      - '**/*.cjs'
+      - '**/*.css'
+      - '**/*.html'
+      - 'data/**'
       - 'tests/**'
       - '.github/workflows/verify.yml'
   pull_request:
     paths:
-      - 'briefing-core.js'
-      - 'briefing-highlights.js'
-      - 'briefing-highlights.css'
-      - 'stitch-today.js'
-      - 'stitch-today.css'
-      - 'briefing-ui.js'
-      - 'region-search-core.js'
-      - 'region-search-ui.js'
-      - 'region-search.css'
-      - 'data/korea-regions-202602.json'
-      - 'location-core.js'
-      - 'location-manager.js'
-      - 'reverse-geocode.js'
+      - '**/*.js'
+      - '**/*.cjs'
+      - '**/*.css'
+      - '**/*.html'
+      - 'data/**'
       - 'tests/**'
+      - '.github/workflows/verify.yml'
 permissions:
   contents: read
 jobs:
@@ -48,20 +29,10 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Check Node
         run: node --version
-      - name: Run weather briefing tests
+      - name: Run web app tests
         run: node --test tests/*.test.cjs
       - name: Parse frontend JavaScript
         run: |
-          node --check app.js
-          node --check briefing-core.js
-          node --check briefing-highlights.js
-          node --check briefing-ui.js
-          node --check stitch-today.js
-          node --check location-core.js
-          node --check location-manager.js
-          node --check region-search-core.js
-          node --check region-search-ui.js
-          node --check reverse-geocode.js
-          node --check forecast-insights.js
-          node --check stitch-layout.js
-          node --check sw.js
+          for file in *.js; do
+            node --check "$file"
+          done
