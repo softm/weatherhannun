@@ -32,7 +32,8 @@
   <script defer src="./briefing-core.js"></script>
   <script defer src="./briefing-ui.js"></script>
   <script defer src="./weather-icons.js?v=17"></script>
-  <script defer src="./forecast-insights.js?v=17"></script>
+  <script defer src="./alert-rules-core.js?v=19"></script>
+  <script defer src="./forecast-insights.js?v=19"></script>
   <script defer src="./stitch-layout.js?v=17"></script>
   <script defer src="./app.js?v=17"></script>
   <script defer src="./location-core.js"></script>
@@ -174,7 +175,25 @@
           <article class="glass-card activity-explain"><span class="section-overline">WHY THIS SCORE?</span><h3>판단 근거</h3><div id="activityReasons"></div><p class="disclaimer">안내용 참고값입니다. 농약 방제는 등록약제 사용기준과 현장 풍속·풍향을 우선하세요.</p></article>
         </div>
         <section class="farm-overview glass-card" aria-label="농업 날씨 인사이트"><span class="section-overline">FARM WEATHER · 48 HOURS</span><h3>🌱 농작업 날씨 판단</h3><p class="farm-lead" id="farmSummary">강수·돌풍·저온 위험을 종합하는 중…</p><div id="farmSignals" class="farm-signals" aria-live="polite"></div><div class="official-warning"><span>농약 방제는 등록약제 사용기준 및 현장 풍속·풍향을 우선하세요.</span><a href="https://www.weather.go.kr/w/special-report/overall.do" target="_blank" rel="noopener noreferrer">공식 특보 ↗</a></div></section>
-        <section id="watchSettings" class="watch-settings glass-card" aria-label="날씨 알림 조건"><span class="section-overline">MY WEATHER ALERTS</span><h3>맞춤 날씨 알림 조건</h3><p class="watch-intro">앱을 열 때 내 지역의 12시간 내 강수, 48시간 내 저온, 24시간 내 돌풍을 확인합니다.</p><div class="watch-choices"><label><input id="watchRain" type="checkbox">☂ 12시간 내 비 가능성 높음</label><label><input id="watchFrost" type="checkbox">❄ 48시간 내 2°C 이하</label><label><input id="watchWind" type="checkbox">🌬 24시간 내 돌풍 35km/h 이상</label></div><div class="watch-action"><button type="button" id="saveWatch">알림 조건 저장</button><button type="button" class="alt" id="allowNotify">알림 권한 요청</button></div><div id="alertList" aria-live="polite"></div><p id="savedAlertStatus" class="watch-note">조건은 내 브라우저에만 저장됩니다.</p><p id="foregroundNotice" class="watch-note">앱이 열린 상태에서만 확인하는 안내용 알림입니다.</p></section>
+        <section id="watchSettings" class="watch-settings glass-card" aria-label="날씨 알림 조건">
+          <span class="section-overline">MY WEATHER ALERTS</span><h3>맞춤 날씨 알림 조건</h3>
+          <p class="watch-intro">Android 앱은 저장한 지역의 예보를 약 15분 주기로 확인합니다. 웹에서는 앱을 열었을 때 확인합니다.</p>
+          <div class="watch-choices watch-rule-grid">
+            <label><span><input id="watchRain" type="checkbox">☂ 12시간 내 비</span><span class="watch-value">강수확률 <select id="rainThreshold" aria-label="비 알림 강수확률"><option value="30">30%</option><option value="50">50%</option><option value="65">65%</option><option value="70">70%</option><option value="80">80%</option></select> 이상</span></label>
+            <label><span><input id="watchDry" type="checkbox">🌂 비 가능성 낮음</span><span class="watch-value">안 올 가능성 <select id="dryThreshold" aria-label="비 안 올 가능성 기준"><option value="70">70%</option><option value="80">80%</option><option value="90">90%</option></select> 이상</span></label>
+            <label><span><input id="watchClear" type="checkbox">☀ 맑은 시간</span><span class="watch-value"><select id="clearHours" aria-label="맑은 시간 지속 기준"><option value="2">2시간</option><option value="3">3시간</option><option value="4">4시간</option><option value="6">6시간</option></select> 이상 지속</span></label>
+            <label><span><input id="watchFrost" type="checkbox">❄ 저온·서리</span><span class="watch-value">48시간 내 2°C 이하</span></label>
+            <label><span><input id="watchWind" type="checkbox">🌬 돌풍</span><span class="watch-value">24시간 내 35km/h 이상</span></label>
+          </div>
+          <div class="watch-schedule-grid" aria-label="정기 날씨 요약">
+            <label><span><input id="morningSummary" type="checkbox">🌅 아침 날씨</span><input id="morningTime" type="time" value="07:00" aria-label="아침 날씨 알림 시간"></label>
+            <label><span><input id="eveningSummary" type="checkbox">🌙 내일 날씨</span><input id="eveningTime" type="time" value="19:00" aria-label="내일 날씨 알림 시간"></label>
+            <label class="quiet-hours"><span><input id="quietHours" type="checkbox">🔕 방해금지</span><span><input id="quietStart" type="time" value="22:00" aria-label="방해금지 시작">–<input id="quietEnd" type="time" value="06:00" aria-label="방해금지 종료"></span></label>
+          </div>
+          <p class="watch-note">‘비 가능성 낮음’은 별도 확률을 만들지 않고, 향후 6시간의 각 시간별 강수확률이 선택 기준 이하인지 확인합니다. 맑음은 낮 시간의 하늘 상태·강수확률·예상 강수량을 함께 봅니다.</p>
+          <div class="watch-action"><button type="button" id="saveWatch">알림 조건 저장</button><button type="button" class="alt" id="allowNotify">알림 권한 요청</button></div>
+          <div id="alertList" aria-live="polite"></div><p id="savedAlertStatus" class="watch-note">저장하기 전에는 백그라운드 알림이 시작되지 않습니다.</p><p id="foregroundNotice" class="watch-note">Android 시스템 절전 상태에서는 실행 시각이 늦어질 수 있습니다.</p>
+        </section>
         <div class="section-title"><div><span class="section-overline">BEST HOURS</span><h2>시간대별 적합도</h2></div></div><div class="glass-card suitability-panel" id="activityHours"><div class="empty-state">분석 중…</div></div>
       </section>
 

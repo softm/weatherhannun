@@ -64,7 +64,8 @@ html[data-weather-view]:not([data-weather-view="today"]) .intro{display:none}
 .rain-tabs{background:var(--panel2);border:1px solid var(--st-line);border-radius:8px}
 .rain-tabs button{color:var(--st-muted)}
 .rain-tabs button.active{background:var(--st-accent);color:var(--st-surface)}
-.rain-dates input,.rain-dates button,.watch-choices label,.watch-action button{border-color:var(--st-line);background:var(--panel2);color:var(--st-fg)}
+.rain-dates input,.rain-dates button,.watch-choices label,.watch-schedule-grid label,.watch-settings select,.watch-settings input[type="time"],.watch-action button{border-color:var(--st-line);background:var(--panel2);color:var(--st-fg)}
+.watch-value,.watch-note,.watch-intro,.quiet-hours>span:last-child{color:var(--st-muted)!important}
 .rain-headline,.forecast-spans h3{color:var(--st-fg)}
 .forecast-rows>*,.forecast-day-grid>*{border-color:var(--st-line)}
 .hourly-chart{background:var(--st-surface)!important}

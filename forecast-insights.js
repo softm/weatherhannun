@@ -13,15 +13,18 @@
   const prettyTime = date => date?prettyDate(date.slice(0,10))+" "+date.slice(11,16):"—";
   const formatHour = date => date?date.slice(11,13)+"시":"—";
   const TRACK_KEY="weatherhannun_alert_v1";
+  const rules=window.WeatherAlertRules;
   let data=null;
   let period="48";
   let rangeStart="";
   let rangeEnd="";
-  let prefs={rain:false,frost:false,wind:false};
+  let prefs=rules?rules.defaults():{rain:false,frost:false,wind:false};
+  let latestLocation=null;
   let notifyEnabled=false;
   try {
     const saved=JSON.parse(localStorage.getItem(TRACK_KEY)||"null");
-    if(saved&&typeof saved==="object")prefs={rain:!!saved.rain,frost:!!saved.frost,wind:!!saved.wind};
+    if(rules)prefs=rules.normalizePreferences(saved);
+    else if(saved&&typeof saved==="object")prefs={rain:!!saved.rain,frost:!!saved.frost,wind:!!saved.wind};
   }catch(_){}
   function rows(){
     if(!data?.weather?.hourly?.time)return [];
@@ -132,31 +135,49 @@
     const next=el("farmSummary");
     if(next)next.textContent=firstCold?"향후 48시간에 저온 구간이 있습니다. 작물과 시설을 확인해 주세요.":"향후 48시간의 저온·돌풍·강수를 고려해 작업 시점을 정하세요.";
   }
+  function noticeCopy(alert){
+    const row=alert.row||{};
+    if(alert.id==="rain")return {title:"강수 가능성 높음",body:prettyTime(alert.time)+" · "+(finite(row.rain)?"강수확률 "+number(row.rain)+"%":"시간당 강수량 "+number(row.mm,1)+"mm")};
+    if(alert.id==="dry")return {title:"비 가능성 낮음",body:"향후 6시간 최고 강수확률 "+number(alert.maxRain)+"% · 예보상 비 가능성이 낮아요"};
+    if(alert.id==="clear")return {title:"맑은 시간 이어짐",body:prettyTime(alert.time)+"부터 맑음·구름 조금 조건이 "+alert.hours+"시간 이상 이어져요"};
+    if(alert.id==="frost")return {title:"저온·서리 가능성 확인",body:prettyTime(alert.time)+" · 기온 "+number(row.temp)+"°C"};
+    return {title:"돌풍 위험 확인",body:prettyTime(alert.time)+" · 돌풍 "+number(row.gust)+"km/h"};
+  }
   function pickNotices(){
-    const hours=rows(),alerts=[];
-    const rain=hours.slice(0,12).find(h=>(h.rain??0)>=65||(h.mm??0)>=1);
-    const frost=hours.slice(0,48).find(h=>finite(h.temp)&&h.temp<=2);
-    const wind=hours.slice(0,24).find(h=>finite(h.gust)&&h.gust>=35);
-    if(prefs.rain&&rain)alerts.push({id:"rain",time:rain.time,title:"강수 가능성 높음",body:prettyTime(rain.time)+" · 강수확률 "+number(rain.rain)+"%"});
-    if(prefs.frost&&frost)alerts.push({id:"frost",time:frost.time,title:"저온·서리 가능성 확인",body:prettyTime(frost.time)+" · 기온 "+number(frost.temp)+"°C"});
-    if(prefs.wind&&wind)alerts.push({id:"wind",time:wind.time,title:"돌풍 위험 확인",body:prettyTime(wind.time)+" · 돌풍 "+number(wind.gust)+"km/h"});
-    return alerts;
+    if(!rules)return [];
+    return rules.pick(rows(),prefs).map(alert=>Object.assign(alert,noticeCopy(alert)));
+  }
+  function nativeBridge(){
+    return window.WeatherHannunAndroid&&typeof window.WeatherHannunAndroid.saveAlertConfiguration==="function"?window.WeatherHannunAndroid:null;
+  }
+  function nativePermission(){
+    try{return nativeBridge()?.notificationPermissionState?.()||"unknown";}catch(_){return "unknown";}
+  }
+  function syncWithAndroid(){
+    const bridge=nativeBridge();
+    if(!bridge||!latestLocation||!finite(Number(latestLocation.lat))||!finite(Number(latestLocation.lon)))return false;
+    const payload={version:2,configured:!!prefs.configured,location:{name:String(latestLocation.name||"선택 지역").slice(0,75),lat:Number(latestLocation.lat),lon:Number(latestLocation.lon)},rules:{rain:!!prefs.rain,rainThreshold:prefs.rainThreshold,dry:!!prefs.dry,dryThreshold:prefs.dryThreshold,clear:!!prefs.clear,clearHours:prefs.clearHours,frost:!!prefs.frost,wind:!!prefs.wind},schedules:{morning:!!prefs.morning,morningTime:prefs.morningTime,evening:!!prefs.evening,eveningTime:prefs.eveningTime},quietHours:{enabled:!!prefs.quiet,start:prefs.quietStart,end:prefs.quietEnd}};
+    try{bridge.saveAlertConfiguration(JSON.stringify(payload));return true;}catch(_){return false;}
   }
   function renderAlerts(){
     const root=el("alertList");if(!root||!data)return;
     const notices=pickNotices();
     root.innerHTML=notices.length?notices.map(a=>'<div class="notice-result"><b>'+safe(a.title)+'</b><span>'+safe(a.body)+'</span></div>').join(""):'<p class="muted-text">설정한 기준에서 가까운 경보 조건이 없거나 조건을 선택하지 않았습니다.</p>';
-    if(el("foregroundNotice"))el("foregroundNotice").textContent=("Notification" in window&&Notification.permission==="granted")?"브라우저 알림 사용 허용됨 · 앱 열림 상태에서만 점검":"브라우저 알림 미허용 · 앱 내 알림 조건만 확인";
+    if(el("foregroundNotice")){
+      if(nativeBridge())el("foregroundNotice").textContent="Android 앱이 약 15분 주기로 확인합니다. 절전 상태에서는 알림이 늦어질 수 있습니다.";
+      else el("foregroundNotice").textContent=("Notification" in window&&Notification.permission==="granted")?"브라우저 알림 사용 허용됨 · 앱 열림 상태에서만 점검":"웹에서는 앱이 열린 상태에서만 조건을 확인합니다.";
+    }
   }
   function saveAlertPreferences(){
-    prefs={rain:el("watchRain").checked,frost:el("watchFrost").checked,wind:el("watchWind").checked};
+    prefs=rules.normalizePreferences({version:2,configured:true,rain:el("watchRain").checked,rainThreshold:Number(el("rainThreshold").value),dry:el("watchDry").checked,dryThreshold:Number(el("dryThreshold").value),clear:el("watchClear").checked,clearHours:Number(el("clearHours").value),frost:el("watchFrost").checked,wind:el("watchWind").checked,morning:el("morningSummary").checked,morningTime:el("morningTime").value,evening:el("eveningSummary").checked,eveningTime:el("eveningTime").value,quiet:el("quietHours").checked,quietStart:el("quietStart").value,quietEnd:el("quietEnd").value});
     try{localStorage.setItem(TRACK_KEY,JSON.stringify(prefs));}catch(_){}
     renderAlerts();
-    const save=el("savedAlertStatus");if(save)save.textContent="이 브라우저에 조건이 저장되었습니다. 알림은 앱 접속 시 확인됩니다.";
+    const synced=syncWithAndroid();
+    const save=el("savedAlertStatus");if(save)save.textContent=synced?"조건을 Android 앱에 저장했습니다. 약 15분 주기로 확인합니다.":"조건을 이 브라우저에 저장했습니다. 웹에서는 앱을 열 때 확인합니다.";
     notifyIfAllowed();
   }
   function notifyIfAllowed(){
-    if(!data||!("Notification" in window)||Notification.permission!=="granted"||document.visibilityState!=="visible")return;
+    if(nativeBridge()||!data||!("Notification" in window)||Notification.permission!=="granted"||document.visibilityState!=="visible")return;
     const hours=rows(),now=hours[0]?.time||"";
     const soon=pickNotices().filter(x=>x.time.slice(0,13)<=hours[Math.min(hours.length-1,3)]?.time?.slice(0,13));
     soon.forEach(a=>{
@@ -183,6 +204,11 @@
     });
     const save=el("saveWatch");if(save)save.addEventListener("click",saveAlertPreferences);
     const allow=el("allowNotify");if(allow)allow.addEventListener("click",async()=>{
+      const bridge=nativeBridge();
+      if(bridge){
+        try{bridge.requestNotificationPermission();el("savedAlertStatus").textContent=nativePermission()==="granted"?"Android 알림이 허용되어 있습니다.":"Android 알림 권한 요청을 표시했습니다.";}catch(_){el("savedAlertStatus").textContent="Android 알림 권한을 요청하지 못했습니다.";}
+        return;
+      }
       if(!("Notification" in window)){el("savedAlertStatus").textContent="이 브라우저는 알림 API를 지원하지 않습니다.";return;}
       try{
         const permission=await Notification.requestPermission();
@@ -190,18 +216,22 @@
       }catch(e){el("savedAlertStatus").textContent="브라우저 알림 권한을 확인할 수 없습니다.";}
       renderAlerts();notifyIfAllowed();
     });
-    Object.keys(prefs).forEach(k=>{const box=el("watch"+k.charAt(0).toUpperCase()+k.slice(1));if(box)box.checked=prefs[k];});
+    [["watchRain","rain"],["watchDry","dry"],["watchClear","clear"],["watchFrost","frost"],["watchWind","wind"],["morningSummary","morning"],["eveningSummary","evening"],["quietHours","quiet"]].forEach(([id,key])=>{if(el(id))el(id).checked=!!prefs[key];});
+    [["rainThreshold","rainThreshold"],["dryThreshold","dryThreshold"],["clearHours","clearHours"],["morningTime","morningTime"],["eveningTime","eveningTime"],["quietStart","quietStart"],["quietEnd","quietEnd"]].forEach(([id,key])=>{if(el(id))el(id).value=String(prefs[key]);});
+    if(nativeBridge()){allow.textContent="Android 알림 권한 허용";renderAlerts();}
     updateButtons();
   }
   window.addEventListener("weatherhannun:data",function(event){
     data=event.detail;
+    latestLocation=event.detail?.loc||latestLocation;
     const hours=rows();
     const start=el("rainDateStart"),end=el("rainDateEnd");
     if(!hours.length)return;
     if(start){start.min=hours[0].date;start.max=hours[hours.length-1].date;if(!start.value||start.value<start.min||start.value>start.max)start.value=hours[0].date;}
     if(end){end.min=hours[0].date;end.max=hours[hours.length-1].date;if(!end.value||end.value<end.min||end.value>end.max)end.value=hours[Math.min(47,hours.length-1)].date;}
     rangeStart=start?.value||hours[0].date;rangeEnd=end?.value||hours[hours.length-1].date;
-    rainSummary();farm();renderAlerts();notifyIfAllowed();
+    rainSummary();farm();renderAlerts();syncWithAndroid();notifyIfAllowed();
   });
+  window.WeatherHannunAlerts={syncWithAndroid,onAndroidPermissionChanged(granted){const save=el("savedAlertStatus");if(save)save.textContent=granted?"Android 알림 권한을 허용했습니다.":"알림 권한이 허용되지 않았습니다. Android 설정에서 다시 허용할 수 있습니다.";renderAlerts();}};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind);else bind();
 })();
