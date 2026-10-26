@@ -161,9 +161,18 @@
   var chips=[...nodes.air.querySelectorAll('div')].filter(x=>x.childElementCount<=1&&/^(미세|초미세)\s/.test(x.textContent.trim()));
   chips.slice(-2).forEach((el,i)=>{el.textContent=(i?'초미세 ':'미세 ')+(i?fine:pm)+' '+fmt(i?air.pm2_5:air.pm10)+'㎍/㎥';el.title='Open-Meteo 대기질 모델 예측값';});
   put(nodes.briefName,loc+' 기상브리핑');
+  // The Stitch prototype has amber/emerald emphasis, but a textContent
+  // update used to erase all inline colors. Render weather-backed semantic
+  // highlights as safe text nodes and marks instead of unescaped HTML.
   var summary=document.getElementById('briefingText')?.textContent;
-  var headline=document.getElementById('briefingHeadline')?.textContent;
-  put(nodes.briefMessage,headline&&summary?headline+' · '+summary:current.name+' · 시간별 예보를 확인해 주세요.');
+  var fallback=current.name+' · 시간별 예보를 확인해 주세요.';
+  var sentence=summary||fallback;
+  var briefing=window.WeatherHannunBriefingCore?.analyse(data);
+  var highlighter=window.WeatherBriefingHighlights;
+  nodes.briefMessage?.classList.add('stitch-caster-briefing');
+  if(highlighter&&nodes.briefMessage){
+    highlighter.render(nodes.briefMessage,sentence,{where:loc,events:briefing?.events||[]});
+  }else put(nodes.briefMessage,sentence);
   put(nodes.actionPlace,loc+' 기준');
   var next=h.find(x=>+x.rain>=55||+x.mm>=.3);
   put(nodes.hourlyBanner,next?short(next.time)+' 비 가능성 '+fmt(next.rain)+'%':'강수 변화 확인');
