@@ -21,6 +21,30 @@ function weather(temp, rain, mm, wind, gust) {
   };
 }
 
+function periodWeather(baseTemp, rainAt, missingAt) {
+  const time = Array.from({ length: 14 }, (_, index) => `2026-10-26T${String(index + 8).padStart(2, "0")}:00`);
+  const values = Array.from({ length: 14 }, (_, index) => index);
+  const payload = {
+    current: { time: time[0] },
+    hourly: {
+      time,
+      temperature_2m: values.map(index => baseTemp + index * 0.5),
+      precipitation_probability: values.map(index => index === rainAt ? 60 : 10),
+      precipitation: values.map(index => index === rainAt ? 0.4 : 0),
+      weather_code: values.map(index => index === rainAt ? 61 : 1),
+      wind_speed_10m: values.map(index => 5 + index),
+      wind_gusts_10m: values.map(index => 10 + index),
+      is_day: values.map(() => 1)
+    }
+  };
+  if (Number.isInteger(missingAt)) {
+    payload.hourly.temperature_2m[missingAt] = null;
+    payload.hourly.precipitation_probability[missingAt] = null;
+    payload.hourly.precipitation[missingAt] = null;
+  }
+  return payload;
+}
+
 test("WH-L01 compares only the exact shared forecast time", () => {
   const origin = { name: "서울", lat: 37.5665, lon: 126.978 };
   const destination = { name: "부산", lat: 35.1796, lon: 129.0756 };
@@ -54,6 +78,84 @@ test("comparison rejects same place and a time not present in both forecasts", (
   const other = { name: "부산", lat: 35.1796, lon: 129.0756 };
   assert.equal(compare.compare(place, weather(17, 0, 0, 10, 15), place, weather(18, 0, 0, 11, 16), "2026-10-26T14:00").reason, "same_location");
   assert.equal(compare.compare(place, weather(17, 0, 0, 10, 15), other, weather(18, 0, 0, 11, 16), "2026-10-27T14:00").reason, "time_not_shared");
+});
+
+test("WH-L01 compares the same complete 12-hour period without shifting either place", () => {
+  const origin = { name: "서울", lat: 37.5665, lon: 126.978 };
+  const destination = { name: "부산", lat: 35.1796, lon: 129.0756 };
+  const result = compare.comparePeriod(
+    origin,
+    periodWeather(10, -1),
+    destination,
+    periodWeather(12, 3),
+    "2026-10-26T08:00",
+    12
+  );
+
+  assert.equal(result.status, "ready");
+  assert.equal(result.complete, true);
+  assert.equal(result.startTime, "2026-10-26T08:00");
+  assert.equal(result.endTime, "2026-10-26T19:00");
+  assert.equal(result.origin.summary.availableHours, 12);
+  assert.equal(result.origin.summary.temperatureMin, 10);
+  assert.equal(result.origin.summary.temperatureMax, 15.5);
+  assert.equal(result.destination.summary.temperatureMin, 12);
+  assert.equal(result.destination.summary.temperatureMax, 17.5);
+  assert.equal(result.destination.summary.rain.triggered, true);
+  assert.equal(result.destination.summary.rain.firstSignalTime, "2026-10-26T11:00");
+  assert.equal(result.destination.summary.rainProbabilityMax, 60);
+  assert.equal(result.destination.summary.precipitationTotal, 0.4);
+  assert.equal(result.delta.temperatureMax, 2);
+  assert.equal(result.delta.windMax, 0);
+  assert.equal(result.officialAlerts.status, "unavailable");
+});
+
+test("12-hour comparison keeps incomplete metrics unknown instead of filling missing cells", () => {
+  const origin = { name: "서울", lat: 37.5665, lon: 126.978 };
+  const destination = { name: "부산", lat: 35.1796, lon: 129.0756 };
+  const result = compare.comparePeriod(
+    origin,
+    periodWeather(10, -1),
+    destination,
+    periodWeather(12, 3, 5),
+    "2026-10-26T08:00",
+    12
+  );
+
+  assert.equal(result.status, "ready");
+  assert.equal(result.complete, false);
+  assert.equal(result.destination.summary.temperatureMin, null);
+  assert.equal(result.destination.summary.temperatureMax, null);
+  assert.equal(result.destination.summary.precipitationTotal, null);
+  assert.equal(result.destination.summary.rain.complete, false);
+  assert.equal(result.destination.summary.rain.triggered, true);
+  assert.equal(result.delta.temperatureMax, null);
+  assert.equal(result.delta.precipitationTotal, null);
+});
+
+test("a short shared horizon is explicit and an unshared period start is rejected", () => {
+  const origin = { name: "서울", lat: 37.5665, lon: 126.978 };
+  const destination = { name: "부산", lat: 35.1796, lon: 129.0756 };
+  const short = compare.comparePeriod(
+    origin,
+    periodWeather(10, -1),
+    destination,
+    periodWeather(12, -1),
+    "2026-10-26T18:00",
+    12
+  );
+  assert.equal(short.status, "ready");
+  assert.equal(short.complete, false);
+  assert.equal(short.origin.summary.availableHours, 4);
+  assert.equal(short.origin.summary.temperatureMin, null);
+  assert.equal(compare.comparePeriod(
+    origin,
+    periodWeather(10, -1),
+    destination,
+    periodWeather(12, -1),
+    "2026-10-27T08:00",
+    12
+  ).reason, "period_not_shared");
 });
 
 test("destination request uses the forecast endpoint without embedding a secret", () => {
