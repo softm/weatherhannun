@@ -60,8 +60,8 @@ test("service worker version tracks the aligned shell", () => {
   const html = read("index.html");
   const worker = read("sw.js");
 
-  assert.ok(worker.includes("weatherhannun-shell-v16-contrast-audit"));
-  for (const asset of ["stitch-theme.css?v=16", "stitch-today.css?v=16", "stitch-today.js?v=15", "stitch-mobile.css?v=16", "region-search.css?v=14"]) {
+  assert.ok(worker.includes("weatherhannun-shell-v17-weather-icons"));
+  for (const asset of ["stitch-theme.css?v=16", "stitch-today.css?v=16", "stitch-today.js?v=17", "stitch-mobile.css?v=16", "region-search.css?v=14", "weather-icons.css?v=17", "weather-icons.js?v=17", "app.js?v=17", "forecast-insights.js?v=17"]) {
     assert.ok(html.includes(asset), `page must request ${asset}`);
     assert.ok(worker.includes(asset), `service worker must warm ${asset}`);
   }
