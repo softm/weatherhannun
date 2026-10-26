@@ -1,0 +1,18 @@
+/* Immediate rain decision: neutral when uncertain, amber when a wet window is expected. */
+.rain-decision-card{box-sizing:border-box;display:flex;align-items:center;gap:14px;min-width:0;padding:14px 16px;margin:0 0 2px;border:1px solid #cbdff3;border-radius:16px;background:#f0f7ff;color:#142a43;box-shadow:0 4px 14px rgba(20,74,120,.07)}
+.rain-decision-icon{flex:0 0 37px;display:grid;place-items:center;width:37px;height:37px;border-radius:11px;background:#d7eafb;color:#165a9d;font-size:22px}
+.rain-decision-copy{flex:1 1 auto;min-width:0}
+.rain-decision-label{margin:0 0 4px;font-weight:700;font-size:12px;letter-spacing:.01em;color:#37658f}
+.rain-decision-title{display:block;font-weight:800;font-size:16px;line-height:1.45;color:#163856;overflow-wrap:anywhere}
+.rain-decision-detail{margin:3px 0 0;font-size:13px;line-height:1.5;color:#405b75}
+.rain-decision-caution{display:block;margin-top:3px;font-size:11px;line-height:1.45;color:#566f82}
+.rain-decision-link{flex:0 0 auto;cursor:pointer;background:#fff;border:1px solid #afd0f1;color:#165b9b;padding:9px 11px;border-radius:10px;font-size:12px;font-weight:800;min-height:38px}
+.rain-decision-link:focus-visible{outline:3px solid #3478ed;outline-offset:3px}
+.rain-decision-link:hover{background:#e2efff}
+.rain-decision-card--now,.rain-decision-card--later{background:#fff7ec;border-color:#efcc9e}
+.rain-decision-card--now .rain-decision-icon,.rain-decision-card--later .rain-decision-icon{background:#fce4bd;color:#855107}
+.rain-decision-card--now .rain-decision-title,.rain-decision-card--later .rain-decision-title{color:#7b4107}
+.rain-decision-card--now .rain-decision-label,.rain-decision-card--later .rain-decision-label{color:#975817}
+.rain-decision-card--unknown{background:#f5f6f8;border-color:#d8dde5}
+@media(max-width:560px){.rain-decision-card{gap:9px;padding:12px 11px}.rain-decision-icon{width:32px;flex-basis:32px;height:32px;font-size:19px}.rain-decision-title{font-size:14px}.rain-decision-detail{font-size:12px}.rain-decision-link{padding:8px;font-size:11px}}
+@media(prefers-color-scheme:dark){.rain-decision-card{background:#102b43;border-color:#294861;color:#f1f7fc}.rain-decision-label{color:#b5dafa}.rain-decision-title{color:#f3f8ff}.rain-decision-detail{color:#cddce8}.rain-decision-caution{color:#aabfcd}.rain-decision-icon{background:#204966;color:#b5e4ff}.rain-decision-link{background:#1d4264;border-color:#467aa5;color:#f0f8ff}.rain-decision-link:hover{background:#255377}.rain-decision-card--now,.rain-decision-card--later{background:#4b2e15;border-color:#88613a}.rain-decision-card--now .rain-decision-title,.rain-decision-card--later .rain-decision-title{color:#ffe0ac}.rain-decision-card--now .rain-decision-label,.rain-decision-card--later .rain-decision-label{color:#ffcd91}.rain-decision-card--unknown{background:#252e39;border-color:#455366}}
