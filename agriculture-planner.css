@@ -1,0 +1,41 @@
+.agriculture-planner{margin-top:18px;padding:20px}
+.agriculture-planner-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.agriculture-planner-heading h3{margin:4px 0 0;font-size:20px}
+.agriculture-planner>p{margin:10px 0 0;color:var(--st-muted);font-size:12px;line-height:1.65}
+.agriculture-planner fieldset{display:grid;gap:13px;margin:16px 0 0;padding:0;border:0}
+.agriculture-planner fieldset:disabled{opacity:.62}
+.agriculture-planner-selects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.agriculture-planner-selects label{display:grid;gap:6px;color:var(--st-muted);font-size:10px;font-weight:800}
+.agriculture-planner select{width:100%;min-height:42px;padding:8px 10px;border:1px solid var(--st-line);border-radius:10px;background:var(--panel2);color:var(--st-fg);font:inherit;font-size:12px}
+.agriculture-planner-label{display:block;margin-bottom:7px;color:var(--st-muted);font-size:10px;font-weight:800}
+.agriculture-site-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.agriculture-site-list>span{grid-column:1/-1;color:var(--st-muted);font-size:11px}
+.agriculture-site-option{display:flex;align-items:center;gap:9px;padding:10px 11px;border:1px solid var(--st-line);border-radius:11px;background:var(--panel2)}
+.agriculture-site-option input{width:17px;height:17px;margin:0;accent-color:#1d75f0}
+.agriculture-site-option span,.agriculture-site-option b,.agriculture-site-option small{display:block;min-width:0}
+.agriculture-site-option b{overflow:hidden;color:var(--st-fg);font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+.agriculture-site-option small{margin-top:2px;color:var(--st-muted);font-size:9px}
+.agriculture-planner-actions{display:flex;flex-wrap:wrap;gap:8px}
+.agriculture-planner-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:1 1 190px;min-height:42px;padding:9px 12px;border:1px solid #1d75f0;border-radius:10px;background:#1d75f0;color:#fff;font-size:11px;font-weight:800}
+.agriculture-planner-actions button.secondary{border-color:var(--st-line);background:var(--panel2);color:var(--st-fg)}
+.agriculture-planner-actions button:disabled{cursor:not-allowed;opacity:.56}
+.agriculture-planner-status{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--st-accent) 8%,var(--panel2));color:var(--st-fg)!important;font-weight:700}
+.agriculture-planner-results{display:grid;gap:10px;margin-top:12px}
+.agriculture-site-result{padding:14px;border:1px solid var(--st-line);border-radius:14px;background:var(--panel2)}
+.agriculture-site-result-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.agriculture-site-result-heading h4{margin:0;color:var(--st-fg);font-size:14px}
+.agriculture-site-result-heading span{color:var(--st-accent-ink);font-size:10px;font-weight:800}
+.agriculture-profile-note{margin:8px 0 2px;color:var(--st-fg);font-size:11px;line-height:1.55}
+.agriculture-coverage{display:block;color:var(--st-muted);font-size:9px;line-height:1.5}
+.agriculture-risk-list{display:grid;gap:7px;margin-top:10px}
+.agriculture-risk{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-left:3px solid #e1a22a;border-radius:8px;background:color-mix(in srgb,#e1a22a 9%,transparent)}
+.agriculture-risk.high{border-left-color:#d24a4a;background:color-mix(in srgb,#d24a4a 8%,transparent)}
+.agriculture-risk span,.agriculture-risk b,.agriculture-risk small{display:block}
+.agriculture-risk b{font-size:11px}.agriculture-risk small{margin-top:2px;color:var(--st-muted);font-size:9px;line-height:1.45}
+.agriculture-risk a{flex:0 0 auto;color:var(--st-accent-ink);font-size:9px;font-weight:800}
+.agriculture-risk-empty{padding:9px 10px;border:1px dashed var(--st-line);border-radius:9px;color:var(--st-muted);font-size:10px;line-height:1.5}
+.agriculture-work-windows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.agriculture-work-group{display:grid;align-content:start;gap:4px;padding:9px;border:1px solid var(--st-line);border-radius:9px}
+.agriculture-work-group b{font-size:10px}.agriculture-work-group span{color:var(--st-muted);font-size:9px;line-height:1.45}
+.agriculture-planner-disclaimer{padding-top:10px;border-top:1px solid var(--st-line);font-size:10px!important}
+@media(max-width:640px){.agriculture-planner{padding:16px}.agriculture-planner-selects,.agriculture-site-list,.agriculture-work-windows{grid-template-columns:1fr}.agriculture-planner-heading{align-items:flex-start}.agriculture-site-result-heading{align-items:flex-start;flex-direction:column}}

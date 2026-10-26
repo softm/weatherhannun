@@ -91,8 +91,19 @@
     var sync = element('homeWidgetSync');
     var badge = element('homeWidgetStatusBadge');
     var note = element('homeWidgetSupportNote');
+    var theme = element('homeWidgetTheme');
     if (add) add.disabled = !android || !nativeWidgetState?.pinSupported;
     if (sync) sync.disabled = !android || !latestWeather;
+    if (theme) {
+      var premiumAllowed = nativeWidgetState?.premiumThemesAllowed === true;
+      var requested = premiumAllowed ? nativeWidgetState?.selectedTheme : nativeWidgetState?.theme;
+      var selected = ['default', 'contrast', 'field'].includes(requested) ? requested : 'default';
+      theme.value = selected;
+      theme.disabled = !android;
+      Array.from(theme.options).forEach(function (option) {
+        option.disabled = !premiumAllowed && option.value !== 'default';
+      });
+    }
     if (!android) {
       if (badge) badge.textContent = 'Android 전용';
       if (note) note.textContent = '웹 브라우저에서는 위젯을 추가할 수 없습니다. Android 앱에서 설정하세요.';
@@ -109,7 +120,10 @@
       if (!nativeWidgetState.pinSupported) note.textContent = '이 런처는 앱 안에서 바로 추가를 지원하지 않습니다. 홈 화면의 위젯 선택기에서 날씨한눈을 추가하세요.';
       else if (!nativeWidgetState.locationAvailable) note.textContent = '지역을 먼저 선택하면 위젯에 최신 모델 예보를 전달합니다.';
       else if (!nativeWidgetState.weatherAvailable) note.textContent = '지역은 준비됐습니다. 최신 예보를 불러오면 위젯을 갱신합니다.';
-      else note.textContent = count ? '현재 선택 지역과 모델 예보를 사용 중입니다. 위젯 크기를 바꾸면 2×1·4×2·4×3 화면이 자동 전환됩니다.' : '현재 예보가 준비됐습니다. 추가 버튼을 누른 뒤 Android 런처에서 확인하세요.';
+      else {
+        var themeLabel = nativeWidgetState.theme === 'contrast' ? '고대비' : nativeWidgetState.theme === 'field' ? '들녘' : '기본 하늘';
+        note.textContent = count ? '현재 선택 지역과 모델 예보를 사용 중입니다. '+themeLabel+' 테마이며 크기에 따라 2×1·4×2·4×3 화면이 자동 전환됩니다.' : '현재 예보가 준비됐습니다. 추가 버튼을 누른 뒤 Android 런처에서 확인하세요.';
+      }
     }
   }
   function readNativeState() {
@@ -205,6 +219,15 @@
     element('homeWidgetSync')?.addEventListener('click', function () {
       var updated = updateSnapshot(latestWeather);
       if (element('homeWidgetSupportNote')) element('homeWidgetSupportNote').textContent = updated ? '현재 선택 지역의 모델 예보를 위젯에 전달했습니다.' : '최신 예보를 먼저 불러와 주세요.';
+    });
+    element('homeWidgetTheme')?.addEventListener('change', function () {
+      var android = widgetBridge();
+      if (!android || typeof android.saveWidgetTheme !== 'function') return;
+      try {
+        android.saveWidgetTheme(this.value);
+        if (typeof android.widgetState === 'function') nativeWidgetState = parseNativeState(android.widgetState());
+      } catch (_) {}
+      renderWidgetState();
     });
     readNativeState();
     readWidgetState();

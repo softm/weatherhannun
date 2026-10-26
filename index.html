@@ -26,8 +26,9 @@
   <link rel="stylesheet" href="./location-manager.css">
   <link rel="stylesheet" href="./region-search.css?v=15">
   <link rel="stylesheet" href="./stitch-mobile.css?v=16">
-  <link rel="stylesheet" href="./settings.css?v=26">
-  <link rel="stylesheet" href="./screen-weather-settings.css?v=25">
+  <link rel="stylesheet" href="./settings.css?v=34">
+  <link rel="stylesheet" href="./screen-weather-settings.css?v=34">
+  <link rel="stylesheet" href="./agriculture-planner.css?v=34">
   <link rel="stylesheet" href="./weather-icons.css?v=17">
   <link rel="stylesheet" href="./briefing-highlights.css?v=20">
   <link rel="stylesheet" href="./rain-decision.css?v=21">
@@ -45,9 +46,16 @@
   <script defer src="./stitch-layout.js?v=18"></script>
   <script defer src="./daily-delta-core.js?v=27"></script>
   <script defer src="./weather-provider-core.js?v=31"></script>
+  <script defer src="./monetization-core.js?v=32"></script>
+  <script defer src="./monetization-settings.js?v=34"></script>
+  <script defer src="./plus-personalization-core.js?v=34"></script>
+  <script defer src="./plus-personalization.js?v=34"></script>
+  <script defer src="./product-metrics-core.js?v=33"></script>
+  <script defer src="./product-metrics.js?v=33"></script>
   <script defer src="./location-compare-core.js?v=31"></script>
   <script defer src="./activity-decision-core.js?v=28"></script>
-  <script defer src="./app.js?v=31"></script>
+  <script defer src="./agriculture-planner-core.js?v=34"></script>
+  <script defer src="./app.js?v=34"></script>
   <script defer src="./official-data-ui.js?v=30"></script>
   <script defer src="./location-core.js"></script>
   <script defer src="./reverse-geocode.js"></script>
@@ -61,7 +69,8 @@
   <script defer src="./stitch-today.js?v=31"></script>
   <script defer src="./rain-decision-ui.js?v=21"></script>
   <script defer src="./outfit-decision-ui.js?v=24"></script>
-  <script defer src="./screen-weather-settings.js?v=25"></script>
+  <script defer src="./screen-weather-settings.js?v=34"></script>
+  <script defer src="./agriculture-planner.js?v=34"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -198,6 +207,18 @@
           <article class="glass-card activity-explain"><span class="section-overline">WHY THIS SCORE?</span><h3>판단 근거</h3><div id="activityReasons"></div><p class="disclaimer">안내용 참고값입니다. 농약 방제는 등록약제 사용기준과 현장 풍속·풍향을 우선하세요.</p></article>
         </div>
         <section class="farm-overview glass-card" aria-label="농업 날씨 인사이트"><span class="section-overline">FARM WEATHER · 48 HOURS</span><h3>🌱 농작업 날씨 판단</h3><p class="farm-lead" id="farmSummary">강수·돌풍·저온 위험을 종합하는 중…</p><div id="farmSignals" class="farm-signals" aria-live="polite"></div><div class="official-warning"><span>농약 방제는 등록약제 사용기준 및 현장 풍속·풍향을 우선하세요.</span><a href="https://www.weather.go.kr/w/special-report/overall.do" target="_blank" rel="noopener noreferrer">공식 특보 ↗</a></div></section>
+        <section id="agriculturePlanner" class="agriculture-planner stitch-card" aria-labelledby="agriculturePlannerTitle">
+          <div class="agriculture-planner-heading"><div><span class="section-overline">AGRICULTURE PREMIUM · 48 HOURS</span><h3 id="agriculturePlannerTitle">여러 지역 농작업 계획</h3></div><span id="agriculturePlannerBadge" class="screen-weather-badge">판매 전</span></div>
+          <p>작물·생육단계와 저장 지역을 선택해 실제 시간별 모델 예보의 저온·고온·강수·돌풍 근거를 나란히 봅니다. 전용 기준을 확인하지 못한 단계는 공통 기상 신호만 표시합니다.</p>
+          <fieldset id="agriculturePlannerControls" disabled>
+            <div class="agriculture-planner-selects"><label>작물<select id="agricultureCrop"></select></label><label>생육단계<select id="agricultureStage"></select></label></div>
+            <div><span class="agriculture-planner-label">계획 지역 · 최대 10곳</span><div id="agricultureSites" class="agriculture-site-list"><span>현재 지역과 저장 지역을 확인하고 있습니다.</span></div></div>
+            <div class="agriculture-planner-actions"><button type="button" id="agriculturePlanRun"><span class="material-symbols-outlined" aria-hidden="true">event_note</span>48시간 계획 만들기</button><button type="button" id="agriculturePlanExport" class="secondary" disabled><span class="material-symbols-outlined" aria-hidden="true">download</span>근거 리포트 저장</button></div>
+          </fieldset>
+          <p id="agriculturePlannerStatus" class="agriculture-planner-status" role="status" aria-live="polite">농업 Premium 권한과 상업 데이터 이용권이 확인되기 전에는 실행하지 않습니다.</p>
+          <div id="agriculturePlannerResults" class="agriculture-planner-results"><div class="empty-state">권한 확인 후 선택한 지역의 계획이 여기에 표시됩니다.</div></div>
+          <p class="agriculture-planner-disclaimer">모델 예보 기반 사전 점검입니다. 작물 상태·포장 미기상·토양수분·등록 농약 표시사항·공식 특보·농업기술센터 지도를 우선하세요.</p>
+        </section>
         <div class="section-title"><div><span class="section-overline">BEST HOURS</span><h2>시간대별 적합도</h2></div></div><div class="glass-card suitability-panel" id="activityHours"><div class="empty-state">분석 중…</div></div>
       </section>
 
@@ -266,6 +287,7 @@
             <div class="settings-card-heading"><span class="settings-card-icon material-symbols-outlined" aria-hidden="true">widgets</span><div><span class="section-overline">ANDROID · HOME</span><h3 id="homeWidgetSettingsTitle">홈 위젯</h3></div><span id="homeWidgetStatusBadge" class="screen-weather-badge">확인 중</span></div>
             <p>앱을 열지 않고 현재 지역의 기온, 앞으로 12시간 비 신호와 갱신시각을 확인합니다.</p>
             <div class="home-widget-sizes" aria-label="지원 위젯 크기"><span><b>2×1</b><small>간단형</small></span><span><b>4×2</b><small>표준형</small></span><span><b>4×3</b><small>상세형</small></span></div>
+            <label class="home-widget-theme" for="homeWidgetTheme"><span><b>위젯 테마</b><small>고대비·들녘 테마는 검증된 Plus 권한에서만 적용</small></span><select id="homeWidgetTheme" disabled><option value="default">기본 하늘</option><option value="contrast">고대비 · Plus</option><option value="field">들녘 · Plus</option></select></label>
             <div class="settings-actions screen-weather-actions"><button type="button" id="homeWidgetAdd"><span class="material-symbols-outlined" aria-hidden="true">add_to_home_screen</span>홈 화면에 추가</button><button type="button" id="homeWidgetSync" class="secondary"><span class="material-symbols-outlined" aria-hidden="true">sync</span>현재 예보로 갱신</button></div>
             <p id="homeWidgetSupportNote" class="screen-weather-note" aria-live="polite">Android 앱 지원 상태를 확인하고 있습니다.</p>
           </section>
@@ -282,6 +304,28 @@
             <p id="screenWeatherSupportNote" class="screen-weather-note" aria-live="polite">Android 앱 지원 상태를 확인하고 있습니다.</p>
           </section>
         </div>
+
+        <section id="membershipSettings" class="settings-card membership-settings stitch-card" aria-labelledby="membershipSettingsTitle">
+          <div class="settings-card-heading"><span class="settings-card-icon material-symbols-outlined" aria-hidden="true">workspace_premium</span><div><span class="section-overline">FREE · PLUS · AGRICULTURE</span><h3 id="membershipSettingsTitle">이용 플랜</h3></div><span id="membershipStatusBadge" class="screen-weather-badge">판매 전</span></div>
+          <p>핵심 날씨와 위험정보는 무료입니다. 가격은 임의로 정하지 않고 Google Play에 실제 등록된 지역화 가격만 표시합니다.</p>
+          <div class="membership-plan-grid">
+            <article class="membership-plan active" data-membership-plan="free"><div><b>Free</b><span data-plan-status>기본 제공</span></div><strong>핵심 날씨·위험정보</strong><ul><li>오늘·시간별·주간</li><li>기본 활동·필수 알림</li><li>공식 위험정보는 무료 유지</li></ul><small data-plan-price>무료</small></article>
+            <article class="membership-plan" data-membership-plan="plus"><div><b>Plus</b><span data-plan-status>판매 전</span></div><strong>편의·개인화 확장</strong><ul><li>운영 광고 제거</li><li>추가 위젯 테마</li><li>고급 활동·알림 개인화</li></ul><small data-plan-price>가격 미확정 · 임의 가격을 표시하지 않음</small><button type="button" data-purchase-plan="plus" disabled>판매 준비 중</button></article>
+            <article class="membership-plan premium" data-membership-plan="agriculture"><div><b>농업 Premium</b><span data-plan-status>판매 전</span></div><strong>여러 현장의 작업 계획</strong><ul><li>작물·생육단계별 위험</li><li>여러 지역 작업 일정</li><li>근거가 포함된 위험 리포트</li></ul><small data-plan-price>가격 미확정 · 임의 가격을 표시하지 않음</small><button type="button" data-purchase-plan="agriculture" disabled>판매 준비 중</button></article>
+          </div>
+          <p id="membershipStatus" class="membership-status" aria-live="polite">유료 판매 준비 상태를 확인하고 있습니다.</p>
+          <ul id="membershipBlockers" class="membership-blockers"><li>유료 서비스용 데이터 이용권과 Play Billing 검증 전 판매하지 않습니다.</li></ul>
+          <div class="settings-actions"><button type="button" id="membershipRestore" disabled><span class="material-symbols-outlined" aria-hidden="true">restore</span>구매 복원</button><button type="button" id="membershipManage" class="secondary" disabled><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>Play 구독 관리</button></div>
+          <div id="plusPersonalization" class="plus-personalization">
+            <div><span><b>Plus 활동·알림 프로필</b><small>기존 무료 알림을 잠그지 않고, 선택한 프리셋과 TOP 3 활동 우선순위만 빠르게 적용합니다.</small></span><span id="plusPersonalizationBadge">Plus</span></div>
+            <fieldset id="plusPersonalizationControls" disabled>
+              <label>알림 프리셋<select id="plusAlertProfile"><option value="commute">출퇴근·등하교</option><option value="outdoor">야외활동 민감형</option><option value="farm">농작업 점검형</option></select></label>
+              <div><span class="plus-personalization-label">TOP 3 우선 활동 · 적합 점수 60점 이상 · 최대 3개</span><div class="plus-activity-priorities"><label><input type="checkbox" value="walk" checked>산책·외출</label><label><input type="checkbox" value="laundry" checked>빨래</label><label><input type="checkbox" value="carwash">세차</label><label><input type="checkbox" value="harvest" checked>수확·농작업</label><label><input type="checkbox" value="spray">방제 참고</label><label><input type="checkbox" value="irrigation">관수 참고</label></div></div>
+              <button type="button" id="plusPersonalizationApply">프로필을 알림 설정에 적용</button>
+            </fieldset>
+            <p id="plusPersonalizationStatus">검증된 Plus 권한과 상업 데이터 이용권이 준비되면 사용할 수 있습니다.</p>
+          </div>
+        </section>
 
         <section id="watchSettings" class="watch-settings glass-card" aria-label="날씨 알림 조건">
           <span class="section-overline">MY WEATHER ALERTS</span><h3>맞춤 날씨 알림</h3>
@@ -319,6 +363,12 @@
             <a href="./privacy.html"><span class="material-symbols-outlined" aria-hidden="true">privacy_tip</span><span><b>개인정보 처리 안내</b><small>위치와 설정의 저장·이용 방식</small></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></a>
             <a href="./data-status.html"><span class="material-symbols-outlined" aria-hidden="true">database</span><span><b>데이터 수집 상태</b><small>예보 원천과 최근 갱신 정보</small></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></a>
             <a href="https://www.weather.go.kr/w/special-report/overall.do" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined" aria-hidden="true">warning</span><span><b>기상청 공식 특보</b><small>공식 위험기상 정보 확인</small></span><span class="material-symbols-outlined" aria-hidden="true">open_in_new</span></a>
+          </div>
+          <div class="product-metrics-settings" aria-labelledby="productMetricsTitle">
+            <label class="screen-weather-toggle"><span><b id="productMetricsTitle">기기 내 품질 측정</b><small>기본 OFF · 좌표·주소·검색어·사용자 ID 저장 안 함</small></span><input id="productMetricsConsent" type="checkbox" role="switch" aria-describedby="productMetricsStatus"></label>
+            <div class="product-metrics-summary" aria-label="이 기기의 품질 지표"><span><small>세션</small><b id="metricSessions">0</b></span><span><small>예보 정상률</small><b id="metricForecastRate">측정 전</b></span><span><small>행동카드 활용</small><b id="metricActionRate">측정 전</b></span><span><small>활성일</small><b id="metricActiveDays">0</b></span></div>
+            <p id="productMetricsStatus" class="screen-weather-note" aria-live="polite">기본 OFF입니다. 동의 전에는 품질 이벤트를 저장하지 않습니다.</p>
+            <button type="button" id="productMetricsReset" class="product-metrics-reset">동의 해제·기기 기록 삭제</button>
           </div>
           <p class="settings-data-note">날씨한눈의 날씨·대기질 값은 모델 예보이며 관측 실측 또는 공식 기상특보가 아닙니다. 상업 이용권·동의·전용 광고 단위 검증 전에는 광고와 유료 상품이 차단됩니다.</p>
         </section>

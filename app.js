@@ -15,11 +15,12 @@
     { name: "제주", lat: 33.4996, lon: 126.5312 }
   ];
   var ACTIVITY_CORE=window.WeatherActivityCore;
+  var PLUS_PERSONALIZATION=window.WeatherHannunPlusPersonalization;
   var ACTIVITIES=ACTIVITY_CORE?ACTIVITY_CORE.DEFINITIONS:{};
   var STATE = {
     loc: CITY_LIST[0], weather: null, air: null, activity: "walk", dataStatus: "loading",
     view: "today", hourly: [], fetchedAt: null, cityData: null,
-    map: null, tileLayer: null, mapObserver: null, markers: [], loading: false, ticket: 0, mapBusy: false, activityFilter: "all"
+    map: null, tileLayer: null, mapObserver: null, markers: [], loading: false, ticket: 0, mapBusy: false, activityFilter: "all", activityPriority: []
   };
   var toastTimer;
   function storeGet(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (_) { return null; } }
@@ -132,6 +133,7 @@
       storeSet("weatherhannun_last",{loc:loc,at:STATE.fetchedAt,weather:weather,air:air});
       storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:PROVIDER&&PROVIDER.PROVIDER.id});
       renderAll();
+      window.dispatchEvent(new CustomEvent("weatherhannun:forecast-result",{detail:{ok:true}}));
       if(!air) toast("대기질 API 연결이 불안정합니다. 날씨는 정상 표시됩니다.");
     }catch(e) {
       if(ticket!==STATE.ticket)return;
@@ -139,6 +141,7 @@
       $("updatedBadge").textContent=STATE.weather?"저장된 예보 · 연결 실패":"데이터 연결 오류";
       $("dataFooterStatus").textContent=STATE.weather?"저장된 예보 · 갱신 실패":"예보 연결 실패";
       if(STATE.weather)renderAll();
+      window.dispatchEvent(new CustomEvent("weatherhannun:forecast-result",{detail:{ok:false}}));
       toast(e.message+" 네트워크 상태를 확인해 주세요.");
       if(!STATE.weather) $("weatherSummary").textContent="날씨 연결 실패";
     } finally {
@@ -304,7 +307,8 @@
     return {key:type,info:ACTIVITIES[type],current:current,best:best,data:best?activityEvalAt(type,best.index):current};
   }
   function renderDecisions(){
-    var rank=Object.keys(ACTIVITIES).map(activitySummary).sort(function(a,b){return (finite(b.data.score)?b.data.score:-1)-(finite(a.data.score)?a.data.score:-1);});
+    var candidates=Object.keys(ACTIVITIES).map(activitySummary);
+    var rank=PLUS_PERSONALIZATION?PLUS_PERSONALIZATION.order(candidates,STATE.activityPriority):candidates.sort(function(a,b){return (finite(b.data.score)?b.data.score:-1)-(finite(a.data.score)?a.data.score:-1);});
     var top=rank.slice(0,3);
     text("decisionLead",top[0]&&finite(top[0].data.score)&&top[0].data.score>=60?"오늘은 "+top[0].info.title+"에 유리한 시간대가 있어요.":top.some(function(x){return finite(x.data.score);})?"활동별 추천 시간과 위험 근거를 확인하세요.":"필수 예보값이 부족해 활동 점수를 만들지 않습니다.");
     $("quickActivity").innerHTML=top.map(function(x){return '<button type="button" class="quick-item" data-quick-activity="'+x.key+'"><div class="quick-icon">'+x.info.icon+'</div><div class="quick-main"><b>'+x.info.title+'</b><small>'+(x.best?"추천 "+whenLabel(x.best.start):"필수 예보값 확인 필요")+'</small></div><span class="quick-badge '+scoreClass(x.data.score)+'">'+grade(x.data.score)+(finite(x.data.score)?" "+x.data.score:"")+'</span></button>';}).join("");
@@ -482,9 +486,14 @@
     if(!validLocation(l))l=CITY_LIST[0];
     var remembered=storeGet("weatherhannun_activity_v1");
     if(typeof remembered==="string"&&ACTIVITIES[remembered])STATE.activity=remembered;
+    if(window.WeatherHannunPlusPreferences?.currentPriority)STATE.activityPriority=window.WeatherHannunPlusPreferences.currentPriority();
     document.querySelectorAll("[data-activity]").forEach(function(b){b.classList.toggle("active",b.dataset.activity===STATE.activity);});
     window.addEventListener("weatherhannun:change-location",function(ev){
       if(validLocation(ev.detail))applyLocation(ev.detail,true);
+    });
+    window.addEventListener("weatherhannun:activity-priority",function(ev){
+      STATE.activityPriority=PLUS_PERSONALIZATION?PLUS_PERSONALIZATION.normalizePriority(ev.detail?.activities):[];
+      if(STATE.weather)renderDecisions();
     });
     document.querySelectorAll("[data-view]").forEach(function(btn){btn.addEventListener("click",function(){setView(btn.dataset.view);});});
     document.querySelectorAll("[data-scroll-target]").forEach(function(btn){btn.addEventListener("click",function(){var id=btn.dataset.scrollTarget;requestAnimationFrame(function(){var target=$(id);if(target)target.scrollIntoView({behavior:"smooth",block:"start"});});});});
@@ -546,7 +555,7 @@
     document.addEventListener("keydown",function(e){if(e.key==="Escape")setMapFocus(false);});
     renderPresets();
     applyLocation(l,false);
-    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=18").catch(function(){});
+    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=34").catch(function(){});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
