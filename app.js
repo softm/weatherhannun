@@ -61,6 +61,10 @@
     }
     $("locationTitle").textContent=STATE.loc.name;
     $("locationTitle").title=STATE.loc.address ? STATE.loc.address+(STATE.loc.regionCenter?" (지역 중심 기준 날씨)":STATE.loc.source==="gps"?" (GPS 주변 추정주소)":"") : STATE.loc.name;
+    if($("settingsLocationName"))$("settingsLocationName").textContent=STATE.loc.name;
+    if($("settingsLocationDetail"))$("settingsLocationDetail").textContent=STATE.loc.address||(
+      STATE.loc.source==="gps"?"기기의 현재 위치 기준":STATE.loc.regionCenter?"행정구역 대표 위치 기준":"선택한 지역의 예보 기준"
+    );
     $("heroLocation").textContent=STATE.loc.name;
     storeSet("weatherhannun_location",STATE.loc);
     if(updateUrl){
@@ -389,7 +393,7 @@
     $("airMetrics").innerHTML=values.map(function(v,i){var st=statuses[i];var percent=clamp((v.value||0)/(v.thresholds[2]*1.5)*100,1,100);return '<div><div class="air-row-head"><b>'+v.name+'</b><span>'+st.grade+' <strong>'+num(v.value,1)+'</strong></span></div><div class="air-bar"><div style="width:'+percent+'%"></div></div></div>';}).join("");
   }
   function setView(view){
-    if(!["today","hourly","weekly","activity","air","map"].includes(view))return;
+    if(!["today","hourly","weekly","activity","air","map","settings"].includes(view))return;
     if(view!=="map")setMapFocus(false);
     STATE.view=view;
     document.querySelectorAll(".screen").forEach(function(el){el.classList.toggle("active",el.id==="view-"+view);});
@@ -556,6 +560,8 @@
       button.setAttribute("aria-expanded",String(!open));if(detail)detail.hidden=open;
     });
     $("locationButton").addEventListener("click",searchDialogOpen);
+    $("settingsManageLocations").addEventListener("click",searchDialogOpen);
+    $("settingsUseCurrentLocation").addEventListener("click",getGeo);
     $("dialogClose").addEventListener("click",function(){$("locationDialog").close();});
     $("geoButton").addEventListener("click",getGeo);
     $("refreshButton").addEventListener("click",function(){loadWeather(true);if(STATE.view==="map"){STATE.cityData=null;showMap();}});
@@ -569,7 +575,7 @@
     document.addEventListener("keydown",function(e){if(e.key==="Escape")setMapFocus(false);});
     renderPresets();
     applyLocation(l,false);
-    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=17").catch(function(){});
+    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=18").catch(function(){});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();

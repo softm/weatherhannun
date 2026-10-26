@@ -78,21 +78,27 @@
   if(mobile)mobile.replaceChildren(tab("today","오늘"),tab("hourly","시간별"),tab("weekly","주간"),tab("activity","활동추천"),tab("map","전국지도"));
  }
  function theme(){
-  var actions=document.querySelector(".top-actions");
-  if(!actions||document.getElementById("weatherThemeToggle"))return;
-  var b=el("button",{id:"weatherThemeToggle",type:"button",class:"weather-theme-toggle",title:"라이트·다크 모드 전환","aria-label":"라이트·다크 모드 전환"});
+  var buttons=[...document.querySelectorAll("[data-theme-choice]")];
   function sync(){
    var dark=root.dataset.weatherTheme==="dark";
-   b.textContent=dark?"☀":"☾";b.setAttribute("aria-pressed",String(dark));
+   buttons.forEach(function(button){
+    var active=button.dataset.themeChoice===root.dataset.weatherTheme;
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",String(active));
+   });
    var meta=document.querySelector('meta[name="theme-color"]');
    if(meta)meta.content=dark?"#04132a":"#f0f6fc";
   }
-  b.addEventListener("click",function(){
-   root.dataset.weatherTheme=root.dataset.weatherTheme==="dark"?"light":"dark";
-   try{localStorage.setItem(KEY,root.dataset.weatherTheme);}catch(_){}
-   sync();
+  buttons.forEach(function(button){
+   button.addEventListener("click",function(){
+    var choice=button.dataset.themeChoice;
+    if(choice!=="light"&&choice!=="dark")return;
+    root.dataset.weatherTheme=choice;
+    try{localStorage.setItem(KEY,choice);}catch(_){}
+    sync();
+   });
   });
-  actions.insertBefore(b,actions.querySelector("#refreshButton"));sync();
+  sync();
  }
  function currentWeatherIcon(){
   var target=document.getElementById("weatherIcon");if(!target)return;

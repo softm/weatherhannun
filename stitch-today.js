@@ -58,7 +58,7 @@
   return win;
  }
  function go(tab){
-  (document.querySelector('.desktop-nav [data-view="'+tab+'"]')||document.querySelector('.mobile-nav [data-view="'+tab+'"]'))?.click();
+  (document.querySelector('.desktop-nav [data-view="'+tab+'"]')||document.querySelector('.mobile-nav [data-view="'+tab+'"]')||document.querySelector('[data-view="'+tab+'"]'))?.click();
  }
  function activity(kind){
   document.querySelector('[data-activity="'+kind+'"]')?.click();
@@ -134,7 +134,7 @@
   hour.querySelector('h2')?.addEventListener('click',()=>go('hourly'));
   if(notice){
    notice.tabIndex=0;notice.setAttribute('role','button');notice.style.cursor='pointer';
-   var alerts=()=>{go('activity');setTimeout(()=>document.querySelector('.watch-settings')?.scrollIntoView({behavior:'smooth',block:'center'}),80);};
+   var alerts=()=>{go('settings');setTimeout(()=>document.querySelector('.watch-settings')?.scrollIntoView({behavior:'smooth',block:'center'}),80);};
    notice.addEventListener('click',alerts);
    notice.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();alerts();}});
   }
