@@ -33,6 +33,11 @@ test("appearance, location, alerts and app information live in the settings view
     'id="homeWidgetSettings"',
     'id="homeWidgetAdd"',
     'id="homeWidgetSync"',
+    'id="membershipSettings"',
+    'id="membershipRestore"',
+    'id="membershipManage"',
+    'id="productMetricsConsent"',
+    'id="productMetricsReset"',
     'id="watchSettings"',
     './privacy.html',
     './data-status.html'

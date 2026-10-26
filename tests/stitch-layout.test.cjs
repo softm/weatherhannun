@@ -8,7 +8,7 @@ test("Stitch design assets and theme are wired into page",()=>{
  const html=read("index.html"), css=read("stitch-theme.css"), js=read("stitch-layout.js"),sw=read("sw.js");
  assert.ok(html.includes("./stitch-theme.css"));
  assert.ok(html.includes("./stitch-layout.js"));
-  assert.ok(html.indexOf('src="./stitch-layout.js?v=18"')<html.indexOf('src="./app.js?v=31"'));
+  assert.ok(html.indexOf('src="./stitch-layout.js?v=18"')<html.indexOf('src="./app.js?v=34"'));
  assert.ok(js.includes('id:"view-hourly"'));
  assert.ok(js.includes('data-view'));
  assert.ok(js.includes("weatherhannun:stitch-theme:v1"));

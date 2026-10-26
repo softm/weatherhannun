@@ -51,13 +51,17 @@ test("Android home widget receives current location and all three size fields", 
   assert.match(script, /requestPinWeatherWidget/);
   assert.match(script, /activeWidgetCount/);
   assert.match(html, /id="homeWidgetAdd"/);
+  assert.match(html, /id="homeWidgetTheme" disabled/);
+  assert.match(script, /premiumThemesAllowed/);
+  assert.match(script, /saveWidgetTheme/);
+  assert.match(script, /option\.disabled = !premiumAllowed && option\.value !== 'default'/);
   for (const size of ["2×1", "4×2", "4×3"]) assert.ok(html.includes(size));
 });
 
 test("offline shell contains both settings assets", () => {
   const html = read("index.html");
   const worker = read("sw.js");
-  for (const asset of ["screen-weather-settings.css?v=25", "screen-weather-settings.js?v=25"]) {
+  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=34"]) {
     assert.ok(html.includes(asset));
     assert.ok(worker.includes(asset));
   }
