@@ -52,9 +52,9 @@
 | 웹 로컬 코드·자동 테스트 | **통과** | 화면날씨 Android 11+ 권한 안내 v35 기준 `node --test tests/*.test.cjs` 171/171, 루트 JavaScript 전체 `node --check` 통과 |
 | Android 로컬 코드·빌드 | **통과** | 권한 화면 모드 단위 규칙을 포함해 `scripts/validate.py`, `:app:testDebugUnitTest`, `:app:lintDebug`, `:app:assembleDebug` 통과 |
 | Android 14 에뮬레이터 | **부분 통과** | 최종 Debug APK 설치·실행, 패키지 `net.softm.weatherhannun`·`1.0.1 (2)`·targetSdk 36 확인. 2×1 위젯 실데이터·오프라인/복구·재부팅과 화면날씨 권한/실제 카드/닫기/화면 재활성화/쿨다운 통과. 4×2·4×3·Doze·알림·유료 권한은 별도 |
-| 현재 원격 웹 CI/Pages | **통과** | 직전 문서 head `79e5d9f`의 Pages run `40359472523` 성공. 화면날씨 v35 보정은 아직 로컬 변경이며 푸시 뒤 CI를 다시 확인한다. |
-| 현재 운영 URL | **HTTP 200, v34 운영 중** | `https://softm.github.io/weatherhannun/`에서 `app.js?v=34`, `settings.css?v=34`, 화면날씨·Plus·농업 Premium v34 자산과 UI 확인. v35 권한 안내는 다음 배포 대상이다. |
-| 현재 원격 Android CI | **통과** | 직전 문서 head `492f13d`의 Android CI run `40359472536` 성공. Android 11+ 권한 화면 보정은 아직 로컬 변경이며 푸시 뒤 CI를 다시 확인한다. |
+| 현재 원격 웹 CI/Pages | **통과** | 기능 head `5389637`의 Pages run `40363704958`, verify run `40363704609` 성공. 웹 테스트 171/171·JavaScript 구문 검사·Pages 배포 통과 |
+| 현재 운영 URL | **HTTP 200, v35 운영 중** | `https://softm.github.io/weatherhannun/`에서 `screen-weather-settings.js?v=35`와 Android 11+ 전체 앱 목록 안내 확인. `app.js?v=34`, `settings.css?v=34`, Plus·농업 Premium v34 자산도 정상 |
+| 현재 원격 Android CI | **통과** | 기능 head `7646d06`의 Android CI run `40363703110` 성공. 정적 검증·단위 테스트·lint·Debug APK 빌드/아티팩트 업로드 통과 |
 | 실기기·Play·실결제·실광고 | **미완료/차단 유지** | 데이터 상업 이용권, Play 상품·검증 서버, 앱 전용 광고 ID, 라이선스 테스터, 실제 기기·스토어 권한 필요 |
 
 2026-10-27 통합 기능 변경은 두 저장소의 `main` 푸시, 원격 CI, GitHub Pages v34 자산 확인까지 완료했다. 이후 변경도 코드·로컬 테스트·원격 CI·운영 URL·실기기·Play 공개를 각각 다시 확인하며, 한 단계의 성공을 다른 단계의 완료로 해석하지 않는다.
