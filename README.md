@@ -32,7 +32,7 @@
 - **모델과 관측 구분**: 첫 화면에 '모델 예보 · 실제 관측 아님', API 재조회 시각과 저장된/오래된 캐시 표시.
 - **모바일·PWA**: 캐시 업데이트 방식 보완, 기존 집중지도/활동/대기질/주간예보 유지.
 - **핵심 검증**: `node --test tests/briefing-core.test.cjs`
-- **프로덕트 명세**: `docs/EXPERT-PLAN.md`, `docs/FORECAST-CONTRACT.md`
+- **프로덕트 명세**: `docs/EXPERT-PLAN.md`, `docs/FORECAST-CONTRACT.md`, `docs/ALERTS.md`
 
 ## 4차 개선 — 첫 진입 GPS 권한 및 지역 관리 (2026-10-26)
 
