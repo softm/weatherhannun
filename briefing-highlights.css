@@ -1,0 +1,120 @@
+/*
+ * 날씨한눈 · Stitch-inspired semantic color highlights for LIVE forecast copy.
+ * Only fact-derived tokens are highlighted; never introduce new forecast claims.
+ * Designed for the white caster card and for the dark/light legacy briefing.
+ */
+#stitch-live-dashboard .weather-brief-mark,
+#briefingText .weather-brief-mark{
+  display:inline;
+  padding:0 .13em .045em;
+  margin:0 -.015em;
+  font:inherit;
+  font-weight:750;
+  line-height:inherit;
+  letter-spacing:inherit;
+  border-radius:.27em;
+  -webkit-box-decoration-break:clone;
+  box-decoration-break:clone;
+  text-wrap:pretty;
+}
+#stitch-live-dashboard .stitch-caster-briefing,
+#briefingText{
+  overflow-wrap:anywhere;
+  word-break:keep-all;
+  text-wrap:pretty;
+}
+/* The Stitch source already uses amber for changes and emerald for action.
+ * Reuse that visual grammar while making the location and temperature scannable. */
+#stitch-live-dashboard .weather-brief-mark--place,
+#briefingText .weather-brief-mark--place{
+  color:#1559b3;
+  background:rgba(29,117,240,.095);
+}
+#stitch-live-dashboard .weather-brief-mark--sky,
+#briefingText .weather-brief-mark--sky{
+  color:#08735c;
+  background:rgba(16,185,129,.105);
+}
+#stitch-live-dashboard .weather-brief-mark--temperature,
+#briefingText .weather-brief-mark--temperature{
+  color:#1559b3;
+  background:linear-gradient(180deg,transparent 22%,rgba(37,134,239,.14) 22%,rgba(37,134,239,.14) 94%,transparent 94%);
+  font-variant-numeric:tabular-nums;
+  font-weight:800;
+}
+#stitch-live-dashboard .weather-brief-mark--time,
+#briefingText .weather-brief-mark--time{
+  color:#1559b3;
+  background:rgba(29,117,240,.085);
+  font-variant-numeric:tabular-nums;
+}
+#stitch-live-dashboard .weather-brief-mark--time-warning,
+#briefingText .weather-brief-mark--time-warning{
+  color:#8a5200;
+  background:rgba(245,158,11,.17);
+  box-shadow:inset 0 -1.5px 0 rgba(203,111,10,.36);
+  font-variant-numeric:tabular-nums;
+}
+#stitch-live-dashboard .weather-brief-mark--alert,
+#briefingText .weather-brief-mark--alert{
+  color:#a14c0c;
+  background:rgba(245,158,11,.145);
+  box-shadow:inset 0 -2px 0 rgba(228,137,12,.25);
+  font-weight:800;
+}
+#stitch-live-dashboard .weather-brief-mark--trend,
+#briefingText .weather-brief-mark--trend{
+  color:#1559b3;
+  background:rgba(56,145,226,.11);
+  font-weight:800;
+}
+#stitch-live-dashboard .weather-brief-mark--metric,
+#briefingText .weather-brief-mark--metric{
+  color:#8a5200;
+  background:rgba(245,158,11,.09);
+  font-variant-numeric:tabular-nums;
+  font-weight:750;
+}
+#stitch-live-dashboard .weather-brief-mark--action,
+#briefingText .weather-brief-mark--action{
+  color:#08735c;
+  background:rgba(16,185,129,.11);
+}
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--place,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--place,
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--temperature,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--temperature,
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--time,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--time,
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--trend,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--trend{
+  color:#a9d2ff;
+  background:rgba(75,169,255,.17);
+}
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--sky,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--sky,
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--action,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--action{
+  color:#76e9c8;
+  background:rgba(84,220,187,.17);
+}
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--alert,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--alert,
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--time-warning,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--time-warning,
+html[data-weather-theme="dark"] #stitch-live-dashboard .weather-brief-mark--metric,
+html[data-weather-theme="dark"] #briefingText .weather-brief-mark--metric{
+  color:#ffd28c;
+  background:rgba(250,180,73,.19);
+  box-shadow:inset 0 -1.5px 0 rgba(255,193,94,.25);
+}
+/* Highlight semantics must remain legible for high-contrast preference. */
+@media(prefers-contrast:more){
+  #stitch-live-dashboard .weather-brief-mark,
+  #briefingText .weather-brief-mark{
+    text-decoration:underline;
+    text-decoration-thickness:2px;
+    text-underline-offset:.16em;
+    font-weight:800;
+  }
+}
