@@ -6,11 +6,19 @@
   const $=id=>document.getElementById(id);
   let mode="short",briefing=null;
   const esc=value=>String(value===undefined||value===null?"":value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  function paintBriefingText(){
+    const el=$("briefingText");
+    if(!el||!briefing)return;
+    const sentence=mode==="detail"?briefing.detail:briefing.short;
+    const highlighter=window.WeatherBriefingHighlights;
+    if(highlighter)highlighter.render(el,sentence,{where:briefing.where,events:briefing.events});
+    else el.textContent=sentence;
+  }
   function evidenceText(e){return '<div class="brief-evidence-pair"><dt>'+esc(e.label)+'</dt><dd>'+esc(e.value)+'</dd></div>';}
   function showMode(next){
     mode=next==="detail"?"detail":"short";
     document.querySelectorAll("[data-brief-mode]").forEach(b=>{const selected=b.dataset.briefMode===mode;b.classList.toggle("active",selected);b.setAttribute("aria-pressed",String(selected));});
-    if($("briefingText")&&briefing)$("briefingText").textContent=mode==="detail"?briefing.detail:briefing.short;
+    paintBriefingText();
     if($("briefingModeTitle"))$("briefingModeTitle").textContent=mode==="detail"?"30초 상세 해설":"10초 날씨 브리핑";
   }
   function renderBriefing(payload){
@@ -18,7 +26,7 @@
     if(!core||!payload||!$("briefingText"))return;
     briefing=core.analyse(payload);
     $("briefingHeadline").textContent=briefing.headline;
-    $("briefingText").textContent=mode==="detail"?briefing.detail:briefing.short;
+    paintBriefingText();
     $("briefingSource").textContent=briefing.source+" · 관측 실황 아님";
     const state=payload.status==="live"?"방금 API 조회":payload.status==="cached-error"?"통신 오류 · 저장된 예보":"저장된 예보";
     const out=briefing.freshness.state==="stale"?"오래된 예보 · 재조회 필요":state;
