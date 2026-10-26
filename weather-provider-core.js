@@ -31,6 +31,8 @@
     productionAdUnitConfigured:false,
     playBillingConfigured:false
   });
+  const HOURLY_FIELDS=Object.freeze(["temperature_2m","precipitation_probability","precipitation","weather_code","wind_speed_10m","wind_gusts_10m","relative_humidity_2m","uv_index","is_day"]);
+  const DAILY_FIELDS=Object.freeze(["weather_code","temperature_2m_max","temperature_2m_min","precipitation_sum","precipitation_probability_max","sunrise","sunset","uv_index_max"]);
   const finite=value=>typeof value==="number"&&Number.isFinite(value);
   function normalizeLocation(raw){
     if(!raw)return null;
@@ -74,6 +76,16 @@
     if(!short){
       if(!payload.hourly||!Array.isArray(payload.hourly.time)||!payload.hourly.time.length)missing.push("hourly.time");
       if(!payload.daily||!Array.isArray(payload.daily.time)||!payload.daily.time.length)missing.push("daily.time");
+      const hourlyLength=Array.isArray(payload.hourly?.time)?payload.hourly.time.length:0;
+      const dailyLength=Array.isArray(payload.daily?.time)?payload.daily.time.length:0;
+      HOURLY_FIELDS.forEach(field=>{
+        const values=payload.hourly?.[field];
+        if(!Array.isArray(values)||values.length!==hourlyLength)missing.push("hourly."+field);
+      });
+      DAILY_FIELDS.forEach(field=>{
+        const values=payload.daily?.[field];
+        if(!Array.isArray(values)||values.length!==dailyLength)missing.push("daily."+field);
+      });
     }
     return {valid:missing.length===0,missingFields:missing};
   }
@@ -130,5 +142,5 @@
       radar:Object.freeze({available:PROVIDER.radarAvailable,reason:"허가된 레이더 영상·범례·관측시각 공급 경로가 연결되지 않았습니다."})
     });
   }
-  return Object.freeze({CONTRACT_VERSION,FORECAST_ENDPOINT,AIR_ENDPOINT,PROVIDER,DEPLOYMENT_GATES,normalizeLocation,buildForecastUrl,buildAirUrl,inspectForecastPayload,inspectAirPayload,freshness,sourceRecord,releaseReadiness});
+  return Object.freeze({CONTRACT_VERSION,FORECAST_ENDPOINT,AIR_ENDPOINT,PROVIDER,DEPLOYMENT_GATES,HOURLY_FIELDS,DAILY_FIELDS,normalizeLocation,buildForecastUrl,buildAirUrl,inspectForecastPayload,inspectAirPayload,freshness,sourceRecord,releaseReadiness});
 });

@@ -111,14 +111,17 @@
     $("refreshButton").disabled=true;
     var loc=STATE.loc;
     var cache=storeGet("weatherhannun_last");
-    if (!force && cache && cache.loc && cache.loc.lat===loc.lat && cache.loc.lon===loc.lon && cache.weather) {
-      STATE.weather=cache.weather;STATE.air=cache.air||null;STATE.fetchedAt=cache.at||null;STATE.hourly=makeHours(STATE.weather);STATE.dataStatus="cached";renderAll();
+    var cachedWeatherValid=cache&&PROVIDER&&PROVIDER.inspectForecastPayload(cache.weather).valid;
+    var cachedAirValid=cache&&cache.air&&PROVIDER&&PROVIDER.inspectAirPayload(cache.air).valid;
+    if (!force && cache && cache.loc && cache.loc.lat===loc.lat && cache.loc.lon===loc.lon && cachedWeatherValid) {
+      STATE.weather=cache.weather;STATE.air=cachedAirValid?cache.air:null;STATE.fetchedAt=cache.at||null;STATE.hourly=makeHours(STATE.weather);STATE.dataStatus="cached";renderAll();
     }
     try {
       var results=await Promise.allSettled([getJson(forecastUrl(loc,false)),getJson(airUrl(loc))]);
       if(ticket!==STATE.ticket)return;
       var weather=results[0].status==="fulfilled"?results[0].value:null;
-      var air=results[1].status==="fulfilled"?results[1].value:null;
+      var airCandidate=results[1].status==="fulfilled"?results[1].value:null;
+      var air=PROVIDER&&PROVIDER.inspectAirPayload(airCandidate).valid?airCandidate:null;
       var contract=PROVIDER&&PROVIDER.inspectForecastPayload(weather);
       if(!contract||!contract.valid) throw new Error("날씨 데이터 계약에 필요한 값이 없습니다: "+((contract&&contract.missingFields)||["공급자 모듈"]).join(", "));
       STATE.weather=weather;
@@ -163,7 +166,7 @@
     var nextRain=rainWindow.find(function(x){return (finite(x.rain)&&x.rain>=50)||(finite(x.mm)&&x.mm>=.3);});
     var rainWindowComplete=rainWindow.length===12&&rainWindow.every(function(x){return finite(x.rain)&&finite(x.mm);});
     var cold=STATE.hourly.slice(0,36).some(function(x){return finite(x.temp)&&x.temp<=3;});
-    var note=nextRain?whenLabel(nextRain.time)+"경 비 신호 "+(finite(nextRain.rain)?num(nextRain.rain)+"%":num(nextRain.mm,1)+"mm/h"):cold?"48시간 이내 저온 구간이 있습니다. 작물 냉해와 결빙에 유의하세요.":rainWindowComplete?"현재 모델 예보에서 12시간 내 뚜렷한 강수 신호가 낮습니다.":"강수 자료 일부가 없어 시간별 예보를 확인해 주세요.";
+    var note=nextRain?whenLabel(nextRain.time)+"경 비 신호 "+(finite(nextRain.rain)&&nextRain.rain>=50?num(nextRain.rain)+"%":num(nextRain.mm,1)+"mm/h"):cold?"48시간 이내 저온 구간이 있습니다. 작물 냉해와 결빙에 유의하세요.":rainWindowComplete?"현재 모델 예보에서 12시간 내 뚜렷한 강수 신호가 낮습니다.":"강수 자료 일부가 없어 시간별 예보를 확인해 주세요.";
     text("noticeStrip",note);
     var at=STATE.fetchedAt?new Date(STATE.fetchedAt).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"}):"조회 시각 없음";
     var last=STATE.fetchedAt?Date.parse(STATE.fetchedAt):NaN;

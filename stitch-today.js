@@ -164,7 +164,7 @@
   put(nodes.actionPlace,loc+' 기준');
   var rainWindow=h.slice(0,12),rainComplete=rainWindow.length===12&&rainWindow.every(x=>Number.isFinite(x.rain)&&Number.isFinite(x.mm));
   var next=rainWindow.find(x=>Number.isFinite(x.rain)&&x.rain>=50||Number.isFinite(x.mm)&&x.mm>=.3);
-  put(nodes.hourlyBanner,next?short(next.time)+' 비 신호 '+(Number.isFinite(next.rain)?fmt(next.rain)+'%':fmt(next.mm,1)+'mm/h'):rainComplete?'12시간 뚜렷한 강수 신호 낮음':'강수 자료 일부 누락');
+  put(nodes.hourlyBanner,next?short(next.time)+' 비 신호 '+(Number.isFinite(next.rain)&&next.rain>=50?fmt(next.rain)+'%':fmt(next.mm,1)+'mm/h'):rainComplete?'12시간 뚜렷한 강수 신호 낮음':'강수 자료 일부 누락');
   var kinds=['walk','laundry','harvest'],windows=kinds.map(k=>best(k,h));
   nodes.cards.forEach((card,i)=>{
    var bestTime=windows[i];
@@ -200,7 +200,7 @@
    });
   }
   var values=[
-   [fmt(now.rain)+'%',next?'다음 비 신호 '+short(next.time)+' ('+(Number.isFinite(next.rain)?fmt(next.rain)+'%':fmt(next.mm,1)+'mm/h')+')':rainComplete?'12시간 내 뚜렷한 강수 신호 낮음':'강수 자료 일부 누락'],
+   [fmt(now.rain)+'%',next?'다음 비 신호 '+short(next.time)+' ('+(Number.isFinite(next.rain)&&next.rain>=50?fmt(next.rain)+'%':fmt(next.mm,1)+'mm/h')+')':rainComplete?'12시간 내 뚜렷한 강수 신호 낮음':'강수 자료 일부 누락'],
    [fmt(c.relative_humidity_2m)+'%','상대습도 (기상 모델)'],
    [Number.isFinite(c.wind_speed_10m)?fmt(c.wind_speed_10m/3.6,1)+' m/s':'-- m/s','풍속 '+fmt(c.wind_speed_10m)+'km/h · 돌풍 '+fmt(now.gust)+'km/h'],
    [fmt(now.uv)+' UV',+now.uv>=6?'자외선 차단 권장':'자외선 예보 지수']

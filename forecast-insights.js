@@ -162,7 +162,10 @@
   }
   function noticeCopy(alert){
     const row=alert.row||{};
-    if(alert.id==="rain")return {title:"강수 가능성 높음",body:prettyTime(alert.time)+" · "+(finite(row.rain)?"강수확률 "+number(row.rain)+"%":"시간당 강수량 "+number(row.mm,1)+"mm")};
+    if(alert.id==="rain"){
+      const evidence=finite(row.rain)&&row.rain>=prefs.rainThreshold?"강수확률 "+number(row.rain)+"%":finite(row.mm)&&row.mm>=1?"시간당 강수량 "+number(row.mm,1)+"mm":"강수 자료 확인";
+      return {title:"강수 가능성 높음",body:prettyTime(alert.time)+" · "+evidence};
+    }
     if(alert.id==="dry")return {title:"비 가능성 낮음",body:"향후 6시간 최고 강수확률 "+number(alert.maxRain)+"% · 예보상 비 가능성이 낮아요"};
     if(alert.id==="clear")return {title:"맑은 시간 이어짐",body:prettyTime(alert.time)+"부터 맑음·구름 조금 조건이 "+alert.hours+"시간 이상 이어져요"};
     if(alert.id==="frost")return {title:"저온·서리 가능성 확인",body:prettyTime(alert.time)+" · 기온 "+number(row.temp)+"°C"};
