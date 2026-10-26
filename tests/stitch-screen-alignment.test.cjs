@@ -60,8 +60,8 @@ test("service worker version tracks the aligned shell", () => {
   const html = read("index.html");
   const worker = read("sw.js");
 
-  assert.ok(worker.includes("weatherhannun-shell-v23-settings-hub"));
-  for (const asset of ["briefing-highlights.css?v=20", "briefing-highlights.js?v=20", "stitch-theme.css?v=18", "stitch-today.css?v=16", "stitch-today.js?v=21", "stitch-mobile.css?v=16", "settings.css?v=22", "region-search.css?v=15", "region-search-core.js?v=15", "region-search-ui.js?v=15", "weather-icons.css?v=17", "weather-icons.js?v=17", "app.js?v=18", "alert-rules-core.js?v=19", "forecast-insights.js?v=19"]) {
+  assert.ok(worker.includes("weatherhannun-shell-v24-outfit-guide"));
+  for (const asset of ["briefing-highlights.css?v=20", "briefing-highlights.js?v=20", "stitch-theme.css?v=18", "stitch-today.css?v=16", "stitch-today.js?v=21", "stitch-mobile.css?v=16", "settings.css?v=22", "region-search.css?v=15", "region-search-core.js?v=15", "region-search-ui.js?v=15", "weather-icons.css?v=17", "weather-icons.js?v=17", "app.js?v=18", "alert-rules-core.js?v=19", "forecast-insights.js?v=19", "outfit-decision.css?v=24", "outfit-decision-core.js?v=24", "outfit-decision-ui.js?v=24"]) {
     assert.ok(html.includes(asset), `page must request ${asset}`);
     assert.ok(worker.includes(asset), `service worker must warm ${asset}`);
   }
