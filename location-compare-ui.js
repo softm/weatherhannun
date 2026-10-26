@@ -134,6 +134,60 @@
       '<div><dt>공식 특보</dt><dd>앱 내 자료 미연동</dd></div></dl></article>';
   }
 
+  function periodTemperature(summary) {
+    return finite(summary.temperatureMin) && finite(summary.temperatureMax)
+      ? number(summary.temperatureMin, 1) + "° ~ " + number(summary.temperatureMax, 1) + "°"
+      : "12시간 자료 부족";
+  }
+
+  function periodRain(summary) {
+    var evidence = [];
+    if (finite(summary.rainProbabilityMax)) evidence.push("최대 " + number(summary.rainProbabilityMax) + "%");
+    if (finite(summary.precipitationTotal)) evidence.push("누적 " + number(summary.precipitationTotal, 1) + " mm");
+    if (summary.rain.triggered) {
+      return (summary.rain.firstSignalTime ? timeLabel(summary.rain.firstSignalTime) + "부터 " : "") +
+        "비 신호" + (evidence.length ? " · " + evidence.join(" · ") : "");
+    }
+    if (summary.rain.complete) return "뚜렷한 비 신호 낮음" + (evidence.length ? " · " + evidence.join(" · ") : "");
+    return "강수 자료 부족 · 없음으로 단정하지 않음";
+  }
+
+  function periodSideMarkup(side, role) {
+    var summary = side.summary;
+    var coverage = summary.availableHours + "/" + summary.expectedHours + "시간";
+    return '<article class="compare-period-card '+role+'">' +
+      '<div class="compare-period-head"><span>'+(role === "origin" ? "현재 지역" : "목적지")+'</span><h4>'+escapeHtml(side.place.name)+'</h4><small class="'+(summary.complete?"complete":"partial")+'">'+escapeHtml(coverage)+(summary.complete?" 자료":" · 일부 자료")+'</small></div>'+
+      '<dl><div><dt>기온 범위</dt><dd>'+escapeHtml(periodTemperature(summary))+'</dd></div>'+
+      '<div><dt>비</dt><dd class="'+(summary.rain.triggered?"signal":"")+'">'+escapeHtml(periodRain(summary))+'</dd></div>'+
+      '<div><dt>최대 바람</dt><dd>'+(finite(summary.windMax)?number(summary.windMax,1)+" km/h":"12시간 자료 부족")+'</dd></div>'+
+      '<div><dt>최대 돌풍</dt><dd>'+(finite(summary.gustMax)?number(summary.gustMax,1)+" km/h":"12시간 자료 부족")+'</dd></div></dl></article>';
+  }
+
+  function periodMarkup(period) {
+    if (!period || period.status !== "ready") {
+      return '<section class="compare-period-block"><div class="empty-state">두 지역의 동일 12시간 예보 구간을 만들 수 없습니다.</div></section>';
+    }
+    var rainSummary = period.destination.summary.rain.triggered && !period.origin.summary.rain.triggered
+      ? "목적지에만 비 신호가 있습니다."
+      : !period.destination.summary.rain.triggered && period.origin.summary.rain.triggered
+        ? "현재 지역에만 비 신호가 있습니다."
+        : period.destination.summary.rain.triggered && period.origin.summary.rain.triggered
+          ? "두 지역 모두 비 신호가 있습니다."
+          : period.destination.summary.rain.complete && period.origin.summary.rain.complete
+            ? "두 지역 모두 12시간 비 신호가 낮습니다."
+            : "강수 결측이 있어 비 없음으로 단정하지 않습니다.";
+    var differences = [];
+    if (finite(period.delta.temperatureMax)) differences.push("기간 최고기온 " + signed(period.delta.temperatureMax, "°C"));
+    if (finite(period.delta.windMax)) differences.push("최대 바람 " + signed(period.delta.windMax, " km/h"));
+    if (finite(period.delta.precipitationTotal)) differences.push("누적 강수 " + signed(period.delta.precipitationTotal, " mm"));
+    var comparison = (differences.length
+      ? "목적지는 현재 지역보다 " + differences.join(", ") + "입니다. "
+      : "기간 전체 수치가 확보된 항목만 차이를 계산합니다. ") + rainSummary;
+    return '<section class="compare-period-block" aria-labelledby="comparePeriodTitle">' +
+      '<div class="compare-period-title"><div><span class="section-overline">SAME 12-HOUR WINDOW</span><h3 id="comparePeriodTitle">같은 시작 시각부터 12시간</h3><p>'+escapeHtml(comparison)+'</p></div><span class="compare-period-state '+(period.complete?"complete":"partial")+'">'+(period.complete?"12시간 완전":"기간 자료 일부")+'</span></div>'+
+      '<div class="compare-period-grid">'+periodSideMarkup(period.origin,"origin")+periodSideMarkup(period.destination,"destination")+'</div></section>';
+  }
+
   function render() {
     var resultNode = $("compareResults");
     if (!resultNode) return;
@@ -154,6 +208,7 @@
     }
     var temperatureSummary = signed(comparison.delta.temperature, "°C");
     var windSummary = signed(comparison.delta.wind, " km/h");
+    var period = core.comparePeriod(latest.loc, latest.weather, destinationPlace, destinationWeather, time, 12);
     var rainSummary = comparison.destination.rain.triggered && !comparison.origin.rain.triggered
       ? "목적지에만 비 신호가 있습니다."
       : !comparison.destination.rain.triggered && comparison.origin.rain.triggered
@@ -164,10 +219,13 @@
             ? "두 지역 모두 뚜렷한 비 신호가 낮습니다."
             : "강수 수치가 부족해 비 신호를 단정하지 않습니다.";
     resultNode.innerHTML = '<div class="compare-summary" aria-live="polite"><span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span><div><b>'+escapeHtml(timeLabel(comparison.time))+' 동일 유효시각</b><p>목적지는 현재 지역보다 기온 '+escapeHtml(temperatureSummary)+', 바람 '+escapeHtml(windSummary)+'입니다. '+escapeHtml(rainSummary)+'</p></div></div>'+
-      '<div class="compare-place-grid">'+sideMarkup(comparison.origin,"origin")+sideMarkup(comparison.destination,"destination")+'</div>';
-    $("compareSource").textContent = comparison.sourceLabel + " · 예보끼리 비교 · 실측 관측 아님";
+      '<div class="compare-place-grid">'+sideMarkup(comparison.origin,"origin")+sideMarkup(comparison.destination,"destination")+'</div>'+
+      periodMarkup(period);
+    $("compareSource").textContent = comparison.sourceLabel + " · 동일 유효시각과 동일 12시간 기간 · 예보끼리 비교 · 실측 관측 아님";
     $("compareAlertStatus").textContent = comparison.officialAlerts.reason;
-    setStatus("동일 시각 기준으로 비교했습니다.", "ready");
+    setStatus(period.status === "ready" && period.complete
+      ? "동일 시각과 12시간 기간 기준으로 비교했습니다."
+      : "동일 시각 비교 완료 · 12시간 기간 자료는 일부입니다.", "ready");
   }
 
   async function loadDestination(force) {

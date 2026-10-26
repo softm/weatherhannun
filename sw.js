@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v35-overlay-permission-guide-suite-20261028";
+const CACHE="weatherhannun-shell-v36-location-period-compare";
 const BASE=self.registration.scope;
 const SHELL=[
   "./","./index.html","./styles.css","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
@@ -10,7 +10,7 @@ const SHELL=[
   "./stitch-today.utilities.css","./rain-decision-core.js?v=31","./rain-decision-ui.js?v=21",
   "./rain-decision.css?v=21","./outfit-decision-core.js?v=31","./outfit-decision-ui.js?v=24",
   "./outfit-decision.css?v=24","./daily-delta-core.js?v=27","./daily-delta-ui.js?v=27",
-  "./location-compare-core.js?v=31","./location-compare-ui.js?v=31","./location-compare.css?v=27",
+  "./location-compare-core.js?v=32","./location-compare-ui.js?v=32","./location-compare.css?v=28",
   "./weather-provider-core.js?v=31","./monetization-core.js?v=32","./monetization-settings.js?v=34","./plus-personalization-core.js?v=34","./plus-personalization.js?v=34","./product-metrics-core.js?v=33","./product-metrics.js?v=33","./activity-decision-core.js?v=28","./official-data.css?v=30","./official-data-ui.js?v=30",
   "./assets/stitch/today-presenter.jpg","./assets/stitch/sun.svg",
   "./assets/stitch/partly-cloudy.svg","./assets/stitch/storm.svg","./assets/stitch/snow.svg",

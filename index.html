@@ -33,7 +33,7 @@
   <link rel="stylesheet" href="./briefing-highlights.css?v=20">
   <link rel="stylesheet" href="./rain-decision.css?v=21">
   <link rel="stylesheet" href="./outfit-decision.css?v=24">
-  <link rel="stylesheet" href="./location-compare.css?v=27">
+  <link rel="stylesheet" href="./location-compare.css?v=28">
   <link rel="stylesheet" href="./official-data.css?v=30">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo//kqL4xMVH1x8=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -52,7 +52,7 @@
   <script defer src="./plus-personalization.js?v=34"></script>
   <script defer src="./product-metrics-core.js?v=33"></script>
   <script defer src="./product-metrics.js?v=33"></script>
-  <script defer src="./location-compare-core.js?v=31"></script>
+  <script defer src="./location-compare-core.js?v=32"></script>
   <script defer src="./activity-decision-core.js?v=28"></script>
   <script defer src="./agriculture-planner-core.js?v=34"></script>
   <script defer src="./app.js?v=34"></script>
@@ -61,7 +61,7 @@
   <script defer src="./reverse-geocode.js"></script>
   <script defer src="./location-manager.js"></script>
   <script defer src="./daily-delta-ui.js?v=27"></script>
-  <script defer src="./location-compare-ui.js?v=31"></script>
+  <script defer src="./location-compare-ui.js?v=32"></script>
   <script defer src="./region-search-core.js?v=15"></script>
   <script defer src="./region-search-ui.js?v=15"></script>
   <script defer src="./rain-decision-core.js?v=31"></script>
@@ -248,7 +248,7 @@
       </section>
 
       <section id="view-compare" class="screen content-bound" aria-label="현재 지역과 목적지 날씨 비교">
-        <div class="page-header"><div><span class="section-overline">SAME-TIME LOCATION COMPARE</span><h2>현재 지역과 목적지 비교</h2><p>두 지역의 같은 유효시각 모델 예보만 맞춰 기온·비·바람을 비교합니다. 현재 선택 지역은 바꾸지 않습니다.</p></div></div>
+        <div class="page-header"><div><span class="section-overline">SAME-TIME LOCATION COMPARE</span><h2>현재 지역과 목적지 비교</h2><p>두 지역의 같은 유효시각과 같은 12시간 모델 예보만 맞춰 기온·비·바람을 비교합니다. 현재 선택 지역은 바꾸지 않습니다.</p></div></div>
         <section class="compare-toolbar stitch-card" aria-label="비교 조건">
           <label for="compareDestination">목적지<select id="compareDestination"><option value="">목적지를 선택하세요</option></select></label>
           <label for="compareTime">비교 시각<select id="compareTime" disabled><option value="">공통 예보 시각 확인 중</option></select></label>
