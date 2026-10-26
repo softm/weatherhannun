@@ -1,0 +1,135 @@
+/* Theme-aware weather status illustration system (WMO code based). */
+.weather-glyph {
+  --wi-sun-core: #f59e0b;
+  --wi-sun-highlight: #fff0a6;
+  --wi-sun-ray: #d97706;
+  --wi-moon-core: #6670d8;
+  --wi-moon-highlight: #dfe3ff;
+  --wi-star: #b86c00;
+  --wi-cloud-front: #f8fbff;
+  --wi-cloud-shade: #d9e6f4;
+  --wi-cloud-stroke: #6f87a2;
+  --wi-cloud-heavy: #687d95;
+  --wi-cloud-heavy-stroke: #40566f;
+  --wi-rain: #1765d3;
+  --wi-rain-heavy: #0f478f;
+  --wi-snow: #0276ad;
+  --wi-snow-core: #e0f2fe;
+  --wi-fog: #657b94;
+  --wi-lightning: #f5a400;
+  --wi-lightning-stroke: #a64b00;
+  --wi-hail: #e8f5ff;
+  --wi-hail-stroke: #4f7599;
+  display: inline-grid;
+  inline-size: 1em;
+  block-size: 1em;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: visible;
+  vertical-align: -.14em;
+  line-height: 1;
+  filter: drop-shadow(0 2px 2px rgba(38, 71, 108, .16));
+}
+.weather-glyph-fallback { display: inline-grid; inline-size: 1em; block-size: 1em; place-items: center; border: 2px solid currentColor; border-radius: 50%; font-weight: 800; }
+
+html[data-weather-theme="dark"] .weather-glyph {
+  --wi-sun-core: #ffd45c;
+  --wi-sun-highlight: #fff6c9;
+  --wi-sun-ray: #ffb020;
+  --wi-moon-core: #c5ccff;
+  --wi-moon-highlight: #fff4bd;
+  --wi-star: #ffe38a;
+  --wi-cloud-front: #ddebfa;
+  --wi-cloud-shade: #7891ad;
+  --wi-cloud-stroke: #e7f2fd;
+  --wi-cloud-heavy: #8da6bf;
+  --wi-cloud-heavy-stroke: #d9e8f6;
+  --wi-rain: #6ab8ff;
+  --wi-rain-heavy: #9dcaff;
+  --wi-snow: #7dd3fc;
+  --wi-snow-core: #f0f9ff;
+  --wi-fog: #b8c7d9;
+  --wi-lightning: #ffe066;
+  --wi-lightning-stroke: #ffb020;
+  --wi-hail: #f3f8ff;
+  --wi-hail-stroke: #9dcaff;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .34));
+}
+
+.weather-glyph svg { display: block; inline-size: 100%; block-size: 100%; overflow: visible; }
+.weather-glyph .wi-sun-rays { stroke: var(--wi-sun-ray); stroke-width: 3; stroke-linecap: round; }
+.weather-glyph .wi-sun-core { fill: var(--wi-sun-core); stroke: var(--wi-sun-ray); stroke-width: 1.5; }
+.weather-glyph .wi-sun-highlight { fill: var(--wi-sun-highlight); opacity: .72; }
+.weather-glyph .wi-moon-core { fill: var(--wi-moon-core); stroke: color-mix(in srgb, var(--wi-moon-core), #263172 35%); stroke-width: 1.5; }
+.weather-glyph .wi-moon-highlight { fill: var(--wi-moon-highlight); opacity: .62; }
+.weather-glyph .wi-stars { fill: var(--wi-star); }
+.weather-glyph .wi-cloud-shadow { fill: var(--wi-cloud-shade); opacity: .42; }
+.weather-glyph .wi-cloud-base { fill: var(--wi-cloud-front); stroke: var(--wi-cloud-stroke); stroke-width: 2.1; stroke-linejoin: round; }
+.weather-glyph .wi-cloud-highlight { fill: #fff; opacity: .52; }
+.weather-glyph .wi-cloud--back .wi-cloud-base { fill: var(--wi-cloud-shade); }
+.weather-glyph .wi-cloud--overcast .wi-cloud-base,
+.weather-glyph .wi-cloud--wet .wi-cloud-base,
+.weather-glyph .wi-cloud--cold .wi-cloud-base { fill: color-mix(in srgb, var(--wi-cloud-front), var(--wi-cloud-shade) 32%); }
+.weather-glyph .wi-cloud--storm .wi-cloud-base,
+.weather-glyph .wi-cloud--cold-heavy .wi-cloud-base { fill: var(--wi-cloud-heavy); stroke: var(--wi-cloud-heavy-stroke); }
+.weather-glyph .wi-cloud--storm .wi-cloud-highlight,
+.weather-glyph .wi-cloud--cold-heavy .wi-cloud-highlight { opacity: .2; }
+.weather-glyph .wi-rain { fill: none; stroke: var(--wi-rain); stroke-width: 3.1; stroke-linecap: round; }
+.weather-glyph--heavy .wi-rain { stroke: var(--wi-rain-heavy); stroke-width: 3.5; }
+.weather-glyph .wi-drizzle { fill: var(--wi-rain); }
+.weather-glyph .wi-snow { fill: none; stroke: var(--wi-snow); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.weather-glyph .wi-snow circle { fill: var(--wi-snow-core); stroke: var(--wi-snow); stroke-width: 2; }
+.weather-glyph .wi-snow-grains { fill: var(--wi-snow-core); stroke: var(--wi-snow); stroke-width: 1.8; }
+.weather-glyph .wi-ice { fill: none; stroke: var(--wi-snow); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.weather-glyph .wi-ice circle { fill: var(--wi-snow-core); stroke-width: 2; }
+.weather-glyph .wi-fog-lines { fill: none; stroke: var(--wi-fog); stroke-width: 3.2; stroke-linecap: round; }
+.weather-glyph .wi-lightning { fill: var(--wi-lightning); stroke: var(--wi-lightning-stroke); stroke-width: 1.5; stroke-linejoin: round; }
+.weather-glyph .wi-hail { fill: var(--wi-hail); stroke: var(--wi-hail-stroke); stroke-width: 1.8; }
+.weather-glyph .wi-unknown-mark circle { fill: var(--wi-cloud-front); stroke: var(--wi-cloud-stroke); stroke-width: 2; }
+.weather-glyph .wi-unknown-mark path { fill: none; stroke: var(--wi-cloud-heavy-stroke); stroke-width: 2.8; stroke-linecap: round; }
+
+.weather-glyph--hero { inline-size: 116px; block-size: 94px; filter: drop-shadow(0 8px 12px rgba(31, 95, 156, .2)); }
+.weather-glyph--tile { inline-size: 32px; block-size: 32px; }
+.weather-glyph--insight { inline-size: 42px; block-size: 42px; }
+.hour-icon .weather-glyph { inline-size: 32px; block-size: 32px; }
+.hourly-detail-icon .weather-glyph { inline-size: 34px; block-size: 34px; }
+.today-hour-card > b .weather-glyph { inline-size: 31px; block-size: 31px; }
+.week-item .ico .weather-glyph { inline-size: 38px; block-size: 38px; }
+.week-row-icon .weather-glyph { inline-size: 34px; block-size: 34px; }
+.city-card .city-top .weather-glyph { inline-size: 40px; block-size: 40px; }
+.feed-best-time .weather-glyph { inline-size: 24px; block-size: 24px; margin-right: 4px; }
+.weather-map-pin .weather-glyph { inline-size: 28px; block-size: 28px; }
+.weather-map-pin > .weather-pin-card { min-width: 112px; padding: 7px 9px; background: rgba(8, 29, 55, .94); border-color: rgba(194, 222, 252, .72); }
+html[data-weather-theme="light"] .weather-map-pin > .weather-pin-card { background: rgba(255, 255, 255, .96); color: #0f1b2d; border-color: #9ebddd; box-shadow: 0 5px 14px rgba(29, 78, 135, .24); }
+html[data-weather-theme="light"] .weather-map-pin > .weather-pin-card b { color: #17467d; }
+
+#stitch-live-dashboard .stitch-current-weather-visual { position: relative; inline-size: 128px; block-size: 104px; display: grid; place-items: center; }
+#stitch-live-dashboard .stitch-current-weather-visual::before { content: ""; position: absolute; inset: 12px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 196, 72, .18), transparent 70%); }
+#stitch-live-dashboard .stitch-current-weather-visual .weather-glyph { position: relative; z-index: 1; }
+#stitch-live-dashboard .stitch-hour-weather { display: grid; place-items: center; }
+#stitch-live-dashboard .stitch-hour-current .weather-glyph {
+  --wi-cloud-front: #fff;
+  --wi-cloud-shade: #cfe3fb;
+  --wi-cloud-stroke: #b7d7fb;
+  --wi-cloud-heavy: #7ea4ca;
+  --wi-cloud-heavy-stroke: #e3f1ff;
+  --wi-moon-core: #dce2ff;
+  --wi-moon-highlight: #fff3b1;
+  --wi-star: #ffe38a;
+  --wi-rain: #b8ddff;
+  --wi-rain-heavy: #e2f3ff;
+  --wi-snow: #dff5ff;
+  --wi-fog: #dbeafe;
+}
+
+.feed-best-time { display: flex !important; align-items: center; gap: 2px; }
+
+@media (max-width: 710px) {
+  .weather-glyph--hero { inline-size: 104px; block-size: 84px; }
+  .week-row-icon .weather-glyph { inline-size: 31px; block-size: 31px; }
+  .city-card .city-top .weather-glyph { inline-size: 36px; block-size: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-glyph { transition: none !important; animation: none !important; }
+}

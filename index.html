@@ -24,19 +24,21 @@
   <link rel="stylesheet" href="./location-manager.css">
   <link rel="stylesheet" href="./region-search.css?v=14">
   <link rel="stylesheet" href="./stitch-mobile.css?v=16">
+  <link rel="stylesheet" href="./weather-icons.css?v=17">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo//kqL4xMVH1x8=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="./briefing-core.js"></script>
   <script defer src="./briefing-ui.js"></script>
-  <script defer src="./forecast-insights.js"></script>
-  <script defer src="./stitch-layout.js"></script>
-  <script defer src="./app.js"></script>
+  <script defer src="./weather-icons.js?v=17"></script>
+  <script defer src="./forecast-insights.js?v=17"></script>
+  <script defer src="./stitch-layout.js?v=17"></script>
+  <script defer src="./app.js?v=17"></script>
   <script defer src="./location-core.js"></script>
   <script defer src="./reverse-geocode.js"></script>
   <script defer src="./location-manager.js"></script>
   <script defer src="./region-search-core.js"></script>
   <script defer src="./region-search-ui.js"></script>
-  <script defer src="./stitch-today.js?v=15"></script>
+  <script defer src="./stitch-today.js?v=17"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -70,7 +72,7 @@
         <div class="today-layout">
           <article class="hero-weather glass-card stitch-card">
             <div class="hero-head"><div><span class="model-chip"><i></i> 모델 예보</span><h2><span id="heroLocation">서산</span>의 지금</h2></div><button id="heroShare" class="ghost-button" aria-label="현재 지역 공유"><span class="material-symbols-outlined" aria-hidden="true">ios_share</span></button></div>
-            <div class="weather-core"><div class="giant-icon" id="weatherIcon" aria-hidden="true">☀️</div><div class="temperature"><strong id="currentTemp">--</strong><span>°</span></div><div class="condition-block"><b id="weatherSummary">날씨 불러오는 중</b><span id="feelsText">체감 --°</span></div></div>
+            <div class="weather-core"><div class="giant-icon weather-icon-host" id="weatherIcon" aria-hidden="true"></div><div class="temperature"><strong id="currentTemp">--</strong><span>°</span></div><div class="condition-block"><b id="weatherSummary">날씨 불러오는 중</b><span id="feelsText">체감 --°</span></div></div>
             <div class="temperature-range"><span class="high-temp">↑ 최고 <b id="maxTemp">--°</b></span><span class="pipe"></span><span class="low-temp">↓ 최저 <b id="minTemp">--°</b></span></div>
             <div class="weather-metrics"><div><img src="./assets/stitch/rain.svg" alt=""><p>강수확률</p><b id="rainMetric">--%</b></div><div><img src="./assets/stitch/wind.svg" alt=""><p>풍속</p><b id="windMetric">--</b></div><div><img src="./assets/stitch/humidity.svg" alt=""><p>습도</p><b id="humidityMetric">--%</b></div><div><img src="./assets/stitch/sun.svg" alt=""><p>자외선</p><b id="uvMetric">--</b></div></div>
             <div class="sun-strip"><span class="material-symbols-outlined" aria-hidden="true">wb_twilight</span><span id="sunTimes">일출·일몰 확인 중</span></div>

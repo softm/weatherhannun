@@ -12,15 +12,8 @@
  var leaf=(parent,text)=>Array.from(parent.querySelectorAll('span,div,p,b,strong')).find(e=>!e.children.length&&e.textContent.replace(/\s+/g,' ').trim()===text)||null;
  var put=(node,value)=>{if(node)node.textContent=value};
  function condition(code,day){
-  var n=Number(code);
-  if(n===0)return {name:'맑음',icon:day===0?'nights_stay':'wb_sunny',asset:'sun'};
-  if(n<=2)return {name:'대체로 맑음',icon:day===0?'partly_cloudy_night':'partly_cloudy_day',asset:'partly-cloudy'};
-  if(n===3)return {name:'흐림',icon:'cloud',asset:'partly-cloudy'};
-  if(n===45||n===48)return {name:'안개',icon:'foggy',asset:'partly-cloudy'};
-  if(n>=95)return {name:'뇌우',icon:'thunderstorm',asset:'storm'};
-  if(n>=71&&n<=77||n===85||n===86)return {name:'눈',icon:'weather_snowy',asset:'snow'};
-  if(n>=51&&n<=67||n>=80&&n<=82)return {name:'비',icon:'rainy',asset:'rain'};
-  return {name:'기상 예보',icon:'partly_cloudy_day',asset:'partly-cloudy'};
+  if(window.WeatherIcons)return window.WeatherIcons.describe(code,day);
+  return {name:'날씨 정보 없음',key:'unknown'};
  }
  function hours(w){
   var h=w.hourly||{}, ts=h.time||[],n=w.current?.time||'';
@@ -105,6 +98,7 @@
   var cards=[...actions.querySelectorAll('article')];
   nodes={
    hero,air,brief,actions,hour,metrics,notice,cards,
+   weatherVisual:hero.querySelector('[data-weather-visual]'),
    temperature:leaf(hero,'22'),sky:leaf(hero,'대체로 맑음'),feels:leaf(hero,'체감 23.5°'),
    high:leaf(hero,'최고 25°'),low:leaf(hero,'최저 14°'),updated:leaf(hero,'조회 중'),
    source:leaf(hero,'기상 모델 예보 연결'),airText:leaf(air,'공기 쾌적 및 활동 최적'),
@@ -116,6 +110,7 @@
    track:document.getElementById('stitchHourlyTrack'),
    matrix:metrics.querySelector('.grid.grid-cols-2')
   };
+  if(nodes.weatherVisual&&window.WeatherIcons)window.WeatherIcons.render(nodes.weatherVisual,null,1,'weather-glyph--hero');
   // Turn non-live original demo numbers into placeholders before displaying.
   [nodes.temperature,nodes.high,nodes.low,nodes.feels,nodes.updated].forEach(n=>put(n,'--'));
   put(nodes.airText,'대기질 예측을 불러오는 중…');
@@ -159,18 +154,7 @@
   put(nodes.updated,(data.status==='live'?'조회 ':'저장 ')+clock(data.at));
   put(nodes.source,data.status==='cached-error'?'연결 실패 · 저장된 예보':'기상 모델 예보 연결');
   nodes.source?.classList.toggle('stitch-state-error',data.status==='cached-error');
-  var oldSvg=nodes.hero.querySelector('svg');
-  if(oldSvg){
-   if(current.asset==='sun'||current.asset==='partly-cloudy'&&c.is_day!==0){
-    oldSvg.style.display='';
-    nodes.hero.querySelector('img.stitch-weather-icon')?.remove();
-   }else{
-    oldSvg.style.display='none';
-    var img=nodes.hero.querySelector('img.stitch-weather-icon');
-    if(!img){img=document.createElement('img');img.className='stitch-weather-icon';oldSvg.insertAdjacentElement('afterend',img);}
-    img.src='./assets/stitch/'+current.asset+'.svg';img.alt=current.name;
-   }
-  }
+  if(nodes.weatherVisual&&window.WeatherIcons)window.WeatherIcons.render(nodes.weatherVisual,c.weather_code,c.is_day,'weather-glyph--hero');
   var air=data.air?.current||{},pm=airGrade(air.pm10,[30,80,150]),fine=airGrade(air.pm2_5,[15,35,75]);
   put(nodes.airText,pm==='정보 없음'?'대기질 예측 정보 없음':pm.includes('나쁨')||fine.includes('나쁨')?'대기질 주의 · 활동 전 확인':'대기질 모델 예측 · 실외 활동 참고');
   // Retain original colored 2-chip presentation while replacing fictional values.
@@ -198,10 +182,11 @@
     var cond=condition(item.code,item.day);
     var b=document.createElement('button');b.type='button';
     b.className='stitch-hour-cell flex flex-col items-center justify-between min-w-[72px] h-32 py-space-sm rounded-xl shrink-0 shadow-sm '+(i?'bg-white border border-slate-200/80 text-slate-800':'stitch-hour-current bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-blue-500/20');
-    b.setAttribute('aria-label',(i?short(item.time):'현재 '+short(item.time))+' 기온 '+fmt(item.temp)+'도, 비 '+fmt(item.rain)+'퍼센트 상세');
+    b.setAttribute('aria-label',(i?short(item.time):'현재 '+short(item.time))+' '+cond.name+', 기온 '+fmt(item.temp)+'도, 비 '+fmt(item.rain)+'퍼센트 상세');
     if(!i)b.setAttribute('aria-current','time');
     var hour=document.createElement('span');hour.className='font-label-sm text-label-sm font-semibold';hour.textContent=i?' '+item.time.slice(11,13)+'시':'현재';
-    var ic=document.createElement('span');ic.className='material-symbols-outlined text-[26px] '+(i?'text-blue-600':'text-amber-200');ic.textContent=cond.icon;
+    var ic=document.createElement('span');ic.className='stitch-hour-weather';ic.setAttribute('aria-hidden','true');
+    ic.innerHTML=window.WeatherIcons?window.WeatherIcons.markup(item.code,item.day,'weather-glyph--tile'):'<span class="weather-glyph-fallback" aria-hidden="true">?</span>';
     var num=document.createElement('div');num.className='flex flex-col items-center';
     var temp=document.createElement('span');temp.className='font-tabular-metric text-tabular-metric font-bold';temp.textContent=fmt(item.temp)+'°';
     var rain=document.createElement('span');rain.className='font-label-sm text-label-sm mt-0.5';rain.textContent='비 '+fmt(item.rain)+'%';
@@ -239,7 +224,7 @@
  function init(){
   var oldView=document.getElementById('view-today');if(!oldView)return;
   decorateNav();favourite();
-  fetch('./stitch-today.template.html').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
+  fetch('./stitch-today.template.html?v=17').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
    var host=document.createElement('div');host.id='stitch-live-dashboard';host.innerHTML=html;
    var group=[...host.firstElementChild.children].filter(x=>x.tagName==='SECTION');
    if(group.length!==7)throw Error('Stitch 원본 섹션 변경: '+group.length);

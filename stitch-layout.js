@@ -96,15 +96,9 @@
  }
  function currentWeatherIcon(){
   var target=document.getElementById("weatherIcon");if(!target)return;
-  function update(){
-   var content=target.textContent||"";
-   var iconName=/⛈|⚡|🌩/.test(content)?"storm":/❄|🌨|☃/.test(content)?"snow":
-    /🌧|☔|🌦|☂/.test(content)?"rain":/☁|🌥|🌫/.test(content)?"partly-cloudy":"sun";
-   target.style.backgroundImage='url("./assets/stitch/'+iconName+'.svg")';
-   target.classList.add("stitch-weather-icon");
-  }
-  new MutationObserver(update).observe(target,{childList:true,characterData:true,subtree:true});
-  update();
+  target.style.backgroundImage="";
+  target.classList.remove("stitch-weather-icon");
+  target.classList.add("weather-icon-host");
  }
  function syncTabs(){
   var page=document.querySelector(".screen.active");

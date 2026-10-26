@@ -12,22 +12,9 @@
 <span class="text-slate-300 text-[10px]">|</span>
 <span class="font-label-sm text-label-sm text-primary font-semibold">조회 중</span>
 </div>
-<!-- Weather Icon Illustration (Bright Daytime Sun & Soft Cloud) -->
-<div class="relative w-28 h-24 my-1 flex items-center justify-center">
-<!-- Vibrant Warm Sun -->
-<div class="absolute w-16 h-16 rounded-full bg-gradient-to-tr from-amber-400 to-orange-400 shadow-[0_0_24px_rgba(251,191,36,0.65)] animate-pulse"></div>
-<!-- Soft Crisp Cloud -->
-<svg class="relative -bottom-2 -right-2 w-20 h-14 drop-shadow-[0_4px_10px_rgba(30,64,175,0.18)]" fill="none" viewbox="0 0 100 65">
-<path d="M22 55h58a18 18 0 0 0 4-35.5A24 24 0 0 0 38 14a22 22 0 0 0-21 16A16 16 0 0 0 22 55z" fill="#FFFFFF"></path>
-<path d="M22 55h58a18 18 0 0 0 4-35.5A24 24 0 0 0 38 14a22 22 0 0 0-21 16A16 16 0 0 0 22 55z" fill="url(#cloudGrad)" opacity="0.3"></path>
-<defs>
-<lineargradient id="cloudGrad" x1="0" x2="1" y1="0" y2="1">
-<stop offset="0%" stop-color="#93C5FD"></stop>
-<stop offset="100%" stop-color="#3B82F6"></stop>
-</lineargradient>
-</defs>
-</svg>
-</div>
+<!-- Live WMO weather illustration. The shared renderer supplies the exact
+     day/night, precipitation, fog, snow or thunder state. -->
+<div class="stitch-current-weather-visual my-1" data-weather-visual aria-hidden="true"></div>
 <!-- Temperature Display & Conditions -->
 <div class="flex items-start justify-center text-slate-900 tracking-tighter">
 <span class="font-display-mobile text-display-mobile font-bold text-slate-900">22</span>
@@ -190,7 +177,7 @@
 <!-- Now (Active Highlight Card) -->
 <div class="stitch-hour-cell stitch-hour-current flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20 shrink-0" aria-current="time">
 <span class="font-label-sm text-label-sm text-white/95 font-semibold">현재</span>
-<span class="material-symbols-outlined text-amber-300 text-[26px]">wb_sunny</span>
+<span class="stitch-hour-weather" aria-hidden="true"></span>
 <div class="flex flex-col items-center">
 <span class="font-tabular-metric text-tabular-metric text-white font-bold">22°</span>
 <span class="font-label-sm text-label-sm text-blue-100 font-medium mt-0.5">비 20%</span>
@@ -199,7 +186,7 @@
 <!-- 10시 -->
 <div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
 <span class="font-label-sm text-label-sm text-slate-500 font-medium">10시</span>
-<span class="material-symbols-outlined text-amber-500 text-[26px]">wb_sunny</span>
+<span class="stitch-hour-weather" aria-hidden="true"></span>
 <div class="flex flex-col items-center">
 <span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">22°</span>
 <span class="font-label-sm text-label-sm text-slate-400 mt-0.5">10%</span>
@@ -208,7 +195,7 @@
 <!-- 11시 -->
 <div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
 <span class="font-label-sm text-label-sm text-slate-500 font-medium">11시</span>
-<span class="material-symbols-outlined text-sky-500 text-[26px]">partly_cloudy_day</span>
+<span class="stitch-hour-weather" aria-hidden="true"></span>
 <div class="flex flex-col items-center">
 <span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">23°</span>
 <span class="font-label-sm text-label-sm text-slate-400 mt-0.5">20%</span>
@@ -217,7 +204,7 @@
 <!-- 13시 (Peak Warmth) -->
 <div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
 <span class="font-label-sm text-label-sm text-slate-500 font-medium">13시</span>
-<span class="material-symbols-outlined text-orange-500 text-[26px]">wb_sunny</span>
+<span class="stitch-hour-weather" aria-hidden="true"></span>
 <div class="flex flex-col items-center">
 <span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">25°</span>
 <span class="font-label-sm text-label-sm text-slate-400 mt-0.5">15%</span>
@@ -226,7 +213,7 @@
 <!-- 14시 -->
 <div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
 <span class="font-label-sm text-label-sm text-slate-500 font-medium">14시</span>
-<span class="material-symbols-outlined text-slate-400 text-[26px]">cloud</span>
+<span class="stitch-hour-weather" aria-hidden="true"></span>
 <div class="flex flex-col items-center">
 <span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">24°</span>
 <span class="font-label-sm text-label-sm text-blue-600 font-semibold mt-0.5">40%</span>
@@ -235,7 +222,7 @@
 <!-- 16시 (Rain Alert Card) -->
 <div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-blue-50/80 border border-blue-200/90 shrink-0 shadow-sm">
 <span class="font-label-sm text-label-sm text-amber-700 font-bold">16시</span>
-<span class="material-symbols-outlined text-blue-600 text-[26px] animate-bounce">rainy</span>
+<span class="stitch-hour-weather" aria-hidden="true"></span>
 <div class="flex flex-col items-center">
 <span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">21°</span>
 <span class="font-label-sm text-label-sm text-blue-600 font-bold mt-0.5">85%</span>
@@ -244,7 +231,7 @@
 <!-- 18시 -->
 <div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
 <span class="font-label-sm text-label-sm text-slate-500 font-medium">18시</span>
-<span class="material-symbols-outlined text-blue-500 text-[26px]">water_drop</span>
+<span class="stitch-hour-weather" aria-hidden="true"></span>
 <div class="flex flex-col items-center">
 <span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">20°</span>
 <span class="font-label-sm text-label-sm text-blue-600 font-medium mt-0.5">60%</span>
@@ -253,7 +240,7 @@
 <!-- 20시 -->
 <div class="flex flex-col items-center justify-between w-18 min-w-[72px] h-32 py-space-sm rounded-xl bg-white border border-slate-200/80 shrink-0 shadow-sm">
 <span class="font-label-sm text-label-sm text-slate-500 font-medium">20시</span>
-<span class="material-symbols-outlined text-indigo-500 text-[26px]">nights_stay</span>
+<span class="stitch-hour-weather" aria-hidden="true"></span>
 <div class="flex flex-col items-center">
 <span class="font-tabular-metric text-tabular-metric text-slate-900 font-bold">18°</span>
 <span class="font-label-sm text-label-sm text-slate-400 mt-0.5">10%</span>

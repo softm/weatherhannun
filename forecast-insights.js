@@ -41,7 +41,7 @@
     }
     return all.slice(0,Number(period));
   }
-  function sky(code){if(code===0)return "☀️";if(code===1)return "🌤️";if(code===2)return "⛅";if(code===3)return "☁️";if(code>=61&&code<=82)return "🌧️";if(code>=95)return "⛈️";if(code>=71&&code<=86)return "🌨️";return "🌤️";}
+  function sky(code,isDay){return window.WeatherIcons?window.WeatherIcons.markup(code,isDay,"weather-glyph--insight"):'<span class="weather-glyph-fallback" aria-hidden="true">?</span>';}
   function isWet(row){return (finite(row.rain)&&row.rain>=50)||(finite(row.mm)&&row.mm>=.3);}
   function isClear(row){return row.isDay===1&&row.code<=2&&row.code>=0&&(row.rain??100)<=20&&(row.mm??100)<.1;}
   function spans(all,predicate){
@@ -83,9 +83,10 @@
     const p=hours[0].date===hours[hours.length-1].date?prettyDate(hours[0].date):prettyDate(hours[0].date)+" ~ "+prettyDate(hours[hours.length-1].date);
     caption.textContent=p+" · "+hours.length+"시간 예보 · 현 시점 모델 기준";
     if(wet.length){
-      result.innerHTML='<span class="insight-icon">☂</span><div><span class="insight-small">비 가능성이 높은 첫 시간대</span><strong>'+safe(prettyTime(wet[0].start))+' ~ '+safe(formatHour(wet[0].end))+'</strong><small>강수확률 최고 '+number(wet[0].prob)+'% · 예보된 시간별 강수량 합계 '+number(wet[0].total,1)+'mm</small></div>';
+      const wetStart=hours.find(h=>h.time===wet[0].start)||hours[0];
+      result.innerHTML='<span class="insight-icon" aria-hidden="true">'+sky(wetStart.code,wetStart.isDay)+'</span><div><span class="insight-small">비 가능성이 높은 첫 시간대</span><strong>'+safe(prettyTime(wet[0].start))+' ~ '+safe(formatHour(wet[0].end))+'</strong><small>강수확률 최고 '+number(wet[0].prob)+'% · 예보된 시간별 강수량 합계 '+number(wet[0].total,1)+'mm</small></div>';
     }else{
-      result.innerHTML='<span class="insight-icon">🌤️</span><div><span class="insight-small">선택한 기간</span><strong>강수 가능성 높은 구간 없음</strong><small>최고 강수확률 '+number(maxProb)+'% · 예상 강수량 합계 '+number(estimated,1)+'mm · 비가 절대 오지 않는다는 뜻은 아닙니다</small></div>';
+      result.innerHTML='<span class="insight-icon" aria-hidden="true">'+sky(hours[0].code,hours[0].isDay)+'</span><div><span class="insight-small">선택한 기간</span><strong>강수 가능성 높은 구간 없음</strong><small>최고 강수확률 '+number(maxProb)+'% · 예상 강수량 합계 '+number(estimated,1)+'mm · 비가 절대 오지 않는다는 뜻은 아닙니다</small></div>';
     }
     function renderSegments(target,list,empty,style){
       target.innerHTML=list.length?list.slice(0,5).map((s,i)=>'<div class="forecast-span '+style+'"><div><b>'+safe(prettyTime(s.start))+' ~ '+safe(formatHour(s.end))+'</b><small>'+s.count+'시간 연속</small></div><strong>'+(style==="wet"?"최대 "+number(s.prob)+"%":"맑을 가능성")+'</strong></div>').join("")+(list.length>5?'<small class="muted-text">그 외 '+(list.length-5)+'개 구간이 더 있습니다.</small>':""):'<p class="muted-text">'+empty+'</p>';
