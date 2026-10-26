@@ -1,0 +1,38 @@
+/* WH-H03 clothing and umbrella guide: one compact decision surface, no nested cards. */
+.outfit-decision-card{box-sizing:border-box;min-width:0;margin:0 0 2px;padding:18px;border:1px solid #cfe0ee;border-radius:18px;background:#fff;color:#12243a;box-shadow:0 5px 18px rgba(20,74,120,.07)}
+.outfit-decision-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:13px}
+.outfit-decision-head-copy{min-width:0}
+.outfit-decision-overline{display:block;margin-bottom:3px;color:#526b82;font-size:10px;font-weight:800;letter-spacing:.12em}
+.outfit-decision-heading{margin:0;color:#153652;font-family:"Space Grotesk","DM Sans",sans-serif;font-size:18px;line-height:1.35}
+.outfit-decision-link{flex:0 0 auto;min-height:38px;padding:8px 11px;border:1px solid #b7d1e7;border-radius:10px;background:#f7fbff;color:#155b95;font-size:12px;font-weight:800;cursor:pointer}
+.outfit-decision-link:hover{background:#eaf5ff}
+.outfit-decision-link:focus-visible{outline:3px solid #3478ed;outline-offset:3px}
+.outfit-decision-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.outfit-decision-item{position:relative;min-width:0;padding:13px 14px 13px 47px;border:1px solid #dce7f0;border-radius:13px;background:#f7fafc}
+.outfit-decision-icon{position:absolute;left:13px;top:15px;display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:#e0effc;font-size:16px}
+.outfit-decision-item--umbrella .outfit-decision-icon{color:#1d659e;font-weight:800}
+.outfit-decision-kind{display:block;margin-bottom:2px;color:#52677c;font-size:11px;font-weight:800}
+.outfit-decision-title{display:block;color:#153652;font-size:15px;line-height:1.4;overflow-wrap:anywhere}
+.outfit-decision-detail{margin:3px 0 0;color:#4d6174;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.outfit-decision-evidence{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0 0}
+.outfit-evidence-item{display:flex;align-items:center;gap:5px;min-width:0;padding:5px 8px;border-radius:999px;background:#eef5fa;color:#405a70;font-size:10px;line-height:1.35}
+.outfit-evidence-item dt{font-weight:700}
+.outfit-evidence-item dd{margin:0;color:#173c5a;font-weight:800}
+.outfit-decision-caution{margin:8px 0 0;color:#627488;font-size:10px;line-height:1.45}
+.outfit-decision-card--action{border-color:#e9c99c;background:#fffaf2}
+.outfit-decision-card--action .outfit-decision-item{border-color:#ecd8b8;background:#fffdf8}
+.outfit-decision-card--partial,.outfit-decision-card--unknown{background:#f7f8fa;border-color:#d8dde5}
+[data-weather-theme="dark"] .outfit-decision-card{background:#10283e;border-color:#29465e;color:#f1f7fc;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+[data-weather-theme="dark"] .outfit-decision-overline,[data-weather-theme="dark"] .outfit-decision-kind{color:#aac5d9}
+[data-weather-theme="dark"] .outfit-decision-heading,[data-weather-theme="dark"] .outfit-decision-title{color:#f3f8ff}
+[data-weather-theme="dark"] .outfit-decision-item{background:#17354c;border-color:#34546d}
+[data-weather-theme="dark"] .outfit-decision-detail,[data-weather-theme="dark"] .outfit-decision-caution{color:#b9ccda}
+[data-weather-theme="dark"] .outfit-decision-icon{background:#244b67}
+[data-weather-theme="dark"] .outfit-decision-link{background:#1d4264;border-color:#467aa5;color:#f0f8ff}
+[data-weather-theme="dark"] .outfit-decision-link:hover{background:#255377}
+[data-weather-theme="dark"] .outfit-evidence-item{background:#183950;color:#b8ccdc}
+[data-weather-theme="dark"] .outfit-evidence-item dd{color:#eef8ff}
+[data-weather-theme="dark"] .outfit-decision-card--action{background:#493017;border-color:#84603b}
+[data-weather-theme="dark"] .outfit-decision-card--action .outfit-decision-item{background:#392919;border-color:#765331}
+[data-weather-theme="dark"] .outfit-decision-card--partial,[data-weather-theme="dark"] .outfit-decision-card--unknown{background:#242d38;border-color:#455366}
+@media(max-width:560px){.outfit-decision-card{padding:14px 12px}.outfit-decision-head{margin-bottom:10px}.outfit-decision-heading{font-size:16px}.outfit-decision-link{padding:7px 9px;font-size:11px}.outfit-decision-grid{grid-template-columns:1fr;gap:7px}.outfit-decision-item{padding:11px 10px 11px 43px}.outfit-decision-icon{left:10px;top:12px}.outfit-decision-evidence{gap:5px}.outfit-evidence-item{border-radius:8px}}

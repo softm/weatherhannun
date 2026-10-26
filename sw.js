@@ -1,12 +1,13 @@
 "use strict";
-const CACHE="weatherhannun-shell-v23-settings-hub";
+const CACHE="weatherhannun-shell-v24-outfit-guide";
 const BASE=self.registration.scope;
 const SHELL=[
   "./","./index.html","./styles.css","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
   "./settings.css?v=22","./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",
   "./stitch-today.template.html?v=17","./stitch-today.js?v=21","./stitch-today.css?v=16",
   "./stitch-today.utilities.css","./rain-decision-core.js?v=21","./rain-decision-ui.js?v=21",
-  "./rain-decision.css?v=21","./assets/stitch/today-presenter.jpg","./assets/stitch/sun.svg",
+  "./rain-decision.css?v=21","./outfit-decision-core.js?v=24","./outfit-decision-ui.js?v=24",
+  "./outfit-decision.css?v=24","./assets/stitch/today-presenter.jpg","./assets/stitch/sun.svg",
   "./assets/stitch/partly-cloudy.svg","./assets/stitch/storm.svg","./assets/stitch/snow.svg",
   "./assets/stitch/rain.svg","./assets/stitch/wind.svg","./assets/stitch/humidity.svg",
   "./assets/brand/weatherhannun-32.png?v=18","./assets/brand/weatherhannun-180.png?v=18",
