@@ -72,7 +72,7 @@
     const alerts = [];
     const rain = rows.slice(0, 12).find(row => (finite(row.rain) && row.rain >= prefs.rainThreshold) || (finite(row.mm) && row.mm >= 1));
     const dryRows = rows.slice(0, 6);
-    const dry = dryRows.length >= 3 && dryRows.every(row => finite(row.rain) && row.rain <= 100 - prefs.dryThreshold && (!finite(row.mm) || row.mm < 0.3));
+    const dry = dryRows.length >= 3 && dryRows.every(row => finite(row.rain) && row.rain <= 100 - prefs.dryThreshold && finite(row.mm) && row.mm < 0.3);
     const clear = firstClearRun(rows.slice(0, 24), prefs.clearHours);
     const frost = rows.slice(0, 48).find(row => finite(row.temp) && row.temp <= 2);
     const wind = rows.slice(0, 24).find(row => finite(row.gust) && row.gust >= 35);

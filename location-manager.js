@@ -21,6 +21,7 @@
   function finishIntro(){try{localStorage.setItem(INTRO,"done");}catch(_){ }const dialog=$("weatherLocationWelcome");if(dialog?.open)dialog.close();}
   function status(message){if($("geoLocationStatus"))$("geoLocationStatus").textContent=message;if($("locationMessage"))$("locationMessage").textContent=message;}
   function persist(){if(!store(STORAGE,places)){status("브라우저 저장소에 접근할 수 없어 지역 변경이 유지되지 않을 수 있습니다.");return false;}return true;}
+  function notifyPlaces(){if(typeof CustomEvent==="function")window.dispatchEvent(new CustomEvent("weatherhannun:places-changed",{detail:{count:places.length}}));}
   function loadPlaces(){
     const current=stored(STORAGE);
     if(Array.isArray(current)){places=core.collection(current);return;}
@@ -39,9 +40,9 @@
     const activeSaved=places.some(p=>core.same(p,active));
     const holder=$("favoriteLocations");
     if(holder){
-      holder.innerHTML=places.length?places.map(p=>{
+      holder.innerHTML=places.length?places.map((p,index)=>{
         const selected=core.same(active,p);
-        return '<div class="location-place-row'+(selected?" is-active":"")+'"><button type="button" data-location-select="'+esc(p.id)+'" class="location-place-select" aria-label="'+esc(p.name)+' 날씨 보기"><span class="location-place-symbol">📍</span><span class="location-place-text"><span class="location-place-name">'+esc(p.name)+'</span>'+(p.address&&p.address!==p.name?'<small class="location-place-address">'+esc(p.address)+(p.regionCenter?" · 지역 대표 좌표":" · 추정주소")+'</small>':'')+'</span>'+(selected?'<span class="location-place-current">보는 중</span>':'')+'</button><button type="button" class="location-edit-button" data-location-edit="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 이름 변경" title="이름 변경">수정</button><button type="button" class="location-delete-button" data-location-delete="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 저장 지역 삭제" title="삭제">삭제</button></div>';
+        return '<div class="location-place-row'+(selected?" is-active":"")+'"><button type="button" data-location-select="'+esc(p.id)+'" class="location-place-select" aria-label="'+esc(p.name)+' 날씨 보기"><span class="location-place-symbol">📍</span><span class="location-place-text"><span class="location-place-name">'+esc(p.name)+'</span>'+(p.address&&p.address!==p.name?'<small class="location-place-address">'+esc(p.address)+(p.regionCenter?" · 지역 대표 좌표":" · 추정주소")+'</small>':'')+'</span>'+(selected?'<span class="location-place-current">보는 중</span>':'')+'</button><span class="location-order-buttons" role="group" aria-label="'+esc(p.name)+' 순서 변경"><button type="button" data-location-move="up" data-location-id="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 위로 이동" title="위로 이동"'+(index===0?' disabled':'')+'>↑</button><button type="button" data-location-move="down" data-location-id="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 아래로 이동" title="아래로 이동"'+(index===places.length-1?' disabled':'')+'>↓</button></span><button type="button" class="location-edit-button" data-location-edit="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 이름 변경" title="이름 변경">수정</button><button type="button" class="location-delete-button" data-location-delete="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 저장 지역 삭제" title="삭제">삭제</button></div>';
       }).join(""):'<p class="muted-text location-empty">저장된 지역이 없습니다. 위에서 지역을 검색하거나 현재 위치를 선택한 뒤 저장할 수 있습니다.</p>';
     }
     const save=$("saveCurrentLocation");
@@ -66,6 +67,7 @@
       (placeButtons||'<span class="location-fast-empty">아직 등록한 지역이 없습니다.</span>')+
       (!activeSaved&&active?'<button type="button" class="location-fast-save" data-location-save-current>☆ 현재 지역 등록</button>':'')+
       '<button type="button" class="location-fast-gps" data-geo-quick>⌖ 현위치</button>'+
+      '<button type="button" class="location-fast-compare" data-location-compare>⇄ 지역 비교</button>'+
       '<button type="button" class="location-fast-manage" data-location-manage aria-label="지역 추가 및 관리">+ 지역 추가·관리</button></div>';
     }
   }
@@ -87,7 +89,7 @@
     if(outcome.error==="exists")return status("이미 저장한 지역입니다. 이름 변경은 '수정'을 이용하세요.");
     if(outcome.error==="full")return status("최대 "+core.MAX_SAVED+"곳까지 저장할 수 있습니다. 사용하지 않는 지역을 삭제해 주세요.");
     if(outcome.error)return status("지역을 저장할 수 없습니다.");
-    places=outcome.items;persist();render();
+    places=outcome.items;persist();render();notifyPlaces();
     status("★ "+active.name+" 지역을 저장했습니다. 이름은 '수정'으로 바꿀 수 있습니다.");
   }
   function chooseSaved(id){
@@ -100,7 +102,7 @@
     if(!removed.removed)return;
     places=removed.items;
     deleted={entry:removed.removed,index:removed.index};
-    persist();render();
+    persist();render();notifyPlaces();
     if(core.same(active,removed.removed)){
       const fallback=core.afterDelete(active,removed.removed,places,DEFAULT);
       choose(fallback,"manual",true);
@@ -117,7 +119,15 @@
     updated.items.splice(updated.items.length-1,1);
     updated.items.splice(Math.min(deleted.index,updated.items.length),0,deleted.entry);
     places=core.collection(updated.items);
-    deleted=null;persist();render();status("삭제한 지역을 복구했습니다.");
+    deleted=null;persist();render();notifyPlaces();status("삭제한 지역을 복구했습니다.");
+  }
+  function moveSaved(id,direction){
+    const outcome=core.move(places,id,direction);
+    if(outcome.error)return;
+    places=outcome.items;
+    persist();render();notifyPlaces();
+    const moved=places.find(place=>place.id===id);
+    status((moved?.name||"저장 지역")+" 순서를 "+(direction==="up"?"위":"아래")+"로 옮겼습니다.");
   }
   function editSaved(id){
     const p=places.find(p=>p.id===id);if(!p)return;
@@ -130,7 +140,7 @@
     const input=$("editLocationName"),name=input?.value||"";
     const res=core.rename(places,editId,name);
     if(res.error){$("renameError").textContent="지역 이름을 1자 이상 입력해 주세요.";input?.focus();return;}
-    places=res.items;persist();
+    places=res.items;persist();notifyPlaces();
     const modified=places.find(x=>x.id===editId);
     if(modified&&core.same(active,modified)){
       active={...active,name:modified.name};
@@ -143,10 +153,12 @@
     const target=event.target.closest("button");
     if(!target)return;
     if(target.hasAttribute("data-location-select"))return chooseSaved(target.getAttribute("data-location-select"));
+    if(target.hasAttribute("data-location-move"))return moveSaved(target.getAttribute("data-location-id"),target.getAttribute("data-location-move"));
     if(target.hasAttribute("data-location-delete"))return deleteSaved(target.getAttribute("data-location-delete"));
     if(target.hasAttribute("data-location-edit"))return editSaved(target.getAttribute("data-location-edit"));
     if(target.hasAttribute("data-location-save-current"))return saveCurrent();
     if(target.hasAttribute("data-geo-quick"))return requestCurrentPosition(true);
+    if(target.hasAttribute("data-location-compare"))return document.querySelector('.desktop-nav [data-view="compare"]')?.click();
     if(target.hasAttribute("data-location-manage"))return $("locationButton")?.click();
   }
   function setBusy(value){
@@ -187,7 +199,7 @@
       return {...item,address:found.address,administrative:found.administrative||"",approximate:true,
         name:item.name==="내 현재 위치"?next.name:item.name};
     });
-    if(listChanged)persist();
+    if(listChanged){persist();notifyPlaces();}
     choose(next,"gps");
     status("현재 위치의 추정 주소: "+found.address+" · 지도 데이터 기준이므로 실제 주소와 차이가 있을 수 있습니다.");
   }
@@ -286,6 +298,10 @@
     if(active.source!=="gps")reverseVersion++; // Cancel stale GPS address response.
     render();
   });
-  window.WeatherLocationManager={requestCurrentPosition};
+  window.WeatherLocationManager={
+    requestCurrentPosition,
+    getSavedPlaces:()=>places.map(place=>({...place})),
+    getActiveLocation:()=>active?{...active}:null
+  };
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();

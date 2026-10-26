@@ -1,8 +1,7 @@
 "use strict";
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var BASE = "https://api.open-meteo.com/v1/forecast";
-  var AIR_BASE = "https://air-quality-api.open-meteo.com/v1/air-quality";
+  var PROVIDER = window.WeatherProviderCore;
   var CITY_LIST = [
     { name: "서산", lat: 36.7845, lon: 126.4503 },
     { name: "서울", lat: 37.5665, lon: 126.978 },
@@ -15,13 +14,8 @@
     { name: "부산", lat: 35.1796, lon: 129.0756 },
     { name: "제주", lat: 33.4996, lon: 126.5312 }
   ];
-  var ACTIVITIES = {
-    spray: { title: "농약 방제", icon: "🌿", category: "agri", hint: "바람·비·온도를 종합해 약제 비산 위험을 줄이는 데 참고하세요." },
-    harvest: { title: "수확·농작업", icon: "🌾", category: "agri", hint: "비와 고온, 강풍을 피할 수 있는 시간대를 찾습니다." },
-    walk: { title: "산책·외출", icon: "🚶", category: "outdoor", hint: "기온·비·자외선·바람을 고려합니다." },
-    laundry: { title: "빨래", icon: "👕", category: "daily", hint: "비가 적고 습도가 낮은 낮 시간대를 우선합니다." },
-    carwash: { title: "세차", icon: "🚗", category: "daily", hint: "당장뿐 아니라 다음 6시간의 강수 가능성도 확인합니다." }
-  };
+  var ACTIVITY_CORE=window.WeatherActivityCore;
+  var ACTIVITIES=ACTIVITY_CORE?ACTIVITY_CORE.DEFINITIONS:{};
   var STATE = {
     loc: CITY_LIST[0], weather: null, air: null, activity: "walk", dataStatus: "loading",
     view: "today", hourly: [], fetchedAt: null, cityData: null,
@@ -81,29 +75,13 @@
     else renderAll();
   }
   function forecastUrl(loc,short) {
-    var url = new URL(BASE);
-    url.searchParams.set("latitude",loc.lat);
-    url.searchParams.set("longitude",loc.lon);
-    url.searchParams.set("timezone","Asia/Seoul");
-    if(short){
-      url.searchParams.set("current","temperature_2m,weather_code,is_day");
-    }else{
-      url.searchParams.set("current","temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m");
-      url.searchParams.set("hourly","temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,relative_humidity_2m,uv_index,is_day");
-      url.searchParams.set("daily","weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,uv_index_max");
-      url.searchParams.set("forecast_days","7");
-    }
-    return url.href;
+    return PROVIDER?PROVIDER.buildForecastUrl(loc,{short:!!short}):"";
   }
   function airUrl(loc) {
-    var url=new URL(AIR_BASE);
-    url.searchParams.set("latitude",loc.lat);
-    url.searchParams.set("longitude",loc.lon);
-    url.searchParams.set("current","pm10,pm2_5,us_aqi");
-    url.searchParams.set("timezone","Asia/Seoul");
-    return url.href;
+    return PROVIDER?PROVIDER.buildAirUrl(loc):"";
   }
   async function getJson(url) {
+    if(!url)throw new Error("데이터 공급자 설정을 불러오지 못했습니다.");
     var ctrl=new AbortController();
     var timeout=setTimeout(function(){ctrl.abort();},13000);
     try {
@@ -141,14 +119,15 @@
       if(ticket!==STATE.ticket)return;
       var weather=results[0].status==="fulfilled"?results[0].value:null;
       var air=results[1].status==="fulfilled"?results[1].value:null;
-      if(!weather || !weather.current || !weather.daily || !weather.hourly) throw new Error("날씨 데이터를 불러오지 못했습니다.");
+      var contract=PROVIDER&&PROVIDER.inspectForecastPayload(weather);
+      if(!contract||!contract.valid) throw new Error("날씨 데이터 계약에 필요한 값이 없습니다: "+((contract&&contract.missingFields)||["공급자 모듈"]).join(", "));
       STATE.weather=weather;
       STATE.air=air;
       STATE.dataStatus="live";
       STATE.fetchedAt=new Date().toISOString();
       STATE.hourly=makeHours(weather);
       storeSet("weatherhannun_last",{loc:loc,at:STATE.fetchedAt,weather:weather,air:air});
-      storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air});
+      storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:PROVIDER&&PROVIDER.PROVIDER.id});
       renderAll();
       if(!air) toast("대기질 API 연결이 불안정합니다. 날씨는 정상 표시됩니다.");
     }catch(e) {
@@ -196,7 +175,7 @@
     renderDecisions();
     renderActivity();
     renderAir();
-    window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:{weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt,status:STATE.dataStatus}}));
+    window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:{weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt,status:STATE.dataStatus,source:PROVIDER?PROVIDER.sourceRecord({payload:w,fetchedAt:STATE.fetchedAt,cached:STATE.dataStatus!=="live",fallbackReason:STATE.dataStatus==="cached-error"?"network_error":""}):null}}));
   }
   function renderHourly(){
     var h=STATE.hourly.slice(0,36),width=Math.max(36*76,h.length*76);
@@ -208,20 +187,20 @@
     var labels=h.map(function(x,i){return i%3===0?'<text x="'+(38+i*76)+'" y="'+(103-(x.temp-low)/(high-low)*83-11).toFixed(1)+'" fill="#ffdd97" font-size="12" text-anchor="middle">'+safe(num(x.temp))+'°</text>':"";}).join("");
     var dots=h.map(function(x,i){return i%3===0?'<circle cx="'+(38+i*76)+'" cy="'+(103-(x.temp-low)/(high-low)*83).toFixed(1)+'" r="3.4" fill="#ffda86"/>':"";}).join("");
     $("hourlyChart").innerHTML='<svg width="'+width+'" height="124" viewBox="0 0 '+width+' 124" role="img" aria-label="기온 변동 그래프"><defs><linearGradient id="lineFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#f7bd66" stop-opacity=".22"/><stop offset="100%" stop-color="#f7bd66" stop-opacity="0"/></linearGradient></defs><polygon points="'+points+' '+(38+(h.length-1)*76)+',121 38,121" fill="url(#lineFill)"/><polyline points="'+points+'" stroke="#ffcf78" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>'+dots+labels+'</svg>';
-    $("hourlyItems").innerHTML=h.map(function(x,i){var symbol=weatherSymbol(x.code,x.isDay),label=i===0?"현재":hourLabel(x.time);return '<div class="hour-item '+(i===0?"now":"")+'" data-hour-index="'+i+'" aria-label="'+safe(label+", "+symbol.name+", "+num(x.temp)+"도, 비 "+num(x.rain)+"퍼센트, 바람 "+num(x.wind)+"킬로미터")+'"><span class="hour-time">'+label+'</span><span class="hour-icon" aria-hidden="true">'+symbol.icon+'</span><span class="hour-temp">'+num(x.temp)+'°</span><span class="hour-rain">☂ '+num(x.rain)+'%</span><span class="hour-wind">≋ '+num(x.wind)+' km/h</span></div>';}).join("");
+    $("hourlyItems").innerHTML=h.map(function(x,i){var symbol=weatherSymbol(x.code,x.isDay),label=i===0?"현재":hourLabel(x.time);return '<div class="hour-item '+(i===0?"now":"")+'" data-hour-index="'+i+'" aria-label="'+safe(label+", "+symbol.name+", "+num(x.temp)+"도, 비 "+num(x.rain)+"퍼센트, 풍속 "+num(x.wind)+"킬로미터, 돌풍 "+num(x.gust)+"킬로미터")+'"><span class="hour-time">'+label+'</span><span class="hour-icon" aria-hidden="true">'+symbol.icon+'</span><span class="hour-temp">'+num(x.temp)+'°</span><span class="hour-rain">☂ '+num(x.rain)+'%</span><span class="hour-wind">풍 '+num(x.wind)+'</span><span class="hour-gust">돌 '+num(x.gust)+' km/h</span></div>';}).join("");
     var detail=$("hourlyDetailRows");
     if(detail){
       var windows=[];
       for(var start=0;start<Math.min(24,h.length);start+=3){
-        var rows=h.slice(start,start+3),temps=rows.map(function(x){return x.temp;}).filter(finite),winds=rows.map(function(x){return x.wind;}).filter(finite),rains=rows.map(function(x){return x.rain;}).filter(finite);
+        var rows=h.slice(start,start+3),temps=rows.map(function(x){return x.temp;}).filter(finite),winds=rows.map(function(x){return x.wind;}).filter(finite),gusts=rows.map(function(x){return x.gust;}).filter(finite),rains=rows.map(function(x){return x.rain;}).filter(finite);
         if(!rows.length)continue;
         var avgTemp=temps.length?temps.reduce(function(a,b){return a+b;},0)/temps.length:null;
-        var maxWind=winds.length?Math.max.apply(null,winds):null,maxRain=rains.length?Math.max.apply(null,rains):null;
-        windows.push({index:start,first:rows[0],last:rows[rows.length-1],temp:avgTemp,wind:maxWind,rain:maxRain});
+        var maxWind=winds.length?Math.max.apply(null,winds):null,maxGust=gusts.length?Math.max.apply(null,gusts):null,maxRain=rains.length?Math.max.apply(null,rains):null;
+        windows.push({index:start,first:rows[0],last:rows[rows.length-1],temp:avgTemp,wind:maxWind,gust:maxGust,rain:maxRain});
       }
       detail.innerHTML=windows.map(function(x,i){
         var symbol=weatherSymbol(x.first.code,x.first.isDay),label=i===0?"지금부터":hourLabel(x.first.time)+"–"+hourLabel(x.last.time);
-        return '<button type="button" class="hourly-detail-row" data-hour-window="'+x.index+'" aria-label="'+safe(label+", "+symbol.name+", 평균 "+num(x.temp)+"도, 비 "+num(x.rain)+"퍼센트")+'"><span class="hourly-detail-icon" aria-hidden="true">'+symbol.icon+'</span><span class="hourly-detail-main"><b>'+safe(label)+'</b><small>'+safe(dateLabel(x.first.time.slice(0,10)))+' · '+safe(symbol.name)+'</small></span><span class="hourly-detail-metrics"><span><small>기온</small><b>'+num(x.temp)+'°</b></span><span><small>비</small><b>'+num(x.rain)+'%</b></span><span><small>바람</small><b>'+num(x.wind)+'km/h</b></span></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>';
+        return '<button type="button" class="hourly-detail-row" data-hour-window="'+x.index+'" aria-label="'+safe(label+", "+symbol.name+", 평균 "+num(x.temp)+"도, 비 "+num(x.rain)+"퍼센트, 풍속 "+num(x.wind)+"킬로미터, 돌풍 "+num(x.gust)+"킬로미터")+'"><span class="hourly-detail-icon" aria-hidden="true">'+symbol.icon+'</span><span class="hourly-detail-main"><b>'+safe(label)+'</b><small>'+safe(dateLabel(x.first.time.slice(0,10)))+' · '+safe(symbol.name)+'</small></span><span class="hourly-detail-metrics"><span><small>기온</small><b>'+num(x.temp)+'°</b></span><span><small>비</small><b>'+num(x.rain)+'%</b></span><span><small>풍속</small><b>'+num(x.wind)+'km/h</b></span><span><small>돌풍</small><b>'+num(x.gust)+'km/h</b></span></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>';
       }).join("");
     }
     var preview=$("todayHourlyPreview");
@@ -278,49 +257,7 @@
     }
   }
   function evaluate(activity,h,following){
-    var score=100,reasons=[];
-    var rain=finite(h.rain)?h.rain:0, mm=finite(h.mm)?h.mm:0, wind=finite(h.wind)?h.wind:0, gust=finite(h.gust)?h.gust:wind, humid=finite(h.humidity)?h.humidity:60, t=finite(h.temp)?h.temp:20, uv=finite(h.uv)?h.uv:0, daytime=h.isDay!==0;
-    function penalty(n,label,detail){score-=n;reasons.push({label:label,detail:detail});}
-    if(activity==="spray") {
-      if(wind>=18)penalty(45,"강한 바람","평균풍속 "+num(wind)+" km/h — 비산 위험을 확인하세요.");
-      else if(wind>=10)penalty(18,"바람 주의","평균풍속 "+num(wind)+" km/h — 현장 풍향 확인 필요.");
-      if(gust>=25)penalty(28,"돌풍 위험","순간풍속 "+num(gust)+" km/h.");
-      if(rain>=40||mm>0.2)penalty(42,"강수 위험","강수확률 "+num(rain)+"%, 예상강수 "+num(mm,1)+"mm.");
-      else if(rain>=20)penalty(16,"강수 가능성","비 예보를 다시 확인하세요.");
-      if(t>=30)penalty(19,"고온 주의","기온 "+num(t)+"°C — 약해 및 작업자 열스트레스 유의.");
-      if(!daytime)penalty(42,"야간 작업","방제는 밝은 시간에 현장 안전과 표시사항을 확인하세요.");
-    } else if(activity==="harvest") {
-      if(rain>=45||mm>=0.4)penalty(44,"비에 의한 작업 위험","강수확률 "+num(rain)+"%.");
-      else if(rain>=20)penalty(13,"약한 강수 가능성","당일 강수 예보를 살펴보세요.");
-      if(wind>=30)penalty(23,"강풍 위험","풍속 "+num(wind)+" km/h.");
-      if(t>=31)penalty(21,"온열 부담","예상 기온 "+num(t)+"°C.");
-      if(humid>=90)penalty(11,"높은 습도","이슬·젖은 작물 여부를 확인하세요.");
-      if(!daytime)penalty(14,"야간 안전","야간 농작업은 조명과 안전 장비 필수.");
-    } else if(activity==="walk") {
-      if(rain>=45||mm>=.4)penalty(40,"비 예보","강수확률 "+num(rain)+"%.");
-      else if(rain>=20)penalty(13,"비 가능성","우산을 챙길 수 있습니다.");
-      if(wind>=35)penalty(24,"바람 강함","풍속 "+num(wind)+" km/h.");
-      if(t<4||t>32)penalty(33,"기온 부담","기온 "+num(t)+"°C.");
-      else if(t<9||t>29)penalty(12,"체감 주의","기온 "+num(t)+"°C.");
-      if(uv>=7)penalty(23,"자외선 강함","자외선 지수 "+num(uv,1)+" — 자외선 차단 권장.");
-    } else if(activity==="laundry") {
-      if(rain>=35||mm>=.3)penalty(54,"비 예보","강수확률 "+num(rain)+"%.");
-      else if(rain>=15)penalty(22,"강수 가능성","빨래를 실내로 옮길 준비.");
-      if(humid>80)penalty(28,"높은 습도","습도 "+num(humid)+"%로 건조에 불리.");
-      else if(humid>65)penalty(12,"습도 보통","습도 "+num(humid)+"%.");
-      if(!daytime)penalty(17,"햇빛 부족","야간에는 건조가 느릴 수 있습니다.");
-      if(wind>=35)penalty(16,"강풍 주의","빨래 고정 필요.");
-    } else if(activity==="carwash") {
-      var future=Array.isArray(following)?following:[];
-      var futureMax=Math.max(rain,...future.map(function(x){return finite(x.rain)?x.rain:0;}));
-      if(futureMax>=45||mm>=.4)penalty(58,"세차 후 비 가능성","이후 6시간 최고 강수확률 "+num(futureMax)+"%.");
-      else if(futureMax>=20)penalty(24,"강수 변동 위험","이후 6시간 최고 강수확률 "+num(futureMax)+"%.");
-      if(wind>=32)penalty(17,"강풍 주의","풍속 "+num(wind)+" km/h.");
-      if(t<=1)penalty(38,"결빙 위험","기온 "+num(t)+"°C — 물기 결빙 우려.");
-      if(!daytime)penalty(18,"야간 세차","시야와 주변 안전을 위해 가급적 낮 시간을 선택하세요.");
-    }
-    if(reasons.length===0)reasons.push({label:"주요 기상 위험 낮음",detail:"선택한 활동에 대해 설정된 기상조건의 큰 위험이 없습니다."});
-    return {score:clamp(Math.round(score),0,activity==="spray"?85:100),reasons:reasons};
+    return ACTIVITY_CORE?ACTIVITY_CORE.evaluate(activity,h,following):{available:false,score:null,reasons:[{label:"판단 모듈 없음",detail:"활동 판단 규칙을 불러오지 못했습니다."}]};
   }
   function activityEvalAt(type,index){
     var h=STATE.hourly[index]||{};
@@ -330,22 +267,28 @@
     var top=null;
     for(var i=0;i<Math.min(46,STATE.hourly.length-2);i++){
       var group=[i,i+1,i+2];
-      var avg=Math.round(group.reduce(function(s,j){return s+activityEvalAt(type,j).score;},0)/3);
-      if(!top||avg>top.score)top={score:avg,start:STATE.hourly[i].time,end:STATE.hourly[i+2].time};
+      var scores=group.map(function(j){return activityEvalAt(type,j);});
+      if(scores.some(function(result){return !result.available||!finite(result.score);}))continue;
+      var avg=Math.round(scores.reduce(function(s,result){return s+result.score;},0)/scores.length);
+      if(!top||avg>top.score)top={score:avg,index:i,start:STATE.hourly[i].time,end:STATE.hourly[i+2].time};
     }
     return top;
   }
-  function grade(score){return score>=80?"좋음":score>=60?"무난":score>=40?"주의":"비추천";}
-  function scoreClass(score){return score>=80?"":score>=60?"warn":"bad";}
+  function grade(score){return !finite(score)?"자료 부족":score>=80?"좋음":score>=60?"무난":score>=40?"주의":"비추천";}
+  function scoreClass(score){return !finite(score)?"unknown":score>=80?"":score>=60?"warn":"bad";}
+  function activitySummary(type){
+    var best=bestActivity(type),current=activityEvalAt(type,0);
+    return {key:type,info:ACTIVITIES[type],current:current,best:best,data:best?activityEvalAt(type,best.index):current};
+  }
   function renderDecisions(){
-    var rank=Object.keys(ACTIVITIES).map(function(k){return {key:k,info:ACTIVITIES[k],data:activityEvalAt(k,0),best:bestActivity(k)};}).sort(function(a,b){return b.data.score-a.data.score;});
+    var rank=Object.keys(ACTIVITIES).map(activitySummary).sort(function(a,b){return (finite(b.data.score)?b.data.score:-1)-(finite(a.data.score)?a.data.score:-1);});
     var top=rank.slice(0,3);
-    text("decisionLead",top[0]&&top[0].data.score>=60?"오늘은 "+top[0].info.title+"에 비교적 유리한 날씨예요.":"현재 날씨는 활동을 신중하게 선택할 시간이에요.");
-    $("quickActivity").innerHTML=top.map(function(x){return '<button type="button" class="quick-item" data-quick-activity="'+x.key+'"><div class="quick-icon">'+x.info.icon+'</div><div class="quick-main"><b>'+x.info.title+'</b><small>'+(x.best?"추천 "+whenLabel(x.best.start):"조건 확인 필요")+'</small></div><span class="quick-badge '+scoreClass(x.data.score)+'">'+grade(x.data.score)+' '+x.data.score+'</span></button>';}).join("");
+    text("decisionLead",top[0]&&finite(top[0].data.score)&&top[0].data.score>=60?"오늘은 "+top[0].info.title+"에 유리한 시간대가 있어요.":top.some(function(x){return finite(x.data.score);})?"활동별 추천 시간과 위험 근거를 확인하세요.":"필수 예보값이 부족해 활동 점수를 만들지 않습니다.");
+    $("quickActivity").innerHTML=top.map(function(x){return '<button type="button" class="quick-item" data-quick-activity="'+x.key+'"><div class="quick-icon">'+x.info.icon+'</div><div class="quick-main"><b>'+x.info.title+'</b><small>'+(x.best?"추천 "+whenLabel(x.best.start):"필수 예보값 확인 필요")+'</small></div><span class="quick-badge '+scoreClass(x.data.score)+'">'+grade(x.data.score)+(finite(x.data.score)?" "+x.data.score:"")+'</span></button>';}).join("");
   }
   function renderActivityFeed(){
     var target=$("activityFeed");if(!target)return;
-    var rank=Object.keys(ACTIVITIES).map(function(k){return {key:k,info:ACTIVITIES[k],data:activityEvalAt(k,0),best:bestActivity(k)};}).sort(function(a,b){return b.data.score-a.data.score;});
+    var rank=Object.keys(ACTIVITIES).map(activitySummary).sort(function(a,b){return (finite(b.data.score)?b.data.score:-1)-(finite(a.data.score)?a.data.score:-1);});
     var shown=rank.filter(function(x){return STATE.activityFilter==="all"||x.info.category===STATE.activityFilter;});
     target.innerHTML=shown.map(function(x){
       var reason=x.data.reasons[0]||{detail:x.info.hint};
@@ -353,21 +296,22 @@
       var bestIndex=x.best?STATE.hourly.findIndex(function(row){return row.time===x.best.start;}):0;
       var weather=STATE.hourly[Math.max(0,bestIndex)]||STATE.hourly[0]||{};
       var forecast=weatherSymbol(weather.code,weather.isDay);
-      return '<button type="button" class="activity-feed-card stitch-card '+(x.key===STATE.activity?"selected":"")+'" data-activity-open="'+x.key+'" aria-label="'+safe(x.info.title+", "+grade(x.data.score)+" "+x.data.score+"점, 추천 시간 날씨 "+forecast.name)+'"><span class="feed-icon" aria-hidden="true">'+x.info.icon+'</span><span class="feed-copy"><span><strong>'+safe(x.info.title)+'</strong><em class="feed-grade '+scoreClass(x.data.score)+'">'+grade(x.data.score)+'</em></span><small class="feed-best-time"><span aria-hidden="true">'+forecast.icon+'</span>추천 시간: '+safe(best)+' · '+safe(forecast.name)+'</small><span class="feed-metrics"><span>☂ '+num(weather.rain)+'%</span><span>≋ '+num(weather.wind)+'km/h</span><span>습도 '+num(weather.humidity)+'%</span></span><span class="feed-progress" aria-hidden="true"><i style="width:'+x.data.score+'%"></i></span><p>'+safe(reason.detail)+'</p></span><span class="score-ring" style="--score:'+x.data.score+'"><b>'+x.data.score+'</b><small>점</small></span><span class="material-symbols-outlined feed-arrow" aria-hidden="true">chevron_right</span></button>';
+      var scoreText=finite(x.data.score)?String(x.data.score):"--",scoreWidth=finite(x.data.score)?x.data.score:0;
+      return '<button type="button" class="activity-feed-card stitch-card '+(x.key===STATE.activity?"selected":"")+'" data-activity-open="'+x.key+'" aria-label="'+safe(x.info.title+", "+grade(x.data.score)+(finite(x.data.score)?" "+x.data.score+"점":"")+", 추천 시간 날씨 "+forecast.name)+'"><span class="feed-icon" aria-hidden="true">'+x.info.icon+'</span><span class="feed-copy"><span><strong>'+safe(x.info.title)+'</strong><em class="feed-grade '+scoreClass(x.data.score)+'">'+grade(x.data.score)+'</em></span><small class="feed-best-time"><span aria-hidden="true">'+forecast.icon+'</span>추천 시간: '+safe(best)+' · '+safe(forecast.name)+'</small><span class="feed-metrics"><span>☂ '+num(weather.rain)+'%</span><span>≋ '+num(weather.wind)+'km/h</span><span>습도 '+num(weather.humidity)+'%</span></span><span class="feed-progress" aria-hidden="true"><i style="width:'+scoreWidth+'%"></i></span><p>'+safe(reason.detail)+'</p></span><span class="score-ring" style="--score:'+scoreWidth+'"><b>'+scoreText+'</b><small>'+(finite(x.data.score)?"점":"")+'</small></span><span class="material-symbols-outlined feed-arrow" aria-hidden="true">chevron_right</span></button>';
     }).join("")||'<div class="empty-state">이 분류에 표시할 활동이 없습니다.</div>';
     var lead=shown[0]||rank[0];
-    if(lead){text("activitySummaryText",lead.info.title+"에 가장 좋은 조건");text("activitySummarySub",lead.best?"추천 "+whenLabel(lead.best.start):lead.info.hint);text("activitySummaryScore",lead.data.score);}
+    if(lead){text("activitySummaryText",finite(lead.data.score)?lead.info.title+"에 가장 좋은 조건":"활동 판단 자료 부족");text("activitySummarySub",lead.best?"추천 "+whenLabel(lead.best.start):lead.info.hint);text("activitySummaryScore",finite(lead.data.score)?lead.data.score:"--");}
   }
   function renderActivity(){
     var key=STATE.activity,info=ACTIVITIES[key],now=activityEvalAt(key,0),best=bestActivity(key);
     text("activityTitle",info.icon+" "+info.title);
-    text("activityScore",now.score);
+    text("activityScore",finite(now.score)?now.score:"--");
     text("activityGrade",grade(now.score));
-    $("activityProgress").style.width=now.score+"%";
+    $("activityProgress").style.width=(finite(now.score)?now.score:0)+"%";
     text("activityDetail",info.hint+" 현재 조건 평가 "+grade(now.score)+".");
     text("activityBest",best?whenLabel(best.start)+" ~ "+hourLabel(best.end)+" ("+best.score+"점)":"적합 구간 확인 불가");
     $("activityReasons").innerHTML=now.reasons.map(function(r){return '<div class="reason-item"><span class="reason-icon" aria-hidden="true">✦</span><div><b>'+safe(r.label)+'</b><p>'+safe(r.detail)+'</p></div></div>';}).join("");
-    $("activityHours").innerHTML=STATE.hourly.slice(0,24).map(function(x,i){var s=activityEvalAt(key,i).score,c=s>=80?"good":s>=50?"mid":"bad";return '<div class="suitability '+c+'"><span>'+safe(i===0?"지금":hourLabel(x.time))+'</span><b>'+s+'</b><span>'+grade(s)+'</span></div>';}).join("");
+    $("activityHours").innerHTML=STATE.hourly.slice(0,24).map(function(x,i){var s=activityEvalAt(key,i).score,c=!finite(s)?"unknown":s>=80?"good":s>=50?"mid":"bad";return '<div class="suitability '+c+'"><span>'+safe(i===0?"지금":hourLabel(x.time))+'</span><b>'+(finite(s)?s:"--")+'</b><span>'+grade(s)+'</span></div>';}).join("");
     renderActivityFeed();
   }
   function airLevel(value,thresholds){
@@ -393,13 +337,17 @@
     $("airMetrics").innerHTML=values.map(function(v,i){var st=statuses[i];var percent=clamp((v.value||0)/(v.thresholds[2]*1.5)*100,1,100);return '<div><div class="air-row-head"><b>'+v.name+'</b><span>'+st.grade+' <strong>'+num(v.value,1)+'</strong></span></div><div class="air-bar"><div style="width:'+percent+'%"></div></div></div>';}).join("");
   }
   function setView(view){
-    if(!["today","hourly","weekly","activity","air","map","settings"].includes(view))return;
+    if(!["today","hourly","weekly","activity","air","map","compare","settings"].includes(view))return;
     if(view!=="map")setMapFocus(false);
     STATE.view=view;
     document.querySelectorAll(".screen").forEach(function(el){el.classList.toggle("active",el.id==="view-"+view);});
     document.querySelectorAll("[data-view]").forEach(function(el){var a=el.dataset.view===view;el.classList.toggle("active",a);if(el.classList.contains("nav-button"))el.setAttribute("aria-current",a?"page":"false");});
     window.scrollTo({top:0,behavior:"instant"});
     if(view==="map")showMap();
+    window.dispatchEvent(new CustomEvent("weatherhannun:view",{detail:{
+      view:view,
+      data:STATE.weather?{weather:STATE.weather,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt,status:STATE.dataStatus,source:PROVIDER?PROVIDER.sourceRecord({payload:STATE.weather,fetchedAt:STATE.fetchedAt,cached:STATE.dataStatus!=="live"}):null}:null
+    }}));
   }
   function setMapFocus(active){
     var shell=$("mapShell");shell.classList.toggle("focus-mode",!!active);

@@ -241,6 +241,7 @@
    while(oldView.firstChild)old.appendChild(oldView.firstChild);
    oldView.append(host,old);view=host;setup(group);
    document.documentElement.dataset.stitchLive='true';
+   window.dispatchEvent(new CustomEvent('weatherhannun:stitch-ready'));
    if(latest)render(latest);
   }).catch(err=>{console.error('Stitch today fallback to existing dashboard',err);});
  }

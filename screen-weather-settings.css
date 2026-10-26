@@ -1,0 +1,29 @@
+/* WH-O01 is Android-only, opt-in and intentionally contained in the unified settings view. */
+.screen-weather-settings{grid-column:1/-1}
+.home-widget-settings{grid-column:1/-1}
+.screen-weather-settings .settings-card-heading{grid-template-columns:auto 1fr auto}
+.home-widget-settings .settings-card-heading{grid-template-columns:auto 1fr auto}
+.screen-weather-badge{align-self:start;padding:5px 9px;border:1px solid var(--st-line);border-radius:999px;background:var(--panel2);color:var(--st-muted);font-size:10px;font-weight:800;white-space:nowrap}
+.screen-weather-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;padding:13px 14px;border:1px solid var(--st-line);border-radius:13px;background:var(--panel2)}
+.screen-weather-toggle b,.screen-weather-toggle small{display:block}
+.screen-weather-toggle b{color:var(--st-fg);font-size:13px}
+.screen-weather-toggle small{margin-top:3px;color:var(--st-muted);font-size:10px;line-height:1.4}
+.screen-weather-toggle input{appearance:none;position:relative;flex:0 0 auto;width:46px;height:26px;margin:0;border:1px solid #9aabba;border-radius:999px;background:#c9d3dc;cursor:pointer}
+.screen-weather-toggle input::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .16s ease}
+.screen-weather-toggle input:checked{border-color:#1d75f0;background:#1d75f0}
+.screen-weather-toggle input:checked::after{transform:translateX(20px)}
+.screen-weather-toggle input:focus-visible{outline:3px solid #3478ed;outline-offset:3px}
+.screen-weather-toggle input:disabled{cursor:not-allowed;opacity:.55}
+.screen-weather-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}
+.screen-weather-options label{display:grid;gap:5px;color:var(--st-muted);font-size:10px;font-weight:800}
+.screen-weather-options select{width:100%;min-height:40px;padding:8px 10px;border:1px solid var(--st-line);border-radius:10px;background:var(--panel2);color:var(--st-fg);font:inherit;font-size:12px}
+.screen-weather-actions{margin-top:10px}
+.screen-weather-note{margin:10px 0 0!important;padding-top:10px;border-top:1px solid var(--st-line);color:var(--st-muted)!important;font-size:10px!important;line-height:1.55}
+.home-widget-sizes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}
+.home-widget-sizes span{display:grid;place-items:center;min-height:68px;padding:10px;border:1px solid var(--st-line);border-radius:13px;background:var(--panel2);text-align:center}
+.home-widget-sizes b{color:var(--st-fg);font-size:19px;letter-spacing:-.03em}
+.home-widget-sizes small{margin-top:3px;color:var(--st-muted);font-size:10px;font-weight:750}
+html[data-weather-theme="dark"] .screen-weather-toggle input{border-color:#587086;background:#32495d}
+html[data-weather-theme="dark"] .screen-weather-toggle input:checked{border-color:#5ca9ff;background:#267bd8}
+@media(max-width:560px){.screen-weather-settings .settings-card-heading,.home-widget-settings .settings-card-heading{grid-template-columns:auto 1fr}.screen-weather-badge{grid-column:2}.screen-weather-options{grid-template-columns:1fr}.screen-weather-toggle{align-items:flex-start}.screen-weather-toggle input{margin-top:2px}.home-widget-sizes{gap:6px}.home-widget-sizes span{min-height:60px;padding:8px}}
+@media(prefers-reduced-motion:reduce){.screen-weather-toggle input::after{transition:none}}

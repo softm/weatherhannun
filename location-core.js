@@ -54,8 +54,19 @@
     if(index<0)return {items,removed:null,index:-1};
     return {items:items.filter(x=>x.id!==id),removed:items[index],index};
   }
+  function move(list,id,direction){
+    const items=collection(list),from=items.findIndex(x=>x.id===id);
+    if(from<0)return {items,error:"missing",from:-1,to:-1};
+    const step=direction==="up"?-1:direction==="down"?1:0;
+    if(!step)return {items,error:"direction",from,to:from};
+    const to=from+step;
+    if(to<0||to>=items.length)return {items,error:"boundary",from,to:from};
+    const reordered=items.slice();
+    [reordered[from],reordered[to]]=[reordered[to],reordered[from]];
+    return {items:reordered,error:null,from,to};
+  }
   function afterDelete(active,removed,remaining,defaultLoc){
     return same(active,removed)?(collection(remaining)[0]||cleanPlace(defaultLoc)):null;
   }
-  return Object.freeze({MAX_SAVED,cleanPlace,key,same,collection,add,rename,remove,afterDelete});
+  return Object.freeze({MAX_SAVED,cleanPlace,key,same,collection,add,rename,remove,move,afterDelete});
 });

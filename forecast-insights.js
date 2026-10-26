@@ -45,6 +45,16 @@
     return all.slice(0,Number(period));
   }
   function sky(code,isDay){return window.WeatherIcons?window.WeatherIcons.markup(code,isDay,"weather-glyph--insight"):'<span class="weather-glyph-fallback" aria-hidden="true">?</span>';}
+  function weatherName(code){
+    if(code===0)return "맑음";
+    if(code===1||code===2)return "대체로 맑음";
+    if(code===3)return "흐림";
+    if(code===45||code===48)return "안개";
+    if((code>=51&&code<=67)||(code>=80&&code<=82))return "비";
+    if((code>=71&&code<=77)||code===85||code===86)return "눈";
+    if(code>=95&&code<=99)return "뇌우";
+    return "날씨 확인";
+  }
   function isWet(row){return (finite(row.rain)&&row.rain>=50)||(finite(row.mm)&&row.mm>=.3);}
   function isClear(row){return row.isDay===1&&row.code<=2&&row.code>=0&&(row.rain??100)<=20&&(row.mm??100)<.1;}
   function spans(all,predicate){
@@ -160,6 +170,7 @@
     try{bridge.saveAlertConfiguration(JSON.stringify(payload));return true;}catch(_){return false;}
   }
   function renderAlerts(){
+    renderNotificationPreview();
     const root=el("alertList");if(!root||!data)return;
     const notices=pickNotices();
     root.innerHTML=notices.length?notices.map(a=>'<div class="notice-result"><b>'+safe(a.title)+'</b><span>'+safe(a.body)+'</span></div>').join(""):'<p class="muted-text">설정한 기준에서 가까운 경보 조건이 없거나 조건을 선택하지 않았습니다.</p>';
@@ -167,6 +178,42 @@
       if(nativeBridge())el("foregroundNotice").textContent="Android 앱이 약 15분 주기로 확인합니다. 절전 상태에서는 알림이 늦어질 수 있습니다.";
       else el("foregroundNotice").textContent=("Notification" in window&&Notification.permission==="granted")?"브라우저 알림 사용 허용됨 · 앱 열림 상태에서만 점검":"웹에서는 앱이 열린 상태에서만 조건을 확인합니다.";
     }
+  }
+  function currentControl(id,fallback){const control=el(id);return control?control.value||fallback:fallback;}
+  function checkedControl(id,fallback){const control=el(id);return control?control.checked:fallback;}
+  function renderNotificationPreview(){
+    const title=el("notificationPreviewTitle"),body=el("notificationPreviewBody"),schedule=el("notificationPreviewSchedule"),icon=el("notificationPreviewWeatherIcon");
+    if(!title||!body||!schedule)return;
+    const current=data?.weather?.current||{};
+    const allRows=rows();
+    const code=finite(current.weather_code)?current.weather_code:allRows[0]?.code;
+    const isDay=finite(current.is_day)?current.is_day:allRows[0]?.isDay;
+    const temp=finite(current.temperature_2m)?current.temperature_2m:allRows[0]?.temp;
+    const feels=current.apparent_temperature;
+    const daily=data?.weather?.daily||{};
+    const high=Array.isArray(daily.temperature_2m_max)?daily.temperature_2m_max[0]:null;
+    const low=Array.isArray(daily.temperature_2m_min)?daily.temperature_2m_min[0]:null;
+    const next=allRows.slice(0,12);
+    const threshold=Number(currentControl("rainThreshold",prefs.rainThreshold||50));
+    const firstRain=next.find(row=>(finite(row.rain)&&row.rain>=threshold)||(finite(row.mm)&&row.mm>=1));
+    const rainProbabilities=next.map(row=>row.rain).filter(finite);
+    const maxRain=rainProbabilities.length?Math.max(...rainProbabilities):null;
+    const completeRainEvidence=next.length===12&&next.every(row=>finite(row.rain)&&finite(row.mm));
+    const location=String(latestLocation?.name||data?.loc?.name||"선택 지역");
+    title.textContent=finite(temp)?location+" · "+number(temp)+"° · "+weatherName(code):location+" · 날씨 요약";
+    const summary=[];
+    if(finite(feels))summary.push("체감 "+number(feels)+"°");
+    if(finite(high)||finite(low))summary.push("최고 "+number(high)+"° / 최저 "+number(low)+"°");
+    if(firstRain)summary.push(formatHour(firstRain.time)+"부터 비 "+(finite(firstRain.rain)?number(firstRain.rain)+"%":number(firstRain.mm,1)+"mm/h")+" · 우산 챙겨요");
+    else if(completeRainEvidence)summary.push("12시간 비 최고 "+number(maxRain)+"% · 우산은 지금 불필요");
+    else if(next.length)summary.push("12시간 강수 자료 일부 누락 · 시간별 예보 확인");
+    body.textContent=summary.join(" · ")||"체감·최고/최저·강수 시각과 우산 판단을 요약합니다.";
+    const schedules=[];
+    if(checkedControl("morningSummary",prefs.morning))schedules.push("오늘 준비 "+currentControl("morningTime",prefs.morningTime||"07:00"));
+    if(checkedControl("eveningSummary",prefs.evening))schedules.push("내일 계획 "+currentControl("eveningTime",prefs.eveningTime||"19:00"));
+    if(checkedControl("quietHours",prefs.quiet))schedules.push("방해금지 "+currentControl("quietStart",prefs.quietStart||"22:00")+"–"+currentControl("quietEnd",prefs.quietEnd||"06:00"));
+    schedule.textContent=schedules.join(" · ")||"정기 요약 꺼짐 · 선택한 조건 변화만 알림";
+    if(icon)icon.innerHTML=sky(code,isDay);
   }
   function saveAlertPreferences(){
     prefs=rules.normalizePreferences({version:2,configured:true,rain:el("watchRain").checked,rainThreshold:Number(el("rainThreshold").value),dry:el("watchDry").checked,dryThreshold:Number(el("dryThreshold").value),clear:el("watchClear").checked,clearHours:Number(el("clearHours").value),frost:el("watchFrost").checked,wind:el("watchWind").checked,morning:el("morningSummary").checked,morningTime:el("morningTime").value,evening:el("eveningSummary").checked,eveningTime:el("eveningTime").value,quiet:el("quietHours").checked,quietStart:el("quietStart").value,quietEnd:el("quietEnd").value});
@@ -218,8 +265,10 @@
     });
     [["watchRain","rain"],["watchDry","dry"],["watchClear","clear"],["watchFrost","frost"],["watchWind","wind"],["morningSummary","morning"],["eveningSummary","evening"],["quietHours","quiet"]].forEach(([id,key])=>{if(el(id))el(id).checked=!!prefs[key];});
     [["rainThreshold","rainThreshold"],["dryThreshold","dryThreshold"],["clearHours","clearHours"],["morningTime","morningTime"],["eveningTime","eveningTime"],["quietStart","quietStart"],["quietEnd","quietEnd"]].forEach(([id,key])=>{if(el(id))el(id).value=String(prefs[key]);});
+    ["watchRain","watchDry","watchClear","watchFrost","watchWind","rainThreshold","dryThreshold","clearHours","morningSummary","morningTime","eveningSummary","eveningTime","quietHours","quietStart","quietEnd"].forEach(id=>{const control=el(id);if(control){control.addEventListener("change",renderNotificationPreview);control.addEventListener("input",renderNotificationPreview);}});
     if(nativeBridge()){allow.textContent="Android 알림 권한 허용";renderAlerts();}
     updateButtons();
+    renderNotificationPreview();
   }
   window.addEventListener("weatherhannun:data",function(event){
     data=event.detail;
