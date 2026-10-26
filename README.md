@@ -91,6 +91,14 @@
 - 구현: `briefing-highlights.js`, `briefing-highlights.css`, `briefing-ui.js`, `stitch-today.js`. 테스트: `tests/briefing-highlights.test.cjs`.
 - GitHub Pages 단일 운영 유지: https://softm.github.io/weatherhannun/
 
+## 10차 개선 — 경쟁앱 벤치마크 기반 첫화면 강수 결정 카드 (2026-10-26)
+
+- [국내외 경쟁앱·수익형 앱 전략](docs/COMPETITOR-REVENUE-STRATEGY.md)을 검증 가능한 공개 기능/일부 사용자 후기와 설계 가설로 구분해 기록.
+- 홈 Stitch 대시보드와 기존 대시보드 모두에 **앞으로 12시간 비·우산 판단** 카드 표시: 비 가능성이 높은 첫 시간 구간, 최고 강수확률/시간당 예측 강수량 근거와 시간별 예보 이동.
+- 강수 시작·종료의 **분 단위 단정 금지**. 결측 데이터·오래된 저장 예보·국지성 강수 불확실성 표시.
+- Android에서는 GitHub Pages 원본 웹을 WebView로 사용하므로 동일한 UI가 적용됨. 기존 Android 광고 단일 슬롯/운영 광고 차단 유지.
+- 테스트: `node --test tests/rain-decision.test.cjs` 및 기존 `node --test tests/*.test.cjs`. PWA v21 캐시에 연결.
+
 ## 실행
 
 정적 웹앱입니다. 루트 `index.html`을 HTTP 정적 서버로 열거나 GitHub Pages로 배포하세요.
