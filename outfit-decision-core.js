@@ -109,6 +109,16 @@
     var maxProbability = maximum(rows.map(row => row.probability));
     var maxPrecipitation = maximum(rows.map(row => row.precipitation));
     if (first < 0) {
+      var complete = rows.length === 12 && rows.every(row => finite(row.probability) && finite(row.precipitation));
+      if (!complete) {
+        return {
+          state: 'unknown',
+          title: '우산 판단 자료 부족',
+          detail: '향후 12시간 강수확률·강수량 일부가 없어 필요 여부를 단정하지 않습니다.',
+          maxProbability: maxProbability,
+          maxPrecipitation: maxPrecipitation
+        };
+      }
       return {
         state: 'optional',
         title: '우산은 선택',

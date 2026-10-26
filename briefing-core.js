@@ -89,9 +89,12 @@
     events.sort(function(a,b){return a.time.localeCompare(b.time);});
     var important=events.filter(function(x){return x.severity==="caution";});
     var lead=important[0]||events[0];
+    var riskCoverageComplete=h.length>=36&&
+      h.slice(0,24).every(function(x){return finite(x.rain)&&finite(x.mm)&&finite(x.wind)&&finite(x.gust)&&finite(x.temp);})&&
+      h.slice(24,36).every(function(x){return finite(x.temp);});
     var nowTemp=finite(c.temperature_2m)?asNumber(c.temperature_2m)+"°C":"기온 정보 없음";
     var start=where+"의 현재 모델 예보는 "+weatherText(c.weather_code)+" 기온은 "+nowTemp+"입니다.";
-    var short=lead?start+" "+lead.title+" — "+dateText(lead.time)+"을 확인해 주세요.":start+" 향후 24시간의 주요 위험 기준에 해당하는 변화는 발견되지 않았습니다.";
+    var short=lead?start+" "+lead.title+" — "+dateText(lead.time)+"을 확인해 주세요.":riskCoverageComplete?start+" 향후 24시간의 주요 위험 기준에 해당하는 변화는 발견되지 않았습니다.":start+" 일부 시간대 자료가 없어 주요 위험 신호가 낮다고 판단하지 않습니다.";
     var d=weather.daily||{};
     var dayLow=d.temperature_2m_min&&d.temperature_2m_min[0];
     var dayHigh=d.temperature_2m_max&&d.temperature_2m_max[0];
@@ -100,13 +103,13 @@
     var detail=short+range+(nextEvents?" "+nextEvents:"")+" 기상특보 실시간 연동은 아직 없어 공식 특보를 별도로 확인해야 합니다.";
     var evidence=[
       {label:"현재 기온 (모델)",value:nowTemp},
-      {label:"12시간 최고 강수확률",value:(function(){var xs=h.slice(0,12).map(function(x){return x.rain;}).filter(finite);return xs.length?asNumber(Math.max.apply(null,xs))+"%":"정보 없음";})()},
-      {label:"24시간 최대 돌풍",value:(function(){var xs=h.slice(0,24).map(function(x){return x.gust;}).filter(finite);return xs.length?asNumber(Math.max.apply(null,xs))+"km/h":"정보 없음";})()},
+      {label:"12시간 최고 강수확률",value:(function(){var rows=h.slice(0,12),xs=rows.map(function(x){return x.rain;});return rows.length===12&&xs.every(finite)?asNumber(Math.max.apply(null,xs))+"%":"정보 없음";})()},
+      {label:"24시간 최대 돌풍",value:(function(){var rows=h.slice(0,24),xs=rows.map(function(x){return x.gust;});return rows.length===24&&xs.every(finite)?asNumber(Math.max.apply(null,xs))+"km/h":"정보 없음";})()},
       {label:"예보 유효 시각",value:typeof c.time==="string"?c.time.replace("T"," ")+" KST":"정보 없음"}
     ];
     var air=payload&&payload.air&&payload.air.current;
     if(air&&finite(air.pm2_5))evidence.push({label:"PM2.5 (모델 예측)",value:asNumber(air.pm2_5,1)+" μg/m³"});
-    return {valid:true,headline:lead?lead.title:"가까운 시간의 뚜렷한 위험 신호 낮음",short:short,detail:detail,events:events.slice(0,5),evidence:evidence,freshness:fresh,source:"Open-Meteo 모델 예보",where:where,validAt:c.time||null};
+    return {valid:true,headline:lead?lead.title:riskCoverageComplete?"가까운 시간의 뚜렷한 위험 신호 낮음":"주요 위험 판단 자료 부족",short:short,detail:detail,events:events.slice(0,5),evidence:evidence,freshness:fresh,source:"Open-Meteo 모델 예보",where:where,validAt:c.time||null};
   }
   return Object.freeze({analyse:analyse,hoursOf:hoursOf,dataFreshness:dataFreshness,dateText:dateText});
 });
