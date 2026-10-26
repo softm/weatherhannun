@@ -9,7 +9,7 @@
   if(root)root.WeatherBriefingHighlights=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
-  const KINDS=Object.freeze(["place","sky","temperature","time","alert","trend","metric","action"]);
+  const KINDS=Object.freeze(["place","sky","temperature","time","time-warning","alert","trend","metric","action"]);
   function ranges(input,context){
     const text=String(input??""),meta=context||{},results=[];
     function add(start,end,kind,priority){
@@ -39,6 +39,13 @@
     (Array.isArray(meta.events)?meta.events:[]).forEach(event=>{
       if(!event||typeof event.title!=="string")return;
       literal(event.title,event.severity==="caution"?"alert":"trend",110);
+    });
+    // Forecast event times have stronger urgency than generic dates.
+    (Array.isArray(meta.events)?meta.events:[]).forEach(event=>{
+      if(typeof event?.time!=="string"||event.time.length<13)return;
+      const date=event.time;
+      const dateLabel=Number(date.slice(5,7))+"월 "+Number(date.slice(8,10))+"일 "+date.slice(11,13)+"시";
+      literal(dateLabel,event.severity==="caution"?"time-warning":"time",99);
     });
     // Full time tokens must win against incidental numeric matches.
     pattern(/\d{1,2}월\s*\d{1,2}일(?:\s*(?:오전|오후))?\s*\d{1,2}시(?:\s*\d{1,2}분)?/g,"time",90);
