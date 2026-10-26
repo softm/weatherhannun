@@ -4,6 +4,10 @@ on:
     branches: [main]
     paths:
       - 'briefing-core.js'
+      - 'briefing-highlights.js'
+      - 'briefing-highlights.css'
+      - 'stitch-today.js'
+      - 'stitch-today.css'
       - 'region-search-core.js'
       - 'region-search-ui.js'
       - 'region-search.css'
@@ -21,6 +25,10 @@ on:
   pull_request:
     paths:
       - 'briefing-core.js'
+      - 'briefing-highlights.js'
+      - 'briefing-highlights.css'
+      - 'stitch-today.js'
+      - 'stitch-today.css'
       - 'briefing-ui.js'
       - 'region-search-core.js'
       - 'region-search-ui.js'
@@ -46,7 +54,9 @@ jobs:
         run: |
           node --check app.js
           node --check briefing-core.js
+          node --check briefing-highlights.js
           node --check briefing-ui.js
+          node --check stitch-today.js
           node --check location-core.js
           node --check location-manager.js
           node --check region-search-core.js
