@@ -71,12 +71,17 @@
       if (note) note.textContent = 'Android 지원 상태를 다시 확인하고 있습니다.';
       return;
     }
+    var listPermissionScreen = nativeState.permissionScreenMode === 'app_list';
     if (!nativeState.enabled) {
       if (badge) badge.textContent = '꺼짐';
-      if (note) note.textContent = '기본 OFF입니다. 기능을 켜면 Android의 다른 앱 위에 표시 권한 화면이 열립니다.';
+      if (note) note.textContent = listPermissionScreen
+        ? '기본 OFF입니다. 켜면 시스템 목록이 열리며, Android 11 이상에서는 목록에서 날씨한눈을 선택해야 합니다.'
+        : '기본 OFF입니다. 기능을 켜면 날씨한눈의 다른 앱 위에 표시 권한 화면이 열립니다.';
     } else if (!nativeState.permissionGranted) {
       if (badge) badge.textContent = '권한 필요';
-      if (note) note.textContent = '기능은 켜졌지만 오버레이 특별 권한이 없어 표시하지 않습니다. 위젯과 알림은 계속 사용할 수 있습니다.';
+      if (note) note.textContent = listPermissionScreen
+        ? '‘다른 앱 위에 표시’ 목록에서 날씨한눈을 선택한 뒤 허용하세요. 허용 전에도 위젯과 알림은 사용할 수 있습니다.'
+        : '날씨한눈의 다른 앱 위에 표시 권한을 허용하세요. 허용 전에도 위젯과 알림은 사용할 수 있습니다.';
     } else if (!nativeState.snapshotAvailable) {
       if (badge) badge.textContent = '예보 대기';
       if (note) note.textContent = '권한은 준비됐습니다. 앱에서 최신 예보를 한 번 불러오면 미리보기를 사용할 수 있습니다.';
