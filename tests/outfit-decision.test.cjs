@@ -92,6 +92,14 @@ test('missing rain arrays never become a no-rain recommendation', () => {
   assert.match(answer.umbrella.detail, /단정하지 않습니다/);
 });
 
+test('one missing low-risk hour prevents an optional umbrella verdict', () => {
+  const sample = weather();
+  sample.hourly.precipitation[4] = null;
+  const answer = evaluate(sample);
+  assert.equal(answer.umbrella.state, 'unknown');
+  assert.match(answer.umbrella.detail, /일부가 없어/);
+});
+
 test('one available rain or wind field produces clean evidence text', () => {
   const sample = weather({precipitation: {2: 0.4}, gust: {2: 36}});
   sample.hourly.precipitation_probability = null;
@@ -113,7 +121,7 @@ test('page and offline shell load the complete outfit guide', () => {
   const root = path.join(__dirname, '..');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  for (const asset of ['outfit-decision.css?v=24', 'outfit-decision-core.js?v=24', 'outfit-decision-ui.js?v=24']) {
+  for (const asset of ['outfit-decision.css?v=24', 'outfit-decision-core.js?v=31', 'outfit-decision-ui.js?v=24']) {
     assert.ok(html.includes(asset), `page must load ${asset}`);
     assert.ok(worker.includes(asset), `offline shell must warm ${asset}`);
   }

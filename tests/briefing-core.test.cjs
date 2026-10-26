@@ -59,3 +59,11 @@ test("missing numeric precipitation is not replaced with fabricated percentage",
  const x=core.analyse(s,{now:Date.UTC(2026,9,25,0,1)});
  assert.match(x.evidence[1].value,/정보 없음/);
 });
+test("partial risk coverage never becomes a reassuring no-event briefing",()=>{
+ const s=scenario();
+ s.weather.hourly.precipitation[5]=null;
+ const x=core.analyse(s,{now:Date.UTC(2026,9,25,0,1)});
+ assert.equal(x.events.length,0);
+ assert.equal(x.headline,"주요 위험 판단 자료 부족");
+ assert.match(x.short,/판단하지 않습니다/);
+});
