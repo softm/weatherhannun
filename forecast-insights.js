@@ -56,13 +56,17 @@
     return "날씨 확인";
   }
   function isWet(row){return (finite(row.rain)&&row.rain>=50)||(finite(row.mm)&&row.mm>=.3);}
-  function isClear(row){return row.isDay===1&&row.code<=2&&row.code>=0&&(row.rain??100)<=20&&(row.mm??100)<.1;}
+  function isClear(row){return row.isDay===1&&finite(row.code)&&row.code<=2&&row.code>=0&&finite(row.rain)&&row.rain<=20&&finite(row.mm)&&row.mm<.1;}
   function spans(all,predicate){
     const out=[];let active=null;
     all.forEach((row,i)=>{
       if(predicate(row)){
-        if(!active){active={start:row.time,end:row.time,count:1,begin:i,prob:row.rain??null,total:finite(row.mm)?row.mm:0};out.push(active);}
-        else{active.end=row.time;active.count++;active.prob=Math.max(active.prob??0,row.rain??0);active.total+=finite(row.mm)?row.mm:0;}
+        if(!active){active={start:row.time,end:row.time,count:1,begin:i,prob:finite(row.rain)?row.rain:null,total:finite(row.mm)?row.mm:null};out.push(active);}
+        else{
+          active.end=row.time;active.count++;
+          if(finite(row.rain))active.prob=finite(active.prob)?Math.max(active.prob,row.rain):row.rain;
+          active.total=finite(active.total)&&finite(row.mm)?active.total+row.mm:null;
+        }
       }else active=null;
     });
     return out;
@@ -91,32 +95,39 @@
     }
     const wet=spans(hours,isWet);
     const clear=spans(hours,isClear).filter(s=>s.count>=2);
-    const maxProb=Math.max(0,...hours.map(h=>finite(h.rain)?h.rain:0));
-    const estimated=hours.reduce((sum,h)=>sum+(finite(h.mm)?h.mm:0),0);
+    const rainComplete=hours.every(h=>finite(h.rain)&&finite(h.mm));
+    const clearComplete=hours.every(h=>(h.isDay===0||h.isDay===1)&&finite(h.code)&&finite(h.rain)&&finite(h.mm));
+    const probabilities=hours.map(h=>h.rain).filter(finite);
+    const maxProb=probabilities.length?Math.max(...probabilities):null;
+    const estimated=hours.every(h=>finite(h.mm))?hours.reduce((sum,h)=>sum+h.mm,0):null;
     const p=hours[0].date===hours[hours.length-1].date?prettyDate(hours[0].date):prettyDate(hours[0].date)+" ~ "+prettyDate(hours[hours.length-1].date);
     caption.textContent=p+" · "+hours.length+"시간 예보 · 현 시점 모델 기준";
     if(wet.length){
       const wetStart=hours.find(h=>h.time===wet[0].start)||hours[0];
       result.innerHTML='<span class="insight-icon" aria-hidden="true">'+sky(wetStart.code,wetStart.isDay)+'</span><div><span class="insight-small">비 가능성이 높은 첫 시간대</span><strong>'+safe(prettyTime(wet[0].start))+' ~ '+safe(formatHour(wet[0].end))+'</strong><small>강수확률 최고 '+number(wet[0].prob)+'% · 예보된 시간별 강수량 합계 '+number(wet[0].total,1)+'mm</small></div>';
-    }else{
+    }else if(rainComplete){
       result.innerHTML='<span class="insight-icon" aria-hidden="true">'+sky(hours[0].code,hours[0].isDay)+'</span><div><span class="insight-small">선택한 기간</span><strong>강수 가능성 높은 구간 없음</strong><small>최고 강수확률 '+number(maxProb)+'% · 예상 강수량 합계 '+number(estimated,1)+'mm · 비가 절대 오지 않는다는 뜻은 아닙니다</small></div>';
+    }else{
+      result.innerHTML='<span class="insight-icon" aria-hidden="true">'+sky(hours[0].code,hours[0].isDay)+'</span><div><span class="insight-small">선택한 기간</span><strong>강수 자료 일부 누락</strong><small>없는 값을 0으로 채우지 않습니다. 시간별 수치와 최신 예보를 다시 확인해 주세요.</small></div>';
     }
     function renderSegments(target,list,empty,style){
       target.innerHTML=list.length?list.slice(0,5).map((s,i)=>'<div class="forecast-span '+style+'"><div><b>'+safe(prettyTime(s.start))+' ~ '+safe(formatHour(s.end))+'</b><small>'+s.count+'시간 연속</small></div><strong>'+(style==="wet"?"최대 "+number(s.prob)+"%":"맑을 가능성")+'</strong></div>').join("")+(list.length>5?'<small class="muted-text">그 외 '+(list.length-5)+'개 구간이 더 있습니다.</small>':""):'<p class="muted-text">'+empty+'</p>';
     }
-    renderSegments(segments,wet,"50% 이상 강수확률 또는 0.3mm 이상 강수 예보 구간이 없습니다.","wet");
-    renderSegments(skyline,clear,"주간에 2시간 이상 연속으로 맑음·구름 조금인 구간이 없습니다.","clear");
+    renderSegments(segments,wet,rainComplete?"50% 이상 강수확률 또는 0.3mm 이상 강수 예보 구간이 없습니다.":"강수 자료 일부가 없어 신호 없음으로 판단하지 않습니다.","wet");
+    renderSegments(skyline,clear,clearComplete?"주간에 2시간 이상 연속으로 맑음·구름 조금인 구간이 없습니다.":"하늘·강수 자료 일부가 없어 맑은 구간 없음으로 판단하지 않습니다.","clear");
     const grouped=new Map();
     hours.forEach(x=>{if(!grouped.has(x.date))grouped.set(x.date,[]);grouped.get(x.date).push(x);});
     dayGrid.innerHTML=Array.from(grouped.entries()).map(([date,rs])=>{
       const wetHours=rs.filter(isWet).length;
       const clearHours=rs.filter(isClear).length;
-      const pr=Math.max(0,...rs.map(r=>r.rain??0));
-      const total=rs.reduce((sum,r)=>sum+(r.mm||0),0);
+      const rainValues=rs.map(r=>r.rain).filter(finite);
+      const pr=rainValues.length?Math.max(...rainValues):null;
+      const total=rs.every(r=>finite(r.mm))?rs.reduce((sum,r)=>sum+r.mm,0):null;
+      const complete=rs.every(r=>finite(r.rain)&&finite(r.mm));
       const pct=Math.round((wetHours/rs.length)*100);
       const bright=Math.round((clearHours/rs.length)*100);
-      const title="모델 예보상 비 가능성이 높은 시간 "+wetHours+"시간, 맑은 낮 시간 "+clearHours+"시간";
-      return '<div class="forecast-day" title="'+safe(title)+'"><b>'+safe(prettyDate(date))+'</b><div class="forecast-day-bar"><span class="rain-share" style="width:'+pct+'%"></span><span class="sun-share" style="width:'+bright+'%"></span></div><span>☂ 최대 '+number(pr)+'% · '+number(total,1)+'mm</span><small>비 가능성 '+wetHours+'h · 낮 맑음 '+clearHours+'h</small></div>';
+      const title="모델 예보상 확인된 비 신호 "+wetHours+"시간, 확인된 맑은 낮 시간 "+clearHours+"시간"+(complete?"":" · 일부 자료 누락");
+      return '<div class="forecast-day" title="'+safe(title)+'"><b>'+safe(prettyDate(date))+'</b><div class="forecast-day-bar"><span class="rain-share" style="width:'+pct+'%"></span><span class="sun-share" style="width:'+bright+'%"></span></div><span>☂ 최대 '+number(pr)+'% · '+number(total,1)+'mm</span><small>'+(complete?'비 신호 '+wetHours+'h · 낮 맑음 '+clearHours+'h':'확인값 기준 · 일부 자료 누락')+'</small></div>';
     }).join("");
   }
   function farm(){
@@ -128,22 +139,26 @@
     const likelyCold=hours.filter(h=>finite(h.temp)&&h.temp<=3);
     const strongWind=hours.filter(h=>finite(h.gust)&&h.gust>=35);
     const hardRain=hours.filter(isWet);
-    const rain48=hours.reduce((a,h)=>a+(finite(h.mm)?h.mm:0),0);
+    const temperatureComplete=hours.length===48&&hours.every(h=>finite(h.temp));
+    const gustComplete=hours.length===48&&hours.every(h=>finite(h.gust));
+    const rainComplete=hours.length===48&&hours.every(h=>finite(h.rain)&&finite(h.mm));
+    const nightComplete=hours.some(h=>h.isDay===0)&&hours.every(h=>(h.isDay===0||h.isDay===1)&&(h.isDay!==0||finite(h.temp)));
+    const rain48=hours.every(h=>finite(h.mm))?hours.reduce((a,h)=>a+h.mm,0):null;
     const nextRain=hardRain[0];
     const nextGust=strongWind[0];
     const firstCold=likelyCold[0];
-    const frostLevel=firstCold&&firstCold.temp<=0?"high":firstCold?"mid":"good";
-    const frostTitle=firstCold?(firstCold.temp<=0?"영하 기온 예보":"저온 가능성 주의"):"뚜렷한 저온 신호 없음";
+    const frostLevel=firstCold&&firstCold.temp<=0?"high":firstCold?"mid":temperatureComplete?"good":"mid";
+    const frostTitle=firstCold?(firstCold.temp<=0?"영하 기온 예보":"저온 가능성 주의"):temperatureComplete?"뚜렷한 저온 신호 없음":"기온 자료 일부 누락";
     const messages=[
-      {icon:"❄️",title:"서리·냉해 주의",cls:frostLevel,value:frostTitle,detail:firstCold?prettyTime(firstCold.time)+" · 예보 기온 "+number(firstCold.temp)+"°C. 실제 서리 발생은 지표면·지형·바람에 따라 다릅니다.":"48시간 내 예보 기온 3°C 이하 시점 없음. 지표면 서리는 별도 확인."},
-      {icon:"🌬️",title:"강풍·비산 주의",cls:nextGust?"mid":"good",value:nextGust?"돌풍 예보 확인":"뚜렷한 돌풍 위험 낮음",detail:nextGust?prettyTime(nextGust.time)+" · 돌풍 "+number(nextGust.gust)+" km/h. 약제 비산과 시설물 점검.":"48시간 내 돌풍 35km/h 이상 예보 없음. 현장 풍향·풍속은 별도로 확인."},
-      {icon:"☂️",title:"강수·관수 참고",cls:nextRain?"mid":"good",value:"향후 48시간 "+number(rain48,1)+"mm",detail:nextRain?"강수 가능성 높은 첫 시각 "+prettyTime(nextRain.time)+". 관수량은 토양·작물 상태로 판단하세요.":"뚜렷한 비 신호가 없어도 토양수분과 관수시설 상태 확인 필요."},
-      {icon:"🌡️",title:"야간 저온",cls:finite(minNight)&&minNight<=3?"mid":"good",value:finite(minNight)?number(minNight)+"°C":"정보 없음",detail:"향후 48시간 야간 최저 예보. 현장 지표면은 예보 기온과 다를 수 있습니다."}
+      {icon:"❄️",title:"서리·냉해 주의",cls:frostLevel,value:frostTitle,detail:firstCold?prettyTime(firstCold.time)+" · 예보 기온 "+number(firstCold.temp)+"°C. 실제 서리 발생은 지표면·지형·바람에 따라 다릅니다.":temperatureComplete?"48시간 내 예보 기온 3°C 이하 시점 없음. 지표면 서리는 별도 확인.":"기온 자료가 완전하지 않아 저온 신호 없음으로 판단하지 않습니다."},
+      {icon:"🌬️",title:"강풍·비산 주의",cls:nextGust?"mid":gustComplete?"good":"mid",value:nextGust?"돌풍 예보 확인":gustComplete?"뚜렷한 돌풍 위험 낮음":"돌풍 자료 일부 누락",detail:nextGust?prettyTime(nextGust.time)+" · 돌풍 "+number(nextGust.gust)+" km/h. 약제 비산과 시설물 점검.":gustComplete?"48시간 내 돌풍 35km/h 이상 예보 없음. 현장 풍향·풍속은 별도로 확인.":"돌풍 자료가 완전하지 않아 위험 없음으로 판단하지 않습니다."},
+      {icon:"☂️",title:"강수·관수 참고",cls:nextRain?"mid":rainComplete?"good":"mid",value:finite(rain48)?"향후 48시간 "+number(rain48,1)+"mm":"강수량 합계 자료 부족",detail:nextRain?"강수 가능성 높은 첫 시각 "+prettyTime(nextRain.time)+". 관수량은 토양·작물 상태로 판단하세요.":rainComplete?"뚜렷한 비 신호가 없어도 토양수분과 관수시설 상태 확인 필요.":"강수 자료가 완전하지 않아 비 없음으로 판단하지 않습니다. 토양수분은 별도 확인하세요."},
+      {icon:"🌡️",title:"야간 저온",cls:finite(minNight)&&minNight<=3?"mid":nightComplete?"good":"mid",value:finite(minNight)?number(minNight)+"°C":"정보 없음",detail:nightComplete?"향후 48시간 야간 최저 예보. 현장 지표면은 예보 기온과 다를 수 있습니다.":"야간 기온 자료가 부족해 최저값을 만들지 않습니다."}
     ];
     const target=el("farmSignals");
     if(target)target.innerHTML=messages.map(m=>'<article class="farm-signal '+m.cls+'"><span class="farm-icon" aria-hidden="true">'+m.icon+'</span><div><span class="farm-name">'+m.title+'</span><strong>'+safe(m.value)+'</strong><p>'+safe(m.detail)+'</p></div></article>').join("");
     const next=el("farmSummary");
-    if(next)next.textContent=firstCold?"향후 48시간에 저온 구간이 있습니다. 작물과 시설을 확인해 주세요.":"향후 48시간의 저온·돌풍·강수를 고려해 작업 시점을 정하세요.";
+    if(next)next.textContent=firstCold||nextGust||nextRain?"향후 48시간에 확인할 위험 신호가 있습니다. 작물·시설과 작업 시점을 점검해 주세요.":temperatureComplete&&gustComplete&&rainComplete?"향후 48시간의 저온·돌풍·강수를 고려해 작업 시점을 정하세요.":"일부 예보 자료가 없어 위험 없음으로 판단하지 않습니다. 최신 시간별 예보를 확인하세요.";
   }
   function noticeCopy(alert){
     const row=alert.row||{};

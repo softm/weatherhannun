@@ -25,32 +25,20 @@
     humid:cell(h.relative_humidity_2m,i),uv:cell(h.uv_index,i),day:cell(h.is_day,i),code:cell(h.weather_code,i)};
   });
  }
- function score(kind,h){
-  if(!Number.isFinite(Number(h?.temp)))return null;
-  var t=+h.temp,r=+h.rain||0,w=+h.wind||0,mm=+h.mm||0,hu=+h.humid||0,uv=+h.uv||0,s=100;
-  if(kind==='walk'){
-   s-=r>=45||mm>=.4?40:r>=20?13:0;
-   if(w>=35)s-=24;
-   s-=t<4||t>32?33:t<9||t>29?12:0;
-   if(uv>=7)s-=23;
-  }else if(kind==='laundry'){
-   s-=r>=35||mm>=.3?54:r>=15?22:0;
-   s-=hu>80?28:hu>65?12:0;
-   if(h.day===0)s-=17;
-   if(w>=35)s-=16;
-  }else{
-   s-=r>=45||mm>=.4?44:r>=20?13:0;
-   if(w>=30)s-=23;
-   if(t>=31)s-=21;
-   if(hu>=90)s-=11;
-   if(h.day===0)s-=14;
-  }
-  return Math.max(0,Math.min(100,s));
+ function activityRow(h){
+  return {time:h?.time,temp:h?.temp,rain:h?.rain,mm:h?.mm,wind:h?.wind,gust:h?.gust,
+   humidity:h?.humid,uv:h?.uv,isDay:h?.day,code:h?.code};
+ }
+ function score(kind,h,following){
+  var core=window.WeatherActivityCore;
+  if(!core)return null;
+  var result=core.evaluate(kind,activityRow(h),(following||[]).map(activityRow));
+  return result.available&&Number.isFinite(result.score)?result.score:null;
  }
  function best(kind,hours){
   var win=null;
   for(var i=0;i<Math.min(22,hours.length-2);i++){
-   var nums=[score(kind,hours[i]),score(kind,hours[i+1]),score(kind,hours[i+2])];
+   var nums=[0,1,2].map(offset=>score(kind,hours[i+offset],hours.slice(i+offset+1,i+offset+7)));
    if(nums.some(x=>x===null))continue;
    var s=Math.round(nums.reduce((a,b)=>a+b,0)/3);
    if(!win||s>win.score)win={score:s,from:hours[i].time,to:hours[i+2].time};
@@ -174,8 +162,9 @@
     highlighter.render(nodes.briefMessage,sentence,{where:loc,events:briefing?.events||[]});
   }else put(nodes.briefMessage,sentence);
   put(nodes.actionPlace,loc+' 기준');
-  var next=h.find(x=>+x.rain>=55||+x.mm>=.3);
-  put(nodes.hourlyBanner,next?short(next.time)+' 비 가능성 '+fmt(next.rain)+'%':'강수 변화 확인');
+  var rainWindow=h.slice(0,12),rainComplete=rainWindow.length===12&&rainWindow.every(x=>Number.isFinite(x.rain)&&Number.isFinite(x.mm));
+  var next=rainWindow.find(x=>Number.isFinite(x.rain)&&x.rain>=50||Number.isFinite(x.mm)&&x.mm>=.3);
+  put(nodes.hourlyBanner,next?short(next.time)+' 비 신호 '+(Number.isFinite(next.rain)?fmt(next.rain)+'%':fmt(next.mm,1)+'mm/h'):rainComplete?'12시간 뚜렷한 강수 신호 낮음':'강수 자료 일부 누락');
   var kinds=['walk','laundry','harvest'],windows=kinds.map(k=>best(k,h));
   nodes.cards.forEach((card,i)=>{
    var bestTime=windows[i];
@@ -211,9 +200,9 @@
    });
   }
   var values=[
-   [fmt(now.rain)+'%',next?'다음 비 가능성 '+short(next.time)+' ('+fmt(next.rain)+'%)':'가까운 시간 뚜렷한 강수 신호 없음'],
+   [fmt(now.rain)+'%',next?'다음 비 신호 '+short(next.time)+' ('+(Number.isFinite(next.rain)?fmt(next.rain)+'%':fmt(next.mm,1)+'mm/h')+')':rainComplete?'12시간 내 뚜렷한 강수 신호 낮음':'강수 자료 일부 누락'],
    [fmt(c.relative_humidity_2m)+'%','상대습도 (기상 모델)'],
-   [fmt(Number(c.wind_speed_10m)/3.6,1)+' m/s','풍속 '+fmt(c.wind_speed_10m)+'km/h · 돌풍 '+fmt(now.gust)+'km/h'],
+   [Number.isFinite(c.wind_speed_10m)?fmt(c.wind_speed_10m/3.6,1)+' m/s':'-- m/s','풍속 '+fmt(c.wind_speed_10m)+'km/h · 돌풍 '+fmt(now.gust)+'km/h'],
    [fmt(now.uv)+' UV',+now.uv>=6?'자외선 차단 권장':'자외선 예보 지수']
   ];
   [...nodes.matrix?.children||[]].forEach((card,i)=>{

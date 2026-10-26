@@ -159,9 +159,11 @@
     text("windMetric",num(c.wind_speed_10m)+" km/h");
     text("humidityMetric",num(c.relative_humidity_2m)+"%");
     text("uvMetric",num(STATE.hourly[0]?.uv,1));
-    var nextRain=STATE.hourly.slice(0,12).find(function(x){return finite(x.rain)&&x.rain>=60;});
+    var rainWindow=STATE.hourly.slice(0,12);
+    var nextRain=rainWindow.find(function(x){return (finite(x.rain)&&x.rain>=50)||(finite(x.mm)&&x.mm>=.3);});
+    var rainWindowComplete=rainWindow.length===12&&rainWindow.every(function(x){return finite(x.rain)&&finite(x.mm);});
     var cold=STATE.hourly.slice(0,36).some(function(x){return finite(x.temp)&&x.temp<=3;});
-    var note=nextRain?whenLabel(nextRain.time)+"경 비 올 가능성 "+num(nextRain.rain)+"%":cold?"48시간 이내 저온 구간이 있습니다. 작물 냉해와 결빙에 유의하세요.":"현재 예보에서 가까운 시간의 뚜렷한 강수 위험이 낮습니다.";
+    var note=nextRain?whenLabel(nextRain.time)+"경 비 신호 "+(finite(nextRain.rain)?num(nextRain.rain)+"%":num(nextRain.mm,1)+"mm/h"):cold?"48시간 이내 저온 구간이 있습니다. 작물 냉해와 결빙에 유의하세요.":rainWindowComplete?"현재 모델 예보에서 12시간 내 뚜렷한 강수 신호가 낮습니다.":"강수 자료 일부가 없어 시간별 예보를 확인해 주세요.";
     text("noticeStrip",note);
     var at=STATE.fetchedAt?new Date(STATE.fetchedAt).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"}):"조회 시각 없음";
     var last=STATE.fetchedAt?Date.parse(STATE.fetchedAt):NaN;
@@ -183,10 +185,16 @@
     if(!values.length){$("hourlyChart").textContent="시간별 기온 정보 없음";return;}
     var low=Math.floor(Math.min.apply(null,values)-2),high=Math.ceil(Math.max.apply(null,values)+2);
     if(high===low)high+=1;
-    var points=h.map(function(x,i){return (38+i*76)+","+(103-(x.temp-low)/(high-low)*83).toFixed(1);}).join(" ");
-    var labels=h.map(function(x,i){return i%3===0?'<text x="'+(38+i*76)+'" y="'+(103-(x.temp-low)/(high-low)*83-11).toFixed(1)+'" fill="#ffdd97" font-size="12" text-anchor="middle">'+safe(num(x.temp))+'°</text>':"";}).join("");
-    var dots=h.map(function(x,i){return i%3===0?'<circle cx="'+(38+i*76)+'" cy="'+(103-(x.temp-low)/(high-low)*83).toFixed(1)+'" r="3.4" fill="#ffda86"/>':"";}).join("");
-    $("hourlyChart").innerHTML='<svg width="'+width+'" height="124" viewBox="0 0 '+width+' 124" role="img" aria-label="기온 변동 그래프"><defs><linearGradient id="lineFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#f7bd66" stop-opacity=".22"/><stop offset="100%" stop-color="#f7bd66" stop-opacity="0"/></linearGradient></defs><polygon points="'+points+' '+(38+(h.length-1)*76)+',121 38,121" fill="url(#lineFill)"/><polyline points="'+points+'" stroke="#ffcf78" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>'+dots+labels+'</svg>';
+    var coordinates=h.map(function(x,i){return finite(x.temp)?{x:38+i*76,y:103-(x.temp-low)/(high-low)*83}:null;});
+    var segments=[],segment=[];
+    coordinates.forEach(function(point){if(point)segment.push(point);else if(segment.length){segments.push(segment);segment=[];}});
+    if(segment.length)segments.push(segment);
+    var pointText=function(point){return point.x+","+point.y.toFixed(1);};
+    var lines=segments.filter(function(items){return items.length>1;}).map(function(items){return '<polyline points="'+items.map(pointText).join(" ")+'" stroke="#ffcf78" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>';}).join("");
+    var fill=coordinates.every(Boolean)&&coordinates.length?'<polygon points="'+coordinates.map(pointText).join(" ")+' '+coordinates[coordinates.length-1].x+',121 38,121" fill="url(#lineFill)"/>':"";
+    var labels=h.map(function(x,i){var point=coordinates[i];return point&&i%3===0?'<text x="'+point.x+'" y="'+(point.y-11).toFixed(1)+'" fill="#ffdd97" font-size="12" text-anchor="middle">'+safe(num(x.temp))+'°</text>':"";}).join("");
+    var dots=h.map(function(_,i){var point=coordinates[i];return point&&i%3===0?'<circle cx="'+point.x+'" cy="'+point.y.toFixed(1)+'" r="3.4" fill="#ffda86"/>':"";}).join("");
+    $("hourlyChart").innerHTML='<svg width="'+width+'" height="124" viewBox="0 0 '+width+' 124" role="img" aria-label="기온 변동 그래프"><defs><linearGradient id="lineFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#f7bd66" stop-opacity=".22"/><stop offset="100%" stop-color="#f7bd66" stop-opacity="0"/></linearGradient></defs>'+fill+lines+dots+labels+'</svg>';
     $("hourlyItems").innerHTML=h.map(function(x,i){var symbol=weatherSymbol(x.code,x.isDay),label=i===0?"현재":hourLabel(x.time);return '<div class="hour-item '+(i===0?"now":"")+'" data-hour-index="'+i+'" aria-label="'+safe(label+", "+symbol.name+", "+num(x.temp)+"도, 비 "+num(x.rain)+"퍼센트, 풍속 "+num(x.wind)+"킬로미터, 돌풍 "+num(x.gust)+"킬로미터")+'"><span class="hour-time">'+label+'</span><span class="hour-icon" aria-hidden="true">'+symbol.icon+'</span><span class="hour-temp">'+num(x.temp)+'°</span><span class="hour-rain">☂ '+num(x.rain)+'%</span><span class="hour-wind">풍 '+num(x.wind)+'</span><span class="hour-gust">돌 '+num(x.gust)+' km/h</span></div>';}).join("");
     var detail=$("hourlyDetailRows");
     if(detail){
@@ -194,8 +202,8 @@
       for(var start=0;start<Math.min(24,h.length);start+=3){
         var rows=h.slice(start,start+3),temps=rows.map(function(x){return x.temp;}).filter(finite),winds=rows.map(function(x){return x.wind;}).filter(finite),gusts=rows.map(function(x){return x.gust;}).filter(finite),rains=rows.map(function(x){return x.rain;}).filter(finite);
         if(!rows.length)continue;
-        var avgTemp=temps.length?temps.reduce(function(a,b){return a+b;},0)/temps.length:null;
-        var maxWind=winds.length?Math.max.apply(null,winds):null,maxGust=gusts.length?Math.max.apply(null,gusts):null,maxRain=rains.length?Math.max.apply(null,rains):null;
+        var avgTemp=temps.length===rows.length?temps.reduce(function(a,b){return a+b;},0)/temps.length:null;
+        var maxWind=winds.length===rows.length?Math.max.apply(null,winds):null,maxGust=gusts.length===rows.length?Math.max.apply(null,gusts):null,maxRain=rains.length===rows.length?Math.max.apply(null,rains):null;
         windows.push({index:start,first:rows[0],last:rows[rows.length-1],temp:avgTemp,wind:maxWind,gust:maxGust,rain:maxRain});
       }
       detail.innerHTML=windows.map(function(x,i){
@@ -216,13 +224,20 @@
   }
   function renderWeek(){
     var d=STATE.weather.daily,len=Math.min(7,d.time.length);
+    var rainProbabilities=Array.isArray(d.precipitation_probability_max)?d.precipitation_probability_max:[];
+    var minimums=Array.isArray(d.temperature_2m_min)?d.temperature_2m_min:[];
+    var maximums=Array.isArray(d.temperature_2m_max)?d.temperature_2m_max:[];
+    var precipitationSums=Array.isArray(d.precipitation_sum)?d.precipitation_sum:[];
     var markup=Array.from({length:len},function(_,i){return weekItem(i);}).join("");
     $("weekPreview").innerHTML=markup;
-    var rainy=d.time.filter(function(_,i){return (d.precipitation_probability_max?.[i]||0)>=60;});
-    var cold=d.time.filter(function(_,i){return finite(d.temperature_2m_min?.[i])&&d.temperature_2m_min[i]<=3;});
-    var drop=Math.max.apply(null,d.temperature_2m_max.filter(finite))-Math.min.apply(null,d.temperature_2m_max.filter(finite));
-    var mins=d.temperature_2m_min.slice(0,len).filter(finite),maxs=d.temperature_2m_max.slice(0,len).filter(finite);
-    var rangeMin=Math.min.apply(null,mins),rangeMax=Math.max.apply(null,maxs),rangeSpan=Math.max(1,rangeMax-rangeMin);
+    var rainy=d.time.filter(function(_,i){return finite(rainProbabilities[i])&&rainProbabilities[i]>=60;});
+    var cold=d.time.filter(function(_,i){return finite(minimums[i])&&minimums[i]<=3;});
+    var mins=minimums.slice(0,len).filter(finite),maxs=maximums.slice(0,len).filter(finite);
+    var drop=maxs.length>=2?Math.max.apply(null,maxs)-Math.min.apply(null,maxs):null;
+    var rangeMin=mins.length?Math.min.apply(null,mins):null,rangeMax=maxs.length?Math.max.apply(null,maxs):null;
+    var rangeSpan=finite(rangeMin)&&finite(rangeMax)?Math.max(1,rangeMax-rangeMin):1;
+    var completeWeeklyRain=len>0&&rainProbabilities.slice(0,len).length===len&&rainProbabilities.slice(0,len).every(finite);
+    var completeWeeklyTemperature=len>0&&minimums.slice(0,len).length===len&&maximums.slice(0,len).length===len&&minimums.slice(0,len).every(finite)&&maximums.slice(0,len).every(finite);
     $("weeklyCards").innerHTML=Array.from({length:len},function(_,i){
       var low=d.temperature_2m_min?.[i],high=d.temperature_2m_max?.[i],rain=d.precipitation_probability_max?.[i],total=d.precipitation_sum?.[i],uv=d.uv_index_max?.[i];
       var left=finite(low)?Math.round((low-rangeMin)/rangeSpan*64):0;
@@ -236,24 +251,29 @@
       else if(weekday===0||weekday===6){badge="주말";badgeClass="weekend";}
       return '<article class="week-row"><button type="button" class="week-row-button" data-week-index="'+i+'" aria-expanded="false" aria-label="'+safe(label+", "+symbol.name+", 최저 "+num(low)+"도, 최고 "+num(high)+"도, 비 "+num(rain)+"퍼센트")+'"><span class="week-row-day"><b>'+safe(label)+'</b><small>☂ '+num(rain)+'%</small>'+(badge?'<em class="week-row-badge '+badgeClass+'">'+safe(badge)+'</em>':"")+'</span><span class="week-row-icon" aria-hidden="true">'+icon+'</span><span class="week-range-bar"><small>'+num(low)+'°</small><i><em style="left:'+left+'%;width:'+width+'%"></em></i><strong>'+num(high)+'°</strong></span><span class="material-symbols-outlined week-chevron" aria-hidden="true">expand_more</span></button><div class="week-row-detail" hidden><span>예상 강수량 <b>'+num(total,1)+'mm</b></span><span>자외선 최대 <b>'+num(uv,1)+'</b></span><span>일출 <b>'+safe((d.sunrise?.[i]||"").slice(11,16))+'</b></span><span>일몰 <b>'+safe((d.sunset?.[i]||"").slice(11,16))+'</b></span></div></article>';
     }).join("");
-    $("weeklyInsight").innerHTML='<p>강수확률 60% 이상 <b>'+rainy.length+'일</b>, 최저 3°C 이하 <b>'+cold.length+'일</b>입니다.</p><small>주간 최고기온 변동 폭은 '+num(drop)+'°C입니다. 큰 변화가 있는 날 전후로 최신 예보를 확인하세요.</small>';
+    var rainInsight=completeWeeklyRain?'강수확률 60% 이상 <b>'+rainy.length+'일</b>':'강수확률 자료 일부 누락';
+    var coldInsight=completeWeeklyTemperature?'최저 3°C 이하 <b>'+cold.length+'일</b>':'최저기온 자료 일부 누락';
+    $("weeklyInsight").innerHTML='<p>'+rainInsight+', '+coldInsight+'입니다.</p><small>주간 최고기온 변동 폭은 '+num(drop)+'°C입니다. 큰 변화가 있는 날 전후로 최신 예보를 확인하세요.</small>';
     if($("weekRangeLabel"))text("weekRangeLabel","최저 "+num(rangeMin)+"° ~ 최고 "+num(rangeMax)+"°");
-    var rainTotal=d.precipitation_sum.slice(0,len).reduce(function(sum,v){return sum+(finite(v)?v:0);},0);
+    var precipitationRows=precipitationSums.slice(0,len);
+    var rainTotal=precipitationRows.length===len&&precipitationRows.every(finite)?precipitationRows.reduce(function(sum,v){return sum+v;},0):null;
     if($("weeklyRainTotal"))text("weeklyRainTotal",num(rainTotal,1)+" mm");
     var weekend=[];
     d.time.slice(0,len).forEach(function(date,i){var day=localDate(date).getDay();if(day===0||day===6)weekend.push(i);});
-    var weekendScores=weekend.map(function(i){
-      var rainRisk=finite(d.precipitation_probability_max?.[i])?d.precipitation_probability_max[i]*.55:0;
-      var high=d.temperature_2m_max?.[i],low=d.temperature_2m_min?.[i],tempRisk=(finite(high)&&high>31?15:0)+(finite(low)&&low<4?15:0);
+    var weekendComplete=weekend.length>0&&weekend.every(function(i){return finite(rainProbabilities[i])&&finite(maximums[i])&&finite(minimums[i]);});
+    var weekendScores=weekendComplete?weekend.map(function(i){
+      var rainRisk=rainProbabilities[i]*.55;
+      var high=maximums[i],low=minimums[i],tempRisk=(high>31?15:0)+(low<4?15:0);
       return clamp(Math.round(100-rainRisk-tempRisk),0,100);
-    });
+    }):[];
     var weekendScore=weekendScores.length?Math.round(weekendScores.reduce(function(a,b){return a+b;},0)/weekendScores.length):null;
     if($("weekendScore"))text("weekendScore",(weekendScore===null?"--":weekendScore)+" / 100");
     if($("weekendScoreRing"))$("weekendScoreRing").style.setProperty("--score",weekendScore===null?0:weekendScore);
     if($("weeklyAlertTitle")&&$("weeklyAlertText")){
       if(cold.length){text("weeklyAlertTitle","저온 구간 미리 알림");text("weeklyAlertText",cold.length+"일은 최저 3°C 이하 예보입니다. 보온·결빙을 확인하세요.");}
       else if(rainy.length){text("weeklyAlertTitle","강수 일정 미리 알림");text("weeklyAlertText",rainy.length+"일은 강수확률이 높습니다. 야외 일정을 점검하세요.");}
-      else{text("weeklyAlertTitle","이번 주 기온·강수 알림");text("weeklyAlertText","큰 위험 신호는 낮지만 전날 최신 예보를 다시 확인하세요.");}
+      else if(completeWeeklyRain&&completeWeeklyTemperature){text("weeklyAlertTitle","이번 주 기온·강수 알림");text("weeklyAlertText","큰 위험 신호는 낮지만 전날 최신 예보를 다시 확인하세요.");}
+      else{text("weeklyAlertTitle","주간 예보 자료 확인");text("weeklyAlertText","일부 기온·강수 자료가 없어 위험 없음으로 판단하지 않습니다.");}
     }
   }
   function evaluate(activity,h,following){
@@ -334,7 +354,7 @@
     if($("airSummaryGrade")){text("airSummaryGrade","공기 "+worst.grade);text("airPm10",num(a.pm10));text("airPm25",num(a.pm2_5));$("airSummaryGrade").className="air-summary-grade "+worst.color;}
     text("airStatement",worst.rank<=1?"대기질 예측이 비교적 양호한 편이에요.":"대기질 예측이 좋지 않습니다. 야외활동 전 공식 관측값도 확인하세요.");
     text("airTime","예측 기준 "+a.time.replace("T"," ")+" (KST) · 모델 추정치");
-    $("airMetrics").innerHTML=values.map(function(v,i){var st=statuses[i];var percent=clamp((v.value||0)/(v.thresholds[2]*1.5)*100,1,100);return '<div><div class="air-row-head"><b>'+v.name+'</b><span>'+st.grade+' <strong>'+num(v.value,1)+'</strong></span></div><div class="air-bar"><div style="width:'+percent+'%"></div></div></div>';}).join("");
+    $("airMetrics").innerHTML=values.map(function(v,i){var st=statuses[i];var percent=finite(v.value)?clamp(v.value/(v.thresholds[2]*1.5)*100,1,100):0;return '<div><div class="air-row-head"><b>'+v.name+'</b><span>'+st.grade+' <strong>'+num(v.value,1)+'</strong></span></div><div class="air-bar"><div style="width:'+percent+'%"></div></div></div>';}).join("");
   }
   function setView(view){
     if(!["today","hourly","weekly","activity","air","map","compare","settings"].includes(view))return;
