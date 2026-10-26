@@ -28,3 +28,16 @@ test("dry and clear rules require the whole configured forecast window", () => {
   rows[2].rain = 30;
   assert.equal(rules.pick(rows, { version: 2, dry: true, dryThreshold: 80 }).some(x => x.id === "dry"), false);
 });
+
+test("missing precipitation never becomes a dry or clear signal", () => {
+  const rows = Array.from({ length: 3 }, (_, i) => row(i, { rain: 5, mm: 0, code: 0, isDay: 1 }));
+  rows[1].mm = null;
+  assert.equal(rules.pick(rows, { version: 2, dry: true, dryThreshold: 80 }).some(x => x.id === "dry"), false);
+  assert.equal(rules.pick(rows, { version: 2, clear: true, clearHours: 3 }).some(x => x.id === "clear"), false);
+});
+
+test("missing risk fields never create frost or wind alerts", () => {
+  const rows = Array.from({ length: 24 }, (_, i) => row(i, { temp: null, gust: null }));
+  const alerts = rules.pick(rows, { version: 2, frost: true, wind: true });
+  assert.deepEqual(alerts, []);
+});

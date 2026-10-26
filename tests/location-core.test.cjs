@@ -30,6 +30,23 @@ test("saved place rename preserves stable id and coordinates",()=>{
  const b=x.rename([a],a.id,"내 농장").items[0];
  assert.equal(b.id,a.id);assert.equal(b.name,"내 농장");assert.equal(b.lat,a.lat);
 });
+test("saved places can move one slot without changing their identity",()=>{
+ const busan={name:"부산",lat:35.1796,lon:129.0756};
+ const items=x.collection([seosan,seoul,busan]);
+ const down=x.move(items,items[0].id,"down");
+ assert.equal(down.error,null);
+ assert.deepEqual(down.items.map(item=>item.name),["서울","서산","부산"]);
+ assert.equal(down.items[1].id,items[0].id);
+ const up=x.move(down.items,items[0].id,"up");
+ assert.deepEqual(up.items.map(item=>item.name),["서산","서울","부산"]);
+});
+test("saved place move rejects missing, invalid and boundary requests",()=>{
+ const items=x.collection([seosan,seoul]);
+ assert.equal(x.move(items,items[0].id,"up").error,"boundary");
+ assert.equal(x.move(items,items[1].id,"down").error,"boundary");
+ assert.equal(x.move(items,items[0].id,"sideways").error,"direction");
+ assert.equal(x.move(items,"missing","down").error,"missing");
+});
 test("delete active location switches to remaining location or default",()=>{
  const items=x.collection([seosan,seoul]);
  const a=x.remove(items,items[0].id);

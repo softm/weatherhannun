@@ -13,7 +13,7 @@ test("settings gear opens a dedicated settings view", () => {
   assert.match(html, /id="settingsButton"[^>]*data-view="settings"/);
   assert.match(html, /id="settingsButton"[\s\S]*?>[\s\S]*?settings/);
   assert.match(html, /id="view-settings"[^>]*aria-label="설정"/);
-  assert.match(app, /"map","settings"/);
+  assert.match(app, /"map","compare","settings"/);
 });
 
 test("appearance, location, alerts and app information live in the settings view", () => {
@@ -30,6 +30,9 @@ test("appearance, location, alerts and app information live in the settings view
     'data-theme-choice="dark"',
     'id="settingsManageLocations"',
     'id="settingsUseCurrentLocation"',
+    'id="homeWidgetSettings"',
+    'id="homeWidgetAdd"',
+    'id="homeWidgetSync"',
     'id="watchSettings"',
     './privacy.html',
     './data-status.html'
@@ -56,4 +59,25 @@ test("theme choices replace the standalone header theme toggle", () => {
   assert.match(layout, /localStorage\.setItem\(KEY,choice\)/);
   assert.doesNotMatch(layout, /weatherThemeToggle/);
   assert.doesNotMatch(html, /weatherThemeToggle/);
+});
+
+test("alert settings explain timing and preview the native notification summary", () => {
+  const html = read("index.html");
+  const insights = read("forecast-insights.js");
+
+  for (const token of [
+    'id="notificationPreviewTitle"',
+    'id="notificationPreviewBody"',
+    'id="notificationPreviewSchedule"',
+    'id="morningTime"',
+    'id="eveningTime"',
+    "시간별",
+    "활동 추천",
+    "알림 설정"
+  ]) assert.ok(html.includes(token), `missing notification preview token ${token}`);
+
+  assert.match(insights, /function renderNotificationPreview\(\)/);
+  assert.match(insights, /12시간 비 최고/);
+  assert.match(insights, /우산 챙겨요/);
+  assert.match(insights, /addEventListener\("change",renderNotificationPreview\)/);
 });

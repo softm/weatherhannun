@@ -135,6 +135,26 @@ test("saved regions stay visible as one-tap chips and put the current region fir
  t.node("locationQuickBar").handlers.get("click")({target:{closest:()=>button}});
  assert.equal(t.events.at(-1).detail.name,"서산");
 });
+test("saved region order controls persist order without switching the active region",async()=>{
+ const SEOUL={name:"서울",lat:37.56,lon:126.98,source:"manual"};
+ const t=boot({initial:{
+  weatherhannun_location:{...SEOSAN,source:"manual"},
+  weatherhannun_places_v2:[SEOSAN,SEOUL]
+ }});
+ await t.settle();
+ const beforeChanges=t.events.filter(event=>event.type==="weatherhannun:change-location").length;
+ const seoulId=core.key(SEOUL);
+ const moveButton={
+  hasAttribute:name=>name==="data-location-move",
+  getAttribute:name=>name==="data-location-id"?seoulId:name==="data-location-move"?"up":null
+ };
+ t.node("favoriteLocations").handlers.get("click")({target:{closest:()=>moveButton}});
+ const saved=JSON.parse(t.localStorage.getItem("weatherhannun_places_v2"));
+ assert.deepEqual(saved.map(place=>place.name),["서울","서산"]);
+ assert.equal(t.events.filter(event=>event.type==="weatherhannun:change-location").length,beforeChanges);
+ assert.match(t.node("favoriteLocations").innerHTML,/서울 위로 이동[^>]* disabled/);
+ assert.match(t.node("locationMessage").textContent,/서울 순서를 위로/);
+});
 test("an unsaved active region exposes a direct register action",async()=>{
  const t=boot({initial:{weatherhannun_location:{...SEOSAN,source:"manual"}}});
  await t.settle();
