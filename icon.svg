@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffdc8a"/><stop offset="1" stop-color="#ffad49"/></linearGradient></defs><rect width="192" height="192" rx="43" fill="#102847"/><circle cx="85" cy="79" r="35" fill="url(#g)"/><g stroke="#ffca66" stroke-width="8" stroke-linecap="round"><path d="M85 23v12M85 123v12M29 79h12M129 79h12M44 38l9 9M119 111l9 9M44 120l9-9M120 47l9-9"/></g><path d="M80 134c-17 0-27-9-27-22 0-14 11-24 25-24 4 0 8 1 12 3 7-14 19-22 36-22 22 0 38 17 38 36 0 16-14 29-30 29H80Z" fill="#d7edff" stroke="#91bedb" stroke-width="3"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 108 108" role="img" aria-labelledby="title desc">
+  <title id="title">날씨한눈</title>
+  <desc id="desc">남색 바탕에 구름 뒤로 떠오른 노란 해와 민트빛 반짝임</desc>
+  <rect width="108" height="108" fill="#0B1730"/>
+  <g fill="#FFB020">
+    <path d="M43 17h4v9h-4zM26 24l7 7-3 3-7-7zM19 41h9v4h-9zM61 24l3 3-7 7-3-3zM62 41h9v4h-9zM30 54l3 3-7 7-3-3z"/>
+  </g>
+  <circle cx="45" cy="43" r="17" fill="#FF9F1C"/>
+  <circle cx="42" cy="40" r="13" fill="#FFD84A"/>
+  <path d="M77 18l2.1 5.1L84 25l-4.9 1.9L77 32l-2.1-5.1L70 25l4.9-1.9L77 18Z" fill="#68F0C4"/>
+  <path d="M38 75c-8 0-13-5.2-13-12.5S31 49 39 49c3.8 0 7.2 1.4 9.8 3.8C52.8 45.5 59.7 41 68 41c10.2 0 18 8.1 18 18.5C86 68 79 75 70 75H38Z" fill="#F8FCFF" stroke="#7FA8C9" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M31.5 68.2c2.1 2.5 5.4 3.8 9.4 3.8h29.4c5.1 0 9.4-2.5 11.5-6.2C79.6 71.3 75.2 75 70 75H38c-5 0-9.1-2-11.3-5.3 1.5.2 3.1-.3 4.8-1.5Z" fill="#CFE4F7"/>
+</svg>
