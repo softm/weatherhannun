@@ -40,8 +40,13 @@ test("50 percent or 0.3 mm/h are independent rain signals; missing stays unknown
   assert.equal(compare.rainSignal({ rainProbability: 50, precipitation: 0 }).triggered, true);
   assert.equal(compare.rainSignal({ rainProbability: 10, precipitation: 0.3 }).triggered, true);
   assert.deepEqual(compare.rainSignal({ rainProbability: null, precipitation: undefined }), {
-    known: false, triggered: false, probability: null, precipitation: null
+    available: false, complete: false, known: false, triggered: false, probability: null, precipitation: null
   });
+  const partial = compare.rainSignal({ rainProbability: 10, precipitation: null });
+  assert.equal(partial.available, true);
+  assert.equal(partial.complete, false);
+  assert.equal(partial.known, false);
+  assert.equal(partial.triggered, false);
 });
 
 test("comparison rejects same place and a time not present in both forecasts", () => {

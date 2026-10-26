@@ -27,6 +27,7 @@ test("comparison preserves the selected origin and guards destination request ra
   assert.match(script, /requestTicket/);
   assert.match(script, /AbortController/);
   assert.match(script, /ticket !== requestTicket/);
+  assert.match(script, /destination\.rain\.complete && comparison\.origin\.rain\.complete/);
   assert.doesNotMatch(script, /weatherhannun:change-location/);
   assert.doesNotMatch(script, /history\.(pushState|replaceState)/);
   assert.doesNotMatch(script, /searchParams\.set\("(?:lat|lon|name)"/);
