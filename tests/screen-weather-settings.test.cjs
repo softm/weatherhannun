@@ -6,13 +6,13 @@ const fs = require("node:fs");
 
 const read = file => fs.readFileSync(file, "utf8");
 
-test("screen weather is an explicit Android-only opt-in", () => {
+test("screen weather defaults on and keeps Android overlay permission explicit", () => {
   const html = read("index.html");
   const script = read("screen-weather-settings.js");
 
   assert.match(html, /id="screenWeatherEnabled"[^>]*type="checkbox"[^>]*role="switch"/);
-  assert.match(html, /기본 OFF/);
-  assert.match(script, /enabled:\s*false/);
+  assert.match(html, /기본 ON/);
+  assert.match(script, /enabled:\s*true/);
   assert.match(script, /requestScreenWeatherPermission/);
   assert.match(script, /웹 브라우저에서는 동작하지 않습니다/);
   assert.match(script, /permissionScreenMode/);
@@ -63,7 +63,7 @@ test("Android home widget receives current location and all three size fields", 
 test("offline shell contains both settings assets", () => {
   const html = read("index.html");
   const worker = read("sw.js");
-  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=35"]) {
+  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=36"]) {
     assert.ok(html.includes(asset));
     assert.ok(worker.includes(asset));
   }
