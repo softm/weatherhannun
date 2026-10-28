@@ -1,0 +1,11 @@
+.action-progress{position:fixed;inset:0 0 auto;z-index:5000;pointer-events:none;color:#0b2a27}
+.action-progress-track{display:block;height:3px;background:#17324a55;overflow:hidden}
+.action-progress-track i{display:block;width:42%;height:100%;background:linear-gradient(90deg,#55d8b6,#ffcf72);transform:translateX(-110%);box-shadow:0 0 12px #55d8b6}
+.action-progress.running .action-progress-track i{animation:action-progress-slide 1.05s ease-in-out infinite}
+.action-progress.finishing .action-progress-track i{width:100%;transform:translateX(0);transition:transform .16s ease,width .16s ease}
+.action-progress-label{position:absolute;top:13px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;max-width:calc(100vw - 28px);padding:9px 14px;border:1px solid #91cdbd;border-radius:999px;background:#eefcf7ed;box-shadow:0 8px 28px #06152535;backdrop-filter:blur(12px);font-size:12px;white-space:nowrap}
+.action-progress-label b{overflow:hidden;text-overflow:ellipsis}
+.action-progress-spinner{width:14px;height:14px;border:2px solid #9ccfc2;border-top-color:#087c68;border-radius:50%;animation:action-progress-spin .75s linear infinite;flex:none}
+@keyframes action-progress-slide{0%{transform:translateX(-110%)}55%{transform:translateX(120%)}100%{transform:translateX(240%)}}
+@keyframes action-progress-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.action-progress-track i,.action-progress-spinner{animation:none!important}.action-progress-track i{transform:translateX(70%)}}

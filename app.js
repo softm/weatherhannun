@@ -105,6 +105,7 @@
     });
   }
   async function loadWeather(force) {
+    var progressId=window.WeatherActionProgress?.begin("날씨 정보를 불러오는 중…");
     var ticket=++STATE.ticket;
     STATE.loading=true;
     $("updatedBadge").textContent="예보 갱신 중…";
@@ -146,6 +147,7 @@
       if(!STATE.weather) $("weatherSummary").textContent="날씨 연결 실패";
     } finally {
       if(ticket===STATE.ticket){STATE.loading=false;$("refreshButton").disabled=false;}
+      window.WeatherActionProgress?.end(progressId);
     }
   }
   function text(id,value){$(id).textContent=value;}
@@ -444,17 +446,22 @@
     refreshMapLayout(true);
     if(STATE.cityData){renderCities();updateMapMarkers();return;}
     if(STATE.mapBusy)return;
+    var progressId=window.WeatherActionProgress?.begin("전국 날씨를 불러오는 중…");
     STATE.mapBusy=true;
     text("mapUpdated","주요 도시 예보 조회 중");
     $("cityGrid").innerHTML='<div class="empty-state">전국 주요 도시의 현재 날씨를 가져오고 있습니다…</div>';
-    var results=await Promise.allSettled(CITY_LIST.map(function(city){return getJson(forecastUrl(city,true));}));
-    STATE.cityData=CITY_LIST.map(function(city,i){
-      var v=results[i].status==="fulfilled"?results[i].value.current:null;
-      return {name:city.name,lat:city.lat,lon:city.lon,temp:v?.temperature_2m,code:v?.weather_code,isDay:v?.is_day};
-    });
-    STATE.mapBusy=false;
-    text("mapUpdated","도시별 모델 예보 · "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"})+" 갱신");
-    renderCities();updateMapMarkers();
+    try{
+      var results=await Promise.allSettled(CITY_LIST.map(function(city){return getJson(forecastUrl(city,true));}));
+      STATE.cityData=CITY_LIST.map(function(city,i){
+        var v=results[i].status==="fulfilled"?results[i].value.current:null;
+        return {name:city.name,lat:city.lat,lon:city.lon,temp:v?.temperature_2m,code:v?.weather_code,isDay:v?.is_day};
+      });
+      text("mapUpdated","도시별 모델 예보 · "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"})+" 갱신");
+      renderCities();updateMapMarkers();
+    }finally{
+      STATE.mapBusy=false;
+      window.WeatherActionProgress?.end(progressId);
+    }
   }
   function searchDialogOpen(){
     $("locationDialog").showModal();

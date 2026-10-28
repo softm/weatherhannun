@@ -1,8 +1,8 @@
 "use strict";
-const CACHE="weatherhannun-shell-v39-official-observations";
+const CACHE="weatherhannun-shell-v40-action-progress";
 const BASE=self.registration.scope;
 const SHELL=[
-  "./","./index.html","./styles.css","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
+  "./","./index.html","./styles.css","./action-progress.css?v=40","./action-progress.js?v=40","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
   "./settings.css?v=34","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=36",
   "./agriculture-planner.css?v=34","./agriculture-planner-core.js?v=34","./agriculture-planner.js?v=34",
   "./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",

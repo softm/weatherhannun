@@ -205,10 +205,12 @@
   }
   function requestCurrentPosition(explicit=true){
     if(busy||!canUse())return Promise.resolve(false);
+    const progressId=window.WeatherActionProgress?.begin("현재 위치를 확인하는 중…");
     setBusy(true);
     // Calling getCurrentPosition directly in this click handler preserves user activation.
     return new Promise(resolve=>{
       navigator.geolocation.getCurrentPosition(function(position){
+        window.WeatherActionProgress?.end(progressId);
         setBusy(false);
         const la=position.coords?.latitude,lo=position.coords?.longitude;
         if(!Number.isFinite(la)||!Number.isFinite(lo)){status("좌표를 확인할 수 없습니다. 지역을 선택해 주세요.");return resolve(false);}
@@ -221,6 +223,7 @@
         resolveGPSAddress(loc).catch(()=>status("GPS 위치는 저장했지만 주변 주소를 확인하지 못했습니다."));
         resolve(true);
       },function(error){
+        window.WeatherActionProgress?.end(progressId);
         setBusy(false);
         const code=error?.code;
         const description=code===1?"위치 권한이 거부되었습니다. 브라우저의 사이트 설정에서 위치 권한을 허용하거나 지역을 직접 선택해 주세요.":
