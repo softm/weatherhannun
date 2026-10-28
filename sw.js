@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v35-overlay-permission-guide";
+const CACHE="weatherhannun-shell-v35-overlay-permission-guide-suite-20261028";
 const BASE=self.registration.scope;
 const SHELL=[
   "./","./index.html","./styles.css","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
