@@ -21,6 +21,9 @@ test("official data is resolved from a key-free licensed snapshot and cached off
  const worker=fs.readFileSync("sw.js","utf8");
  assert.match(ui,/WeatherHannunOfficialData/);
  assert.match(ui,/data\/official\/latest\.json/);
+ assert.match(ui,/setInterval\(loadFeed,15\*60\*1000\)/);
+ assert.match(ui,/visibilitychange/);
+ assert.match(ui,/resolved\.latestAvailable/);
  assert.match(ui,/weatherhannun:official-data/);
  for(const asset of ["official-data-core.js?v=39","official-data.css?v=39","official-data-ui.js?v=39","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
 });

@@ -168,6 +168,20 @@ test("an unsaved active region exposes a direct register action",async()=>{
  assert.equal(saved[0].name,"서산");
  assert.doesNotMatch(t.node("locationQuickBar").innerHTML,/data-location-save-current/);
 });
+test("새로 등록한 지역은 기존 등록 지역보다 앞에 저장되고 표시된다",async()=>{
+ const SEOUL={name:"서울",lat:37.56,lon:126.98,source:"manual"};
+ const t=boot({initial:{
+  weatherhannun_location:{...SEOSAN,source:"manual"},
+  weatherhannun_places_v2:[SEOUL]
+ }});
+ await t.settle();
+ const button={hasAttribute:name=>name==="data-location-save-current",getAttribute:()=>null};
+ t.node("locationQuickBar").handlers.get("click")({target:{closest:()=>button}});
+ const saved=JSON.parse(t.localStorage.getItem("weatherhannun_places_v2"));
+ assert.deepEqual(saved.map(place=>place.name),["서산","서울"]);
+ const html=t.node("locationQuickBar").innerHTML;
+ assert.ok(html.indexOf(">서산<")<html.indexOf(">서울<"));
+});
 test("shared location query suppresses auto GPS override",async()=>{
  const t=boot({permission:"granted",search:"?lat=37.5&lon=127&name=%EC%84%9C%EC%9A%B8"});
  await t.settle();

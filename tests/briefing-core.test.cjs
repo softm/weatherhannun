@@ -33,6 +33,7 @@ test("rain scenario: interprets probability as possibility, not certainty",()=>{
  const x=core.analyse(s,{now:Date.UTC(2026,9,25,0,5)});
  assert.equal(x.events[0].id,"rain");
  assert.match(x.short,/비 가능성 증가/);
+ assert.match(x.short,/예보를 확인해 주세요/);
  assert.match(x.detail,/강수확률 65%/);
  assert.ok(!x.detail.includes("반드시 비"));
 });

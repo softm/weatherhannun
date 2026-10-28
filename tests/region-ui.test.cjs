@@ -5,6 +5,7 @@ const vm=require("node:vm");
 const path=require("node:path");
 const source=fs.readFileSync(path.join(__dirname,"../region-search-ui.js"),"utf8");
 const page=fs.readFileSync(path.join(__dirname,"../index.html"),"utf8");
+const styles=fs.readFileSync(path.join(__dirname,"../region-search.css"),"utf8");
 const data=JSON.parse(fs.readFileSync(path.join(__dirname,"../data/korea-regions-202602.json"),"utf8"));
 const core=require("../region-search-core.js");
 test("지역 검색 화면은 내부 데이터 출처와 장황한 후보 설명을 노출하지 않는다",()=>{
@@ -49,6 +50,12 @@ test("the unified results panel is directly below the search field, before saved
  const favorites=page.indexOf('id="favoriteLocations"');
  assert.ok(field>=0&&field<panel);
  assert.ok(panel<results&&results<current&&current<favorites);
+});
+test("검색 결과가 늘어나도 데스크톱 검색 입력 위치는 고정된다",()=>{
+ assert.match(styles,/#locationDialog\{[\s\S]*?position:fixed;[\s\S]*?inset:clamp\(16px,5dvh,48px\) auto auto 50%;/);
+ assert.match(styles,/#locationDialog\{[\s\S]*?transform:translateX\(-50%\);/);
+ assert.match(styles,/\.region-result-list\{[\s\S]*?overflow-y:auto;/);
+ assert.match(styles,/@media\(max-width:640px\)\{[\s\S]*?#locationDialog\{[\s\S]*?transform:none/);
 });
 test("region management follows search, current location, current region, and saved regions hierarchy",()=>{
  assert.match(page,/id="locationDialogTitle">지역 관리/);

@@ -31,6 +31,8 @@ test("resolves nearby fresh official observations and WH-H02 equivalent pair", (
 test("never substitutes stale, distant or unconfigured data for an observation", () => {
   const stale = core.resolve(feed(), { lat: 36.78, lon: 126.45 }, "2026-10-28T05:30:00Z");
   assert.equal(stale.status, "partial");
+  assert.equal(stale.reason, "official_observation_stale");
+  assert.equal(stale.latestAvailable.observedAt, "2026-10-28T10:00:00+09:00");
   assert.equal(stale.current, null);
   assert.equal(stale.observations, null);
   assert.equal(delta.compare(stale.observations).status, "unavailable");

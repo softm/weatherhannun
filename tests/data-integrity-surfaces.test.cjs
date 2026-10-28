@@ -21,6 +21,14 @@ test("forecast summaries distinguish complete low-risk evidence from missing dat
   assert.doesNotMatch(source, /sum\+\(r\.mm\|\|0\)/);
 });
 
+test("daily precipitation bars represent maximum probability, not wet-hour share", () => {
+  const source = read("forecast-insights.js");
+  assert.match(source, /probabilityWidth=finite\(pr\)\?Math\.round\(within\(pr,0,100\)\):0/);
+  assert.match(source, /aria-label="'\+safe\(probabilityLabel\)\+'"/);
+  assert.doesNotMatch(source, /wetHours\/rs\.length/);
+  assert.doesNotMatch(source, /class="sun-share"/);
+});
+
 test("hourly and weekly views keep missing aggregates unknown", () => {
   const source = read("app.js");
   assert.match(source, /coordinates=h\.map\(function\(x,i\)\{return finite\(x\.temp\)/);
@@ -32,7 +40,7 @@ test("hourly and weekly views keep missing aggregates unknown", () => {
 test("cache-busted shell ships the data-integrity implementations", () => {
   const page = read("index.html");
   const worker = read("sw.js");
-  for (const asset of ["app.js?v=41", "stitch-today.js?v=31", "forecast-insights.js?v=31", "alert-rules-core.js?v=31"]) {
+  for (const asset of ["app.js?v=41", "stitch-today.js?v=31", "forecast-insights.js?v=32", "alert-rules-core.js?v=31"]) {
     assert.match(page, new RegExp(asset.replace(/[.?]/g, "\\$&")));
     assert.ok(worker.includes(asset));
   }

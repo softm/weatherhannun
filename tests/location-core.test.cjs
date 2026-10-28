@@ -22,7 +22,8 @@ test("can store and switch between multiple favorites",()=>{
  const a=x.add([],seosan);
  const b=x.add(a.items,seoul);
  assert.equal(b.items.length,2);
- assert.equal(b.items[1].name,"서울");
+ assert.equal(b.items[0].name,"서울");
+ assert.equal(b.items[1].name,"서산");
  assert.equal(x.add(b.items,seosan).error,"exists");
 });
 test("saved place rename preserves stable id and coordinates",()=>{
