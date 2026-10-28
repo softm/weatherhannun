@@ -87,9 +87,9 @@
   nodes={
    hero,air,brief,actions,hour,metrics,notice,cards,
    weatherVisual:hero.querySelector('[data-weather-visual]'),
-   temperature:leaf(hero,'22'),sky:leaf(hero,'대체로 맑음'),feels:leaf(hero,'체감 23.5°'),
+   temperature:hero.querySelector('[data-official-temp]')||leaf(hero,'22'),sky:leaf(hero,'대체로 맑음'),feels:leaf(hero,'체감 23.5°'),
    high:leaf(hero,'최고 25°'),low:leaf(hero,'최저 14°'),updated:leaf(hero,'조회 중'),
-   source:leaf(hero,'기상 모델 예보 연결'),airText:leaf(air,'공기 쾌적 및 활동 최적'),
+   source:hero.querySelector('[data-official-source]')||leaf(hero,'기상 모델 예보 연결'),airText:air.querySelector('[data-official-air-grade]'),
    briefName:leaf(brief,'삼청동 기상브리핑'),briefMessage:brief.querySelector('p'),
    actionPlace:leaf(actions,'삼청동 기준'),
    hourlyBanner:leaf(hour,'강수 예보 확인 중'),
@@ -222,7 +222,7 @@
  function init(){
   var oldView=document.getElementById('view-today');if(!oldView)return;
   decorateNav();favourite();
-  fetch('./stitch-today.template.html?v=17').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
+  fetch('./stitch-today.template.html?v=39').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
    var host=document.createElement('div');host.id='stitch-live-dashboard';host.innerHTML=html;
    var group=[...host.firstElementChild.children].filter(x=>x.tagName==='SECTION');
    if(group.length!==7)throw Error('Stitch 원본 섹션 변경: '+group.length);

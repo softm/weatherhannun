@@ -8,16 +8,16 @@
 <!-- Location & Updated Chip -->
 <div class="flex items-center gap-space-xs px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 mb-space-sm shadow-xs">
 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-<span class="font-label-sm text-label-sm text-slate-600 font-medium">기상 모델 예보 연결</span>
+<span class="font-label-sm text-label-sm text-slate-600 font-medium" data-official-source>기상 모델 예보 연결</span>
 <span class="text-slate-300 text-[10px]">|</span>
-<span class="font-label-sm text-label-sm text-primary font-semibold">조회 중</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold" data-official-updated>조회 중</span>
 </div>
 <!-- Live WMO weather illustration. The shared renderer supplies the exact
      day/night, precipitation, fog, snow or thunder state. -->
 <div class="stitch-current-weather-visual my-1" data-weather-visual aria-hidden="true"></div>
 <!-- Temperature Display & Conditions -->
 <div class="flex items-start justify-center text-slate-900 tracking-tighter">
-<span class="font-display-mobile text-display-mobile font-bold text-slate-900">22</span>
+<span class="font-display-mobile text-display-mobile font-bold text-slate-900" data-official-temp>22</span>
 <span class="font-headline-lg-mobile text-headline-lg-mobile text-primary mt-1 font-bold">°</span>
 </div>
 <div class="font-headline-sm text-headline-sm text-slate-800 mt-0.5 flex items-center gap-space-xs justify-center font-semibold">
@@ -42,6 +42,7 @@
 <div class="daily-delta-copy"><span>어제 같은 시각</span><b data-daily-delta-value>비교 불가</b><p data-daily-delta-reason>동일 관측소 자료를 확인하고 있습니다.</p></div>
 <small data-daily-delta-meta>예보와 관측은 섞지 않습니다.</small>
 </div>
+<div class="official-glance-line"><span class="material-symbols-outlined" aria-hidden="true">warning</span><span data-official-warning>공식 특보 확인 중</span><a href="https://www.weather.go.kr/w/special-report/overall.do" target="_blank" rel="noopener noreferrer">원문</a></div>
 </div>
 </section>
 <!-- Ambient Air Quality Summary Badge -->
@@ -51,16 +52,16 @@
 <span class="material-symbols-outlined text-[19px]">eco</span>
 </div>
 <div>
-<div class="font-label-sm text-label-sm text-slate-500">통합 대기질 지수</div>
-<div class="font-title-md text-title-md text-slate-900 font-semibold">공기 쾌적 및 활동 최적</div>
+<div class="font-label-sm text-label-sm text-slate-500" data-official-air-source>대기질 모델 예측</div>
+<div class="font-title-md text-title-md text-slate-900 font-semibold" data-official-air-grade>대기질 확인 중</div>
 </div>
 </div>
 <div class="flex items-center gap-space-xs">
 <div class="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/80 text-emerald-700 font-label-sm text-label-sm text-center">
-        미세 <span class="font-bold">좋음</span> 18㎍
+        <span data-official-pm10>미세 확인 중</span>
       </div>
 <div class="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-700 font-label-sm text-label-sm text-center">
-        초미세 <span class="font-bold">보통</span> 16㎍
+        <span data-official-pm25>초미세 확인 중</span>
       </div>
 </div>
 </section>

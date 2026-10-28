@@ -33,6 +33,7 @@
     });
   }
   window.addEventListener("weatherhannun:data", function (event) { latest = event.detail; render(); });
+  window.addEventListener("weatherhannun:official-data", function (event) { latest = event.detail; render(); });
   window.addEventListener("weatherhannun:stitch-ready", render);
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", render, { once: true });

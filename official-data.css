@@ -3,9 +3,21 @@
 .official-data-copy h3{margin:0;font-size:17px;color:var(--st-fg)}
 .official-data-copy p{margin:0;color:var(--st-muted);font-size:12px;line-height:1.6}
 .official-data-status{display:block;margin-top:3px;color:var(--st-amber-ink);font-size:11px;line-height:1.55}
-.official-data-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.official-data-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .official-data-links a{display:flex;align-items:center;gap:8px;min-height:54px;padding:10px 12px;border:1px solid var(--st-line);border-radius:12px;background:var(--panel2);color:var(--st-fg);text-decoration:none;font-size:12px;font-weight:800}
 .official-data-links a:hover{border-color:var(--st-accent);color:var(--st-accent)}
 .official-data-links .material-symbols-outlined{font-size:20px;color:var(--st-accent)}
 .official-data-links small{display:block;color:var(--st-muted);font-size:9px;font-weight:600;margin-top:2px}
-@media(max-width:760px){.official-data-panel{grid-template-columns:1fr}.official-data-links{grid-template-columns:1fr}.official-data-links a{min-height:48px}}
+.official-data-status[data-state="ready"]{color:#08735c}
+.official-radar-preview{grid-column:1/-1;margin:0;display:grid;gap:7px}
+.official-radar-preview img{width:100%;max-height:520px;object-fit:contain;border:1px solid var(--st-line);border-radius:10px;background:var(--panel2)}
+.official-radar-preview figcaption{color:var(--st-muted);font-size:10px}
+.official-glance-line{display:flex;align-items:center;gap:7px;width:min(100%,430px);margin:9px auto 0;padding:8px 11px;border-radius:8px;background:#fff8e8;border:1px solid #ecd49c;color:#6f4b00;font-size:11px;text-align:left}
+.official-glance-line .material-symbols-outlined{font-size:17px}.official-glance-line span:nth-child(2){flex:1}.official-glance-line a{color:#1559b3;font-weight:800;text-decoration:none}
+[data-official-source]{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#stitch-live-dashboard>div{gap:14px}
+#stitch-live-dashboard>div>section:nth-child(3) .relative.shrink-0{display:none}
+#stitch-live-dashboard>div>section:nth-child(3){padding-block:16px}
+#stitch-live-dashboard>div>section:nth-child(4) article{padding-block:11px}
+html[data-weather-theme="dark"] .official-glance-line{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#fcd38a}
+@media(max-width:760px){.official-data-panel{grid-template-columns:1fr}.official-data-links{grid-template-columns:1fr}.official-data-links a{min-height:48px}.official-glance-line{align-items:flex-start}}
