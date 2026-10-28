@@ -1,9 +1,9 @@
 "use strict";
-const CACHE="weatherhannun-shell-v36-location-period-compare";
+const CACHE="weatherhannun-shell-v37-screen-weather-default-on";
 const BASE=self.registration.scope;
 const SHELL=[
   "./","./index.html","./styles.css","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
-  "./settings.css?v=34","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=35",
+  "./settings.css?v=34","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=36",
   "./agriculture-planner.css?v=34","./agriculture-planner-core.js?v=34","./agriculture-planner.js?v=34",
   "./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",
   "./stitch-today.template.html?v=17","./stitch-today.js?v=31","./stitch-today.css?v=16",

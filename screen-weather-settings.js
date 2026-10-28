@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var STORAGE_KEY = 'weatherhannun:screen-weather:v1';
-  var defaults = {enabled: false, displaySeconds: 5, cooldownMinutes: 30};
+  var defaults = {enabled: true, displaySeconds: 5, cooldownMinutes: 30};
   var nativeState = null;
   var nativeWidgetState = null;
   var latestWeather = null;
@@ -25,7 +25,7 @@
   function normalize(value) {
     value = value && typeof value === 'object' ? value : {};
     return {
-      enabled: value.enabled === true,
+      enabled: value.enabled !== false,
       displaySeconds: allowed(value.displaySeconds, [0, 3, 5, 10], 5),
       cooldownMinutes: allowed(value.cooldownMinutes, [0, 15, 30, 60], 30)
     };
@@ -75,8 +75,8 @@
     if (!nativeState.enabled) {
       if (badge) badge.textContent = '꺼짐';
       if (note) note.textContent = listPermissionScreen
-        ? '기본 OFF입니다. 켜면 시스템 목록이 열리며, Android 11 이상에서는 목록에서 날씨한눈을 선택해야 합니다.'
-        : '기본 OFF입니다. 기능을 켜면 날씨한눈의 다른 앱 위에 표시 권한 화면이 열립니다.';
+        ? '사용자가 끈 상태입니다. 다시 켜면 시스템 목록이 열리며, Android 11 이상에서는 목록에서 날씨한눈을 선택해야 합니다.'
+        : '사용자가 끈 상태입니다. 다시 켜면 날씨한눈의 다른 앱 위에 표시 권한 화면이 열립니다.';
     } else if (!nativeState.permissionGranted) {
       if (badge) badge.textContent = '권한 필요';
       if (note) note.textContent = listPermissionScreen

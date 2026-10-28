@@ -69,7 +69,7 @@
   <script defer src="./stitch-today.js?v=31"></script>
   <script defer src="./rain-decision-ui.js?v=21"></script>
   <script defer src="./outfit-decision-ui.js?v=24"></script>
-  <script defer src="./screen-weather-settings.js?v=35"></script>
+  <script defer src="./screen-weather-settings.js?v=36"></script>
   <script defer src="./agriculture-planner.js?v=34"></script>
 </head>
 <body>
@@ -293,9 +293,9 @@
           </section>
 
           <section id="screenWeatherSettings" class="settings-card screen-weather-settings stitch-card" aria-labelledby="screenWeatherSettingsTitle">
-            <div class="settings-card-heading"><span class="settings-card-icon material-symbols-outlined" aria-hidden="true">phone_android</span><div><span class="section-overline">ANDROID · OPT IN</span><h3 id="screenWeatherSettingsTitle">화면 켤 때 날씨</h3></div><span id="screenWeatherStatusBadge" class="screen-weather-badge">확인 중</span></div>
+            <div class="settings-card-heading"><span class="settings-card-icon material-symbols-outlined" aria-hidden="true">phone_android</span><div><span class="section-overline">ANDROID · 기본 ON</span><h3 id="screenWeatherSettingsTitle">화면 켤 때 날씨</h3></div><span id="screenWeatherStatusBadge" class="screen-weather-badge">확인 중</span></div>
             <p>잠금 해제 뒤 작은 날씨 카드를 표시합니다. 잠금화면을 교체하지 않으며 광고를 표시하지 않습니다.</p>
-            <label class="screen-weather-toggle"><span><b>화면 켤 때 표시</b><small>기본 OFF · 사용자가 직접 켠 경우에만 동작</small></span><input id="screenWeatherEnabled" type="checkbox" role="switch" aria-describedby="screenWeatherSupportNote"></label>
+            <label class="screen-weather-toggle"><span><b>화면 켤 때 표시</b><small>기본 ON · 첫 실행에서 오버레이 권한 안내</small></span><input id="screenWeatherEnabled" type="checkbox" role="switch" aria-describedby="screenWeatherSupportNote"></label>
             <div class="screen-weather-options">
               <label>표시 시간<select id="screenWeatherDuration"><option value="3">3초</option><option value="5" selected>5초</option><option value="10">10초</option><option value="0">직접 닫기</option></select></label>
               <label>재표시 제한<select id="screenWeatherCooldown"><option value="0">매번</option><option value="15">15분</option><option value="30" selected>30분</option><option value="60">60분</option></select></label>
