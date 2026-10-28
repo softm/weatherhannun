@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
 permissions:
   contents: read
   pages: write
@@ -26,12 +28,29 @@ jobs:
           for file in *.js; do
             node --check "$file"
           done
+          node --check scripts/sync-official-data.mjs
+      - name: Refresh licensed official data snapshot
+        id: official
+        env:
+          KMA_API_HUB_KEY: ${{ secrets.KMA_API_HUB_KEY }}
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+        run: |
+          if [ -n "$KMA_API_HUB_KEY" ] && [ -n "$DATA_GO_KR_SERVICE_KEY" ]; then
+            node scripts/sync-official-data.mjs
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Official API secrets are absent; keeping safe unavailable snapshot."
+          fi
       - name: Configure Pages
+        if: github.event_name != 'schedule' || steps.official.outputs.configured == 'true'
         uses: actions/configure-pages@v5
       - name: Upload static site
+        if: github.event_name != 'schedule' || steps.official.outputs.configured == 'true'
         uses: actions/upload-pages-artifact@v4
         with:
           path: '.'
       - name: Deploy
+        if: github.event_name != 'schedule' || steps.official.outputs.configured == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
