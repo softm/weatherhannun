@@ -7,6 +7,12 @@ const source=fs.readFileSync(path.join(__dirname,"../region-search-ui.js"),"utf8
 const page=fs.readFileSync(path.join(__dirname,"../index.html"),"utf8");
 const data=JSON.parse(fs.readFileSync(path.join(__dirname,"../data/korea-regions-202602.json"),"utf8"));
 const core=require("../region-search-core.js");
+test("지역 검색 화면은 내부 데이터 출처와 장황한 후보 설명을 노출하지 않는다",()=>{
+ assert.doesNotMatch(source,/입력에서 확인되는|전국 법정동|데이터 출처/);
+ assert.doesNotMatch(page,/regionSearchSource|전국 법정동·읍·면·리 자료 준비 중/);
+ assert.doesNotMatch(page,/regionSearchHelp|가장 알맞은 주소 단계|가장 알맞은 주소/);
+ assert.doesNotMatch(source,/가장 알맞은 주소|가장 적합/);
+});
 function createHarness(){
   const nodes=new Map(),events=[],requests=[];
   function node(id){
@@ -24,15 +30,14 @@ function createHarness(){
   vm.runInNewContext(source,{window,document,fetch,CustomEvent,URL,AbortController,setTimeout,clearTimeout,console});
   return {window,node,events,requests};
 }
-test("opening and typing a district name renders full legal dong address suggestions",async()=>{
+test("opening and typing a district name renders concise district suggestions",async()=>{
  const h=createHarness();
  const input=h.node("locationSearch");
  input.value="옥길동";
  await h.window.WeatherRegionSearch.search();
- assert.match(h.node("searchResults").innerHTML,/경기도 부천시 소사구 옥길동/);
- assert.match(h.node("searchResults").innerHTML,/경기도 광명시 옥길동/);
- assert.match(h.node("searchResults").innerHTML,/법정동/);
- assert.match(h.node("searchResults").innerHTML,/<b>옥길동<\/b><em class="region-result-best">가장 적합<\/em>/);
+ assert.match(h.node("searchResults").innerHTML,/<b>소사구 옥길동<\/b><small>경기도 부천시<\/small>/);
+ assert.match(h.node("searchResults").innerHTML,/<b>광명시 옥길동<\/b><small>경기도<\/small>/);
+ assert.doesNotMatch(h.node("searchResults").innerHTML,/법정동|대표 좌표|가장 적합/);
  assert.equal(input.attributes["aria-expanded"],"true");
  assert.equal(h.requests.length,1);
 });
@@ -44,6 +49,13 @@ test("the unified results panel is directly below the search field, before saved
  const favorites=page.indexOf('id="favoriteLocations"');
  assert.ok(field>=0&&field<panel);
  assert.ok(panel<results&&results<current&&current<favorites);
+});
+test("region management follows search, current location, current region, and saved regions hierarchy",()=>{
+ assert.match(page,/id="locationDialogTitle">지역 관리/);
+ assert.match(page,/id="geoButton"[\s\S]*?현재 위치로 보기/);
+ assert.match(page,/id="managedCurrentName"/);
+ assert.match(page,/id="favoriteCount"[^>]*>0 \/ 10/);
+ assert.match(page,/id="presetCities"/);
 });
 test("typing a suffix-free city name shows the city immediately in the visible panel",async()=>{
  const h=createHarness();
@@ -73,16 +85,14 @@ test("multiple searches use a single cached local dataset without typing network
  h.node("locationSearch").value="서산 화곡리";
  await h.window.WeatherRegionSearch.search();
  assert.equal(h.requests.length,1);
- assert.match(h.node("searchResults").innerHTML,/서산시 대산읍 화곡리/);
+ assert.match(h.node("searchResults").innerHTML,/<b>대산읍 화곡리<\/b><small>충청남도 서산시<\/small>/);
 });
 test("a place-name search shows its linked administrative weather region",async()=>{
  const h=createHarness();
  h.node("locationSearch").value="오이도";
  await h.window.WeatherRegionSearch.search();
  const html=h.node("searchResults").innerHTML;
- assert.match(html,/<b>정왕동<\/b>/);
- assert.match(html,/경기도 시흥시 정왕동/);
- assert.match(html,/오이도 검색 결과 · 법정동 대표 좌표/);
+ assert.match(html,/<b>시흥시 정왕동<\/b><small>경기도<\/small>/);
 });
 test("road/building address is not falsely geocoded as an exact point",async()=>{
  const h=createHarness();
@@ -96,7 +106,7 @@ test("full road address returns only administrative prefix with explicit approxi
  const h=createHarness();
  h.node("locationSearch").value="경기도 부천시 소사구 옥길로 38";
  await h.window.WeatherRegionSearch.search();
- assert.match(h.node("searchResults").innerHTML,/경기도 부천시 소사구/);
+ assert.match(h.node("searchResults").innerHTML,/<b>부천시 소사구<\/b><small>경기도<\/small>/);
  assert.match(h.node("searchResults").innerHTML,/도로명·건물번호는 반영하지 않았습니다/);
 });
 
@@ -105,8 +115,7 @@ test("city and borough inputs show their own best matching level, not every chil
  h.node("locationSearch").value="부천 소사구";
  await h.window.WeatherRegionSearch.search();
  const html=h.node("searchResults").innerHTML;
- assert.match(html,/<b>소사구<\/b>/);
- assert.match(html,/경기도 부천시 소사구/);
+ assert.match(html,/<b>부천시 소사구<\/b><small>경기도<\/small>/);
  assert.doesNotMatch(html,/옥길동/);
- assert.match(html,/후보 1개/);
+ assert.equal((html.match(/data-region-choice=/g)||[]).length,1);
 });

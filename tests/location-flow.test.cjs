@@ -123,6 +123,8 @@ test("saved regions stay visible as one-tap chips and put the current region fir
  }});
  await t.settle();
  const html=t.node("locationQuickBar").innerHTML;
+ assert.equal(t.node("managedCurrentName").textContent,"서울");
+ assert.equal(t.node("favoriteCount").textContent,"2 / 10");
  assert.match(html,/등록 지역 <b>2<\/b>/);
  assert.match(html,/aria-label="등록한 지역 선택"/);
  assert.match(html,/aria-current="location"/);
