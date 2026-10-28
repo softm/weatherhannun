@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v37-screen-weather-default-on";
+const CACHE="weatherhannun-shell-v38-screen-weather-runtime";
 const BASE=self.registration.scope;
 const SHELL=[
   "./","./index.html","./styles.css","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
