@@ -55,7 +55,8 @@
     if (!finite(lat) || !finite(lon)) return Object.assign(unavailable, { reason: "location_unavailable", rights: feed.rights || [] });
     var currentRows = feed.kma && feed.kma.observations && feed.kma.observations.current;
     var picked = nearest(currentRows, lat, lon, KMA_MAX_KM);
-    var current = picked && fresh(picked.row.observedAt, now, KMA_MAX_AGE_MS) ? picked.row : null;
+    var currentFresh = picked && fresh(picked.row.observedAt, now, KMA_MAX_AGE_MS);
+    var current = currentFresh ? picked.row : null;
     var previousRows = feed.kma && feed.kma.observations && feed.kma.observations.previous;
     var previous = current && (Array.isArray(previousRows) ? previousRows : []).find(function (row) { return row && row.stationId === current.stationId; });
     var airPicked = nearest(feed.airKorea && feed.airKorea.measurements, lat, lon, AIR_MAX_KM);
@@ -63,8 +64,9 @@
       ? Object.assign({}, airPicked.row, { distanceKm: airPicked.distanceKm }) : null;
     return {
       status: current ? "ready" : "partial",
-      reason: current ? null : "nearby_fresh_observation_unavailable",
+      reason: current ? null : picked ? "official_observation_stale" : "nearby_fresh_observation_unavailable",
       current: current ? Object.assign({}, current, { distanceKm: picked.distanceKm }) : null,
+      latestAvailable: !current && picked ? { observedAt: picked.row.observedAt, stationName: picked.row.stationName || picked.row.stationId, distanceKm: picked.distanceKm } : null,
       observations: current && previous ? { current: observation(current, lat, lon), previous: observation(previous, lat, lon) } : null,
       air: air,
       warnings: Array.isArray(feed.kma && feed.kma.warnings) ? feed.kma.warnings : [],

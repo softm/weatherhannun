@@ -124,10 +124,10 @@
       const pr=rainValues.length?Math.max(...rainValues):null;
       const total=rs.every(r=>finite(r.mm))?rs.reduce((sum,r)=>sum+r.mm,0):null;
       const complete=rs.every(r=>finite(r.rain)&&finite(r.mm));
-      const pct=Math.round((wetHours/rs.length)*100);
-      const bright=Math.round((clearHours/rs.length)*100);
-      const title="모델 예보상 확인된 비 신호 "+wetHours+"시간, 확인된 맑은 낮 시간 "+clearHours+"시간"+(complete?"":" · 일부 자료 누락");
-      return '<div class="forecast-day" title="'+safe(title)+'"><b>'+safe(prettyDate(date))+'</b><div class="forecast-day-bar"><span class="rain-share" style="width:'+pct+'%"></span><span class="sun-share" style="width:'+bright+'%"></span></div><span>☂ 최대 '+number(pr)+'% · '+number(total,1)+'mm</span><small>'+(complete?'비 신호 '+wetHours+'h · 낮 맑음 '+clearHours+'h':'확인값 기준 · 일부 자료 누락')+'</small></div>';
+      const probabilityWidth=finite(pr)?Math.round(within(pr,0,100)):0;
+      const probabilityLabel=finite(pr)?"최고 강수확률 "+number(pr)+"%":"강수확률 자료 없음";
+      const title=probabilityLabel+" · 모델 예보상 확인된 비 신호 "+wetHours+"시간, 확인된 맑은 낮 시간 "+clearHours+"시간"+(complete?"":" · 일부 자료 누락");
+      return '<div class="forecast-day" title="'+safe(title)+'"><b>'+safe(prettyDate(date))+'</b><div class="forecast-day-bar" role="img" aria-label="'+safe(probabilityLabel)+'"><span class="rain-share" style="width:'+probabilityWidth+'%"></span></div><span>☂ 최대 '+number(pr)+'% · '+number(total,1)+'mm</span><small>'+(complete?'비 신호 '+wetHours+'h · 낮 맑음 '+clearHours+'h':'확인값 기준 · 일부 자료 누락')+'</small></div>';
     }).join("");
   }
   function farm(){

@@ -27,7 +27,9 @@
         meta.textContent = result.providerName + " · " + result.stationName + " · 동일 관측소/시각";
       } else {
         value.textContent = "비교 불가";
-        reason.textContent = "현재 연결된 값은 모델 예보입니다. 동일 관측소의 어제 관측자료가 확보된 경우에만 증감을 표시합니다.";
+        reason.textContent = latest && latest.reason === "official_observation_stale"
+          ? "공식 관측 갱신을 기다리고 있습니다. 마지막 관측 "+(latest.latestAvailable?.observedAt||"시각 확인 필요")+" 이후 자료가 도착하면 자동으로 다시 비교합니다."
+          : "현재 연결된 값은 모델 예보입니다. 동일 관측소의 어제 관측자료가 확보된 경우에만 증감을 표시합니다.";
         meta.textContent = "예보를 관측으로 가장하거나 누락 수치로 차이를 만들지 않습니다.";
       }
     });

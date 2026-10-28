@@ -94,7 +94,7 @@
       h.slice(24,36).every(function(x){return finite(x.temp);});
     var nowTemp=finite(c.temperature_2m)?asNumber(c.temperature_2m)+"°C":"기온 정보 없음";
     var start=where+"의 현재 모델 예보는 "+weatherText(c.weather_code)+" 기온은 "+nowTemp+"입니다.";
-    var short=lead?start+" "+lead.title+" — "+dateText(lead.time)+"을 확인해 주세요.":riskCoverageComplete?start+" 향후 24시간의 주요 위험 기준에 해당하는 변화는 발견되지 않았습니다.":start+" 일부 시간대 자료가 없어 주요 위험 신호가 낮다고 판단하지 않습니다.";
+    var short=lead?start+" "+lead.title+" — "+dateText(lead.time)+" 예보를 확인해 주세요.":riskCoverageComplete?start+" 향후 24시간의 주요 위험 기준에 해당하는 변화는 발견되지 않았습니다.":start+" 일부 시간대 자료가 없어 주요 위험 신호가 낮다고 판단하지 않습니다.";
     var d=weather.daily||{};
     var dayLow=d.temperature_2m_min&&d.temperature_2m_min[0];
     var dayHigh=d.temperature_2m_max&&d.temperature_2m_max[0];

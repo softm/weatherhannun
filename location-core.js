@@ -40,7 +40,7 @@
     const k=key(p);
     if(items.some(x=>x.id===k))return {items,error:"exists"};
     if(items.length>=MAX_SAVED)return {items,error:"full"};
-    return {items:items.concat([{id:k,...p}]),error:null};
+    return {items:[{id:k,...p},...items],error:null};
   }
   function rename(list,id,newName){
     const name=String(newName||"").trim().replace(/\s+/g," ").slice(0,42);

@@ -1,10 +1,13 @@
 /* WeatherHannun region hub: one search surface, one current region, one saved list. */
 #locationDialog{
+  position:fixed;
+  inset:clamp(16px,5dvh,48px) auto auto 50%;
   width:min(680px,calc(100% - 32px));
-  max-height:min(820px,calc(100dvh - 32px));
-  margin:auto;
+  max-height:min(820px,calc(100dvh - clamp(32px,7dvh,64px)));
+  margin:0;
   padding:0!important;
   overflow:auto;
+  transform:translateX(-50%);
   color:var(--st-fg)!important;
   border:1px solid var(--st-line)!important;
   border-radius:22px!important;
@@ -75,7 +78,7 @@ html[data-weather-theme="dark"] #locationDialog .search-box button{color:#10223a
 html[data-weather-theme="dark"] #locationDialog::backdrop{background:rgba(1,8,21,.72)}
 
 @media(max-width:640px){
-  #locationDialog{inset:0;width:100%;max-width:none;height:100dvh;max-height:100dvh;margin:0;border:0!important;border-radius:0!important}
+  #locationDialog{inset:0;width:100%;max-width:none;height:100dvh;max-height:100dvh;margin:0;border:0!important;border-radius:0!important;transform:none}
   .location-dialog-top{padding:max(16px,env(safe-area-inset-top)) 18px 15px}
   #locationDialog .location-dialog-head{margin-bottom:14px}
   #locationDialog .location-dialog-head h2{font-size:23px}

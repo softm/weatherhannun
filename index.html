@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="./stitch-today.css?v=16">
   <link rel="stylesheet" href="./location-manager.css?v=17">
   <link rel="stylesheet" href="./region-search.css?v=17">
+  <link rel="stylesheet" href="./startup-briefing.css?v=45">
   <link rel="stylesheet" href="./stitch-mobile.css?v=16">
   <link rel="stylesheet" href="./settings.css?v=34">
   <link rel="stylesheet" href="./screen-weather-settings.css?v=34">
@@ -40,11 +41,12 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="./briefing-core.js?v=31"></script>
+  <script defer src="./startup-briefing-core.js?v=45"></script>
   <script defer src="./briefing-highlights.js?v=20"></script>
   <script defer src="./briefing-ui.js?v=20"></script>
   <script defer src="./weather-icons.js?v=17"></script>
   <script defer src="./alert-rules-core.js?v=31"></script>
-  <script defer src="./forecast-insights.js?v=31"></script>
+  <script defer src="./forecast-insights.js?v=32"></script>
   <script defer src="./stitch-layout.js?v=18"></script>
   <script defer src="./daily-delta-core.js?v=27"></script>
   <script defer src="./official-data-core.js?v=39"></script>
@@ -61,7 +63,7 @@
   <script defer src="./action-progress.js?v=40"></script>
   <script defer src="./app.js?v=41"></script>
   <script defer src="./official-data-ui.js?v=39"></script>
-  <script defer src="./location-core.js"></script>
+  <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
   <script defer src="./location-manager.js?v=17"></script>
   <script defer src="./daily-delta-ui.js?v=27"></script>
@@ -75,6 +77,7 @@
   <script defer src="./outfit-decision-ui.js?v=24"></script>
   <script defer src="./screen-weather-settings.js?v=36"></script>
   <script defer src="./agriculture-planner.js?v=34"></script>
+  <script defer src="./startup-briefing.js?v=45"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -437,6 +440,10 @@
       <p id="renameError" class="location-validation" role="status"></p>
       <div class="rename-actions"><button type="button" id="renameClose">취소</button><button type="submit">저장</button></div>
     </form>
+  </dialog>
+  <dialog id="startupWeatherBriefing" aria-labelledby="startupBriefingTitle" aria-describedby="startupBriefingSummary">
+    <section class="startup-briefing-hero"><div class="startup-briefing-top"><div class="startup-briefing-brand"><span id="startupBriefingIcon" class="startup-briefing-icon material-symbols-outlined" aria-hidden="true">auto_awesome</span><span><b id="startupBriefingEyebrow">오늘의 날씨 인사이트</b><small id="startupBriefingPlace">선택 지역</small></span></div><button id="startupBriefingClose" class="startup-close" type="button" aria-label="오늘 날씨 브리핑 닫기"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div><h2 id="startupBriefingTitle">오늘 날씨 브리핑</h2><p id="startupBriefingSummary">오늘 먼저 확인할 날씨 변화를 정리하고 있습니다.</p></section>
+    <section class="startup-briefing-content"><div id="startupBriefingFacts" class="startup-facts"></div><div id="startupBriefingEvents" class="startup-events"></div><div class="startup-briefing-actions"><button id="startupBriefingDetail" class="startup-primary" type="button">오늘 날씨 자세히 보기</button><button id="startupBriefingDismissToday" class="startup-secondary" type="button">오늘은 다시 보지 않기</button></div><button id="startupBriefingLater" class="startup-briefing-later" type="button">지금은 닫기</button><p id="startupBriefingSource" class="startup-source">Open-Meteo 모델 예보 · 관측 실황 아님</p></section>
   </dialog>
   <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
 <script type="module" src="https://softm.github.io/shared/platform/v1/boot.mjs?site=weatherhannun&amp;v=20261028"></script>

@@ -2,7 +2,7 @@
 (function () {
   var core = window.WeatherHannunOfficialData;
   if (!core) return;
-  var feed = null, weather = null, resolved = null;
+  var feed = null, weather = null, resolved = null, lastLoadedAt = 0;
   function formatTime(value) {
     if (!value) return "시각 없음";
     var date = new Date(value);
@@ -25,7 +25,7 @@
       put("[data-official-temp]", Number.isFinite(current.temperature) ? String(current.temperature.toFixed(1)).replace(/\.0$/, "") : "--");
       document.querySelectorAll("[data-official-source]").forEach(function (node) { node.dataset.state = "ready"; });
     } else {
-      put("[data-official-source]", "모델 예보 · 공식 실황 미확보");
+      put("[data-official-source]", resolved.latestAvailable ? "모델 예보 · 공식 관측 갱신 대기 (마지막 "+formatTime(resolved.latestAvailable.observedAt)+")" : "모델 예보 · 공식 실황 미확보");
       document.querySelectorAll("[data-official-source]").forEach(function (node) { node.dataset.state = "unavailable"; });
     }
     if (air) {
@@ -56,11 +56,16 @@
     window.dispatchEvent(new CustomEvent("weatherhannun:official-data", { detail: resolved }));
     renderHome(); renderPanel();
   }
-  function init() {
-    fetch("./data/official/latest.json", { cache: "no-store" }).then(function (response) {
+  function loadFeed() {
+    return fetch("./data/official/latest.json?refresh="+Date.now(), { cache: "no-store" }).then(function (response) {
       if (!response.ok) throw new Error("official snapshot " + response.status);
       return response.json();
-    }).then(function (json) { feed = json; renderPanel(); resolve(); }).catch(function () { feed = { schemaVersion: 1, status: "unavailable" }; renderPanel(); });
+    }).then(function (json) { feed = json; lastLoadedAt=Date.now(); renderPanel(); resolve(); }).catch(function () { if(!feed)feed = { schemaVersion: 1, status: "unavailable" }; renderPanel(); });
+  }
+  function init() {
+    loadFeed();
+    setInterval(loadFeed,15*60*1000);
+    document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&Date.now()-lastLoadedAt>10*60*1000)loadFeed();});
   }
   window.addEventListener("weatherhannun:data", function (event) { weather = event.detail; setTimeout(resolve, 0); });
   window.addEventListener("weatherhannun:stitch-ready", function () { renderHome(); });
