@@ -49,7 +49,9 @@ function mergeElements(temperatureRows, rainRows) {
   return temperatureRows.map(row => ({ ...row, precipitation: rain.get(`${row.observedAt}|${row.stationId}`) ?? null }));
 }
 async function observations(at) {
-  const tm = compact(at, false);
+  // kma_sfctm5 tm2 requires YYYYMMDDHHmm. Sending only YYYYMMDDHH makes the
+  // service fall back to the latest observation and duplicates it as "previous".
+  const tm = compact(at);
   const base = { tm2: tm, stn: "0", disp: "0", help: "0" };
   const [ta, rn] = await Promise.all([
     fetchOk(kmaUrl("/api/typ01/url/kma_sfctm5.php", { ...base, obs: "TA" })).then(r => r.text()),
@@ -156,6 +158,15 @@ async function airKorea() {
     return { stationId: row.stationName, stationName: row.stationName, measuredAt, lat: station.lat, lon: station.lon, address: station.address, pm10: number(row.pm10Value), pm25: number(row.pm25Value), grade: row.khaiGrade || null };
   }).filter(row => row && row.measuredAt);
 }
+function equivalentObservationPairs(current, previous) {
+  const previousByStation = new Map(previous.map(row => [row.stationId, row]));
+  return current.filter(row => {
+    const before = previousByStation.get(row.stationId);
+    if (!before) return false;
+    const currentTime = Date.parse(row.observedAt), previousTime = Date.parse(before.observedAt);
+    return Number.isFinite(currentTime) && Number.isFinite(previousTime) && currentTime - previousTime === 24 * 60 * 60 * 1000;
+  }).length;
+}
 
 async function main() {
   if (!KMA_KEY || !DATA_KEY) throw new Error("KMA_API_HUB_KEY and DATA_GO_KR_SERVICE_KEY are required");
@@ -165,6 +176,8 @@ async function main() {
   const previousAt = new Date(currentAt.getTime() - 24 * 60 * 60 * 1000);
   const [current, previous, warningRows, radarInfo, measurements] = await Promise.all([observations(currentAt), observations(previousAt), warnings(now), radar(now), airKorea()]);
   if (!current.length || !previous.length || !measurements.length) throw new Error("Official snapshot is incomplete; previous file was not replaced");
+  const pairCount = equivalentObservationPairs(current, previous);
+  if (!pairCount) throw new Error("KMA current/previous observations are not 24-hour equivalent pairs");
   const feed = {
     schemaVersion: 1, status: "ready", generatedAt: now.toISOString(),
     rights: [
@@ -175,7 +188,7 @@ async function main() {
     airKorea: { measurements }
   };
   await writeFile(latestFile, `${JSON.stringify(feed, null, 2)}\n`, "utf8");
-  console.log(`official snapshot: ${current.length} current, ${previous.length} previous, ${measurements.length} air stations`);
+  console.log(`official snapshot: ${current.length} current, ${previous.length} previous, ${pairCount} daily pairs, ${measurements.length} air stations`);
 }
 
 main().catch(error => { console.error(error.message); process.exitCode = 1; });
