@@ -48,7 +48,7 @@
     url.searchParams.set("longitude",String(location.lon));
     url.searchParams.set("timezone","Asia/Seoul");
     if(short){
-      url.searchParams.set("current","temperature_2m,weather_code,is_day");
+      url.searchParams.set("current","temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,is_day");
     }else{
       url.searchParams.set("current","temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m");
       url.searchParams.set("hourly","temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,relative_humidity_2m,uv_index,is_day");

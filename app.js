@@ -20,7 +20,7 @@
   var STATE = {
     loc: CITY_LIST[0], weather: null, air: null, activity: "walk", dataStatus: "loading",
     view: "today", hourly: [], fetchedAt: null, cityData: null,
-    map: null, tileLayer: null, mapObserver: null, markers: [], loading: false, ticket: 0, mapBusy: false, activityFilter: "all", activityPriority: []
+    map: null, tileLayer: null, mapObserver: null, markers: [], loading: false, ticket: 0, mapBusy: false, mapMetric:"temperature", activityFilter: "all", activityPriority: []
   };
   var toastTimer;
   function storeGet(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (_) { return null; } }
@@ -415,9 +415,31 @@
     if(!STATE.cityData)return;
     $("cityGrid").innerHTML=STATE.cityData.map(function(x,i){
       var sym=weatherSymbol(x.code,x.isDay);
-      return '<button class="city-card" data-city="'+i+'" aria-label="'+safe(x.name+", "+sym.name+", "+num(x.temp)+"도, 지역 예보 보기")+'"><div class="city-top"><span class="city-name">'+safe(x.name)+'</span><span aria-hidden="true">'+sym.icon+'</span></div><span class="city-temp">'+num(x.temp)+'°</span><span class="city-desc">'+sym.name+' · 지역 날씨 보기 ↗</span></button>';
+      var alert=x.precipitation>0?"비 "+num(x.precipitation,1)+"mm":x.gust>=35?"돌풍 "+num(x.gust)+"km/h":"특이 신호 없음";
+      return '<button class="city-card" data-city="'+i+'" aria-label="'+safe(x.name+", "+sym.name+", "+num(x.temp)+"도, "+alert+", 지역 예보 보기")+'"><div class="city-top"><span class="city-name">'+safe(x.name)+'</span><span aria-hidden="true">'+sym.icon+'</span></div><span class="city-temp">'+num(x.temp)+'°</span><span class="city-signal '+(x.precipitation>0?'rain':x.gust>=35?'wind':'calm')+'">'+safe(alert)+'</span><span class="city-desc">체감 '+num(x.apparent)+'° · 바람 '+num(x.wind)+'km/h</span></button>';
     }).join("");
     document.querySelectorAll(".city-card[data-city]").forEach(function(btn){btn.addEventListener("click",function(){chooseCity(Number(btn.dataset.city));});});
+  }
+  function renderNationalOverview(){
+    var rows=(STATE.cityData||[]).filter(function(x){return finite(x.temp);});if(!rows.length)return;
+    var hot=rows.reduce(function(a,b){return b.temp>a.temp?b:a;}),cold=rows.reduce(function(a,b){return b.temp<a.temp?b:a;});
+    var rainy=rows.filter(function(x){return x.precipitation>0;}),windy=rows.filter(function(x){return x.gust>=35;});
+    var headline=rainy.length||windy.length?(rainy.length?rainy.length+"곳에 비 신호":"강수 신호 없음")+(windy.length?" · "+windy.length+"곳 돌풍 주의":""):"전국 주요 도시, 뚜렷한 위험 신호 없음";
+    text("nationalHeadline",headline);
+    text("nationalSummary",hot.name+" "+num(hot.temp)+"°로 가장 높고 "+cold.name+" "+num(cold.temp)+"°로 가장 낮습니다. 도시 간 기온 차이는 "+num(hot.temp-cold.temp)+"°입니다.");
+    $("nationalMetrics").innerHTML='<article><span>가장 따뜻</span><strong>'+safe(hot.name)+' '+num(hot.temp)+'°</strong></article><article><span>가장 서늘</span><strong>'+safe(cold.name)+' '+num(cold.temp)+'°</strong></article><article><span>강수 신호</span><strong>'+rainy.length+'곳</strong></article><article><span>돌풍 주의</span><strong>'+windy.length+'곳</strong></article>';
+  }
+  function mapMetricValue(city){
+    if(STATE.mapMetric==="rain")return {value:num(city.precipitation,1)+"mm",tone:city.precipitation>0?"rain":"calm"};
+    if(STATE.mapMetric==="wind")return {value:num(city.gust)+"km/h",tone:city.gust>=35?"wind":"calm"};
+    return {value:num(city.temp)+"°",tone:"temperature"};
+  }
+  function selectMapMetric(metric){
+    if(!["temperature","rain","wind"].includes(metric))return;STATE.mapMetric=metric;
+    document.querySelectorAll("[data-map-metric]").forEach(function(button){var active=button.dataset.mapMetric===metric;button.classList.toggle("active",active);button.setAttribute("aria-pressed",active?"true":"false");});
+    text("mapMetricTitle",metric==="rain"?"전국 강수 신호":metric==="wind"?"전국 돌풍 비교":"전국 기온 비교");
+    text("mapHint",metric==="rain"?"현재 강수량을 비교합니다. 0mm는 현재 비 신호가 없다는 뜻입니다.":metric==="wind"?"돌풍 35km/h 이상 지역을 강조합니다.":"같은 시각의 기온 차이를 비교합니다.");
+    updateMapMarkers();
   }
   function chooseCity(i){
     var city=STATE.cityData&&STATE.cityData[i];if(!city)return;
@@ -428,8 +450,8 @@
     STATE.markers.forEach(function(m){STATE.map.removeLayer(m);});STATE.markers=[];
     STATE.cityData.forEach(function(city,i){
       var sym=weatherSymbol(city.code,city.isDay);
-      var accessible=city.name+", "+sym.name+", "+num(city.temp)+"도";
-      var content='<div class="weather-pin-card"><span aria-hidden="true">'+sym.icon+'</span> '+safe(city.name)+' <b>'+num(city.temp)+'°</b></div>';
+      var metric=mapMetricValue(city),accessible=city.name+", "+sym.name+", "+metric.value;
+      var content='<div class="weather-pin-card metric-'+metric.tone+'"><span aria-hidden="true">'+sym.icon+'</span><em>'+safe(city.name)+'</em><b>'+metric.value+'</b></div>';
       var marker=L.marker([city.lat,city.lon],{title:accessible,alt:accessible,icon:L.divIcon({className:"weather-map-pin",html:content,iconSize:[126,45],iconAnchor:[63,44]})}).addTo(STATE.map);
       marker.bindPopup('<b>'+safe(city.name)+'</b><p>'+sym.name+' · '+num(city.temp)+'°</p><button class="map-open-city">이 지역 예보 보기 →</button>');
       marker.on("click",function(){if(window.innerWidth<710)setMapFocus(true);});
@@ -444,7 +466,7 @@
   async function showMap(){
     initMap();
     refreshMapLayout(true);
-    if(STATE.cityData){renderCities();updateMapMarkers();return;}
+    if(STATE.cityData){renderNationalOverview();renderCities();updateMapMarkers();return;}
     if(STATE.mapBusy)return;
     var progressId=window.WeatherActionProgress?.begin("전국 날씨를 불러오는 중…");
     STATE.mapBusy=true;
@@ -454,10 +476,10 @@
       var results=await Promise.allSettled(CITY_LIST.map(function(city){return getJson(forecastUrl(city,true));}));
       STATE.cityData=CITY_LIST.map(function(city,i){
         var v=results[i].status==="fulfilled"?results[i].value.current:null;
-        return {name:city.name,lat:city.lat,lon:city.lon,temp:v?.temperature_2m,code:v?.weather_code,isDay:v?.is_day};
+        return {name:city.name,lat:city.lat,lon:city.lon,temp:v?.temperature_2m,apparent:v?.apparent_temperature,precipitation:v?.precipitation,wind:v?.wind_speed_10m,gust:v?.wind_gusts_10m,code:v?.weather_code,isDay:v?.is_day};
       });
       text("mapUpdated","도시별 모델 예보 · "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"})+" 갱신");
-      renderCities();updateMapMarkers();
+      renderNationalOverview();renderCities();updateMapMarkers();
     }finally{
       STATE.mapBusy=false;
       window.WeatherActionProgress?.end(progressId);
@@ -559,10 +581,11 @@
     $("mapClose").addEventListener("click",function(){setMapFocus(false);});
     $("mapReset").addEventListener("click",function(){if(STATE.map)STATE.map.setView([36.1,127.8],7);});
     $("mapCurrent").addEventListener("click",getGeo);
+    document.querySelectorAll("[data-map-metric]").forEach(function(button){button.addEventListener("click",function(){selectMapMetric(button.dataset.mapMetric);});});
     document.addEventListener("keydown",function(e){if(e.key==="Escape")setMapFocus(false);});
     renderPresets();
     applyLocation(l,false);
-    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=34").catch(function(){});
+    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=41").catch(function(){});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();

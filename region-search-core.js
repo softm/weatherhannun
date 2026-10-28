@@ -22,6 +22,10 @@
   const ROMAN={seoul:"서울",busan:"부산",incheon:"인천",daegu:"대구",daejeon:"대전",
     gwangju:"광주",ulsan:"울산",sejong:"세종",bucheon:"부천시",seosan:"서산시",pyeongtaek:"평택시",
     gangneung:"강릉시",jeju:"제주시",suwon:"수원시",paju:"파주시"};
+  const PLACE_ALIASES=Object.freeze({
+    "오이도":{name:"오이도",administrative:"경기도 시흥시 정왕동"},
+    "오이도역":{name:"오이도역",administrative:"경기도 시흥시 정왕동"}
+  });
   const SORT={dong:58,eup:55,myeon:55,ri:30,gu:26,gun:25,si:23,sido:9};
   function clean(value){
     return String(value||"").normalize("NFKC").toLowerCase().replace(/[()()[\],.·<>]/g," ")
@@ -136,6 +140,11 @@
     }
     q=ROMAN[q]||q;
     if(q.length<2)return [];
+    const place=PLACE_ALIASES[compact(q).replace(/^시흥(?:시)?/,"")];
+    if(place){
+      const target=(entries||[]).find(entry=>entry.full===place.administrative);
+      if(target)return [{...target,matchedAlias:place.name,score:1000,best:true}];
+    }
     const tokens=splitQuery(q),found=[];
     const biased=isValidCoord(Number(options.biasLat),Number(options.biasLon));
     const originLat=Number(options.biasLat),originLon=Number(options.biasLon);

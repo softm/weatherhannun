@@ -47,10 +47,11 @@
     const kind=entry.label;
     const address=entry.full;
     const suffix=entry.kind==="ri"?"리 단위":entry.kind==="dong"?"법정동":entry.kind==="eup"||entry.kind==="myeon"?"읍·면":"행정구역";
+    const aliasNote=entry.matchedAlias?safe(entry.matchedAlias)+" 검색 결과 · ":"";
     const best=i===0?'<em class="region-result-best">가장 적합</em>':"";
     return '<button class="region-result" type="button" role="option" id="regionOption'+i+'" aria-selected="false" data-region-choice="'+i+'">'+
       '<span class="region-result-icon" aria-hidden="true">⌖</span>'+
-      '<span class="region-result-body"><span class="region-result-heading"><b>'+safe(entry.name)+'</b>'+best+'</span><span>'+safe(address)+'</span><small>'+safe(suffix)+' 대표 좌표 · 정확한 번지 위치 아님</small></span>'+
+      '<span class="region-result-body"><span class="region-result-heading"><b>'+safe(entry.name)+'</b>'+best+'</span><span>'+safe(address)+'</span><small>'+aliasNote+safe(suffix)+' 대표 좌표 · 정확한 번지 위치 아님</small></span>'+
       '<span class="region-result-kind">'+safe(kind)+'</span></button>';
   }
   function renderResults(entries,rawQuery){

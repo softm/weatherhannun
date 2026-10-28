@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="./location-compare.css?v=28">
   <link rel="stylesheet" href="./official-data.css?v=39">
   <link rel="stylesheet" href="./action-progress.css?v=40">
+  <link rel="stylesheet" href="./national-map.css?v=41">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="./briefing-core.js?v=31"></script>
@@ -47,7 +48,7 @@
   <script defer src="./stitch-layout.js?v=18"></script>
   <script defer src="./daily-delta-core.js?v=27"></script>
   <script defer src="./official-data-core.js?v=39"></script>
-  <script defer src="./weather-provider-core.js?v=31"></script>
+  <script defer src="./weather-provider-core.js?v=41"></script>
   <script defer src="./monetization-core.js?v=32"></script>
   <script defer src="./monetization-settings.js?v=34"></script>
   <script defer src="./plus-personalization-core.js?v=34"></script>
@@ -58,15 +59,15 @@
   <script defer src="./activity-decision-core.js?v=28"></script>
   <script defer src="./agriculture-planner-core.js?v=34"></script>
   <script defer src="./action-progress.js?v=40"></script>
-  <script defer src="./app.js?v=34"></script>
+  <script defer src="./app.js?v=41"></script>
   <script defer src="./official-data-ui.js?v=39"></script>
   <script defer src="./location-core.js"></script>
   <script defer src="./reverse-geocode.js"></script>
   <script defer src="./location-manager.js"></script>
   <script defer src="./daily-delta-ui.js?v=27"></script>
   <script defer src="./location-compare-ui.js?v=32"></script>
-  <script defer src="./region-search-core.js?v=15"></script>
-  <script defer src="./region-search-ui.js?v=15"></script>
+  <script defer src="./region-search-core.js?v=16"></script>
+  <script defer src="./region-search-ui.js?v=16"></script>
   <script defer src="./rain-decision-core.js?v=31"></script>
   <script defer src="./outfit-decision-core.js?v=31"></script>
   <script defer src="./stitch-today.js?v=31"></script>
@@ -231,12 +232,13 @@
       </section>
 
       <section id="view-map" class="screen content-bound" aria-label="전국날씨 지도">
-        <div class="page-header"><div><span class="section-overline">KOREA WEATHER MAP</span><h2>전국 날씨, 지도 한눈에</h2><p>각 도시를 눌러 날씨를 비교하고 바로 해당 지역 예보로 이동하세요.</p></div></div>
+        <div class="page-header"><div><span class="section-overline">KOREA WEATHER SITUATION</span><h2>오늘 전국에서 주의할 곳</h2><p>기온 차이와 비·바람 신호를 비교하고, 필요한 지역 예보로 바로 이동하세요.</p></div></div>
+        <section id="nationalOverview" class="national-overview stitch-card" aria-live="polite"><div class="national-overview-copy"><span class="section-overline">NATIONAL BRIEFING</span><h3 id="nationalHeadline">전국 핵심 상황을 확인하고 있습니다.</h3><p id="nationalSummary">주요 도시의 기온·강수·바람을 같은 시각으로 비교합니다.</p></div><div id="nationalMetrics" class="national-metrics"></div><div class="national-layer-tabs" aria-label="전국 지도 비교 항목"><button type="button" data-map-metric="temperature" class="active" aria-pressed="true">기온</button><button type="button" data-map-metric="rain" aria-pressed="false">강수</button><button type="button" data-map-metric="wind" aria-pressed="false">바람</button></div></section>
         <div id="mapShell" class="map-shell glass-card">
-          <div class="map-toolbar"><div class="map-toolbar-label"><span class="live-pulse"></span><b>전국 기온 지도</b><small id="mapUpdated">날씨 데이터 연결 중</small></div><div class="map-buttons"><button id="mapTools" title="지도 도구 펼치기" aria-expanded="false">☷ <span>확장</span></button><button id="mapFocus" title="지도 집중모드" aria-pressed="false">⛶ <span>전체지도</span></button><button id="mapClose" title="전체지도 닫기" hidden>✕</button></div></div>
+          <div class="map-toolbar"><div class="map-toolbar-label"><span class="live-pulse"></span><b id="mapMetricTitle">전국 기온 비교</b><small id="mapUpdated">날씨 데이터 연결 중</small></div><div class="map-buttons"><button id="mapTools" title="지도 도구 펼치기" aria-expanded="false">☷ <span>확장</span></button><button id="mapFocus" title="지도 집중모드" aria-pressed="false">⛶ <span>전체지도</span></button><button id="mapClose" title="전체지도 닫기" hidden>✕</button></div></div>
           <div id="mapExtra" class="map-extra" hidden><button id="mapReset">◎ 전국 맞춤</button><button id="mapCurrent">⌖ 내 위치</button><button id="mapCollapse">↥ 메뉴 접기</button></div>
           <div id="map" role="application" aria-label="한국 주요 도시 날씨 지도"><div class="map-fallback">지도 라이브러리를 불러오지 못했습니다. 아래 도시 목록으로도 예보를 확인할 수 있습니다.</div></div>
-          <div class="map-hint">도시 마커 선택 → 오늘 예보 확인 · 지도 전체모드 지원</div>
+          <div id="mapHint" class="map-hint">색과 수치로 지역 차이를 비교하고 도시를 누르면 상세 예보로 이동합니다.</div>
         </div>
         <aside class="official-data-panel stitch-card" aria-label="공식 특보와 레이더">
           <div class="official-data-copy"><span class="section-overline">OFFICIAL KMA SOURCES</span><h3>공식 특보·레이더 확인</h3><p>레이더 관측과 강수 예측을 구분합니다. 앱 내부 지도 레이어는 이용권·관측시각·범례 연동을 검증한 뒤 활성화합니다.</p><small id="officialMapLayerStatus" class="official-data-status" aria-live="polite">공식 자료 연결 상태를 확인하고 있습니다.</small></div>
