@@ -31,8 +31,11 @@ test("deployment sync keeps credentials server-side and publishes evidence metad
  assert.match(sync,/KMA_API_HUB_KEY/);
  assert.match(sync,/DATA_GO_KR_SERVICE_KEY/);
  assert.match(sync,/kma_sfctm5\.php/);
- assert.match(sync,/wrn_now_data\.php/);
- assert.match(sync,/nph-rdr_cmp1_img/);
+ assert.match(sync,/wrn_now_data_new\.php/);
+ assert.match(sync,/nph-rdr_cmp1_api/);
+ assert.match(sync,/qcd: "MSK"/);
+ assert.match(sync,/disp: "B"/);
+ assert.match(sync,/radarPng/);
  assert.match(sync,/getCtprvnRltmMesureDnsty/);
  assert.match(workflow,/secrets\.KMA_API_HUB_KEY/);
  assert.doesNotMatch(fs.readFileSync("index.html","utf8"),/KMA_API_HUB_KEY|DATA_GO_KR_SERVICE_KEY/);
