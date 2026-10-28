@@ -23,8 +23,8 @@
   <link rel="stylesheet" href="./stitch-theme.css?v=18">
   <link rel="stylesheet" href="./stitch-today.utilities.css">
   <link rel="stylesheet" href="./stitch-today.css?v=16">
-  <link rel="stylesheet" href="./location-manager.css">
-  <link rel="stylesheet" href="./region-search.css?v=15">
+  <link rel="stylesheet" href="./location-manager.css?v=17">
+  <link rel="stylesheet" href="./region-search.css?v=17">
   <link rel="stylesheet" href="./stitch-mobile.css?v=16">
   <link rel="stylesheet" href="./settings.css?v=34">
   <link rel="stylesheet" href="./screen-weather-settings.css?v=34">
@@ -63,11 +63,11 @@
   <script defer src="./official-data-ui.js?v=39"></script>
   <script defer src="./location-core.js"></script>
   <script defer src="./reverse-geocode.js"></script>
-  <script defer src="./location-manager.js"></script>
+  <script defer src="./location-manager.js?v=17"></script>
   <script defer src="./daily-delta-ui.js?v=27"></script>
   <script defer src="./location-compare-ui.js?v=32"></script>
   <script defer src="./region-search-core.js?v=16"></script>
-  <script defer src="./region-search-ui.js?v=16"></script>
+  <script defer src="./region-search-ui.js?v=18"></script>
   <script defer src="./rain-decision-core.js?v=31"></script>
   <script defer src="./outfit-decision-core.js?v=31"></script>
   <script defer src="./stitch-today.js?v=31"></script>
@@ -394,13 +394,30 @@
       <button data-view="map"><span class="material-symbols-outlined">map</span>전국지도</button>
     </nav>
   </div>
-  <dialog id="locationDialog" aria-label="지역 선택"><div class="dialog-head"><div><span class="section-overline">LOCATION</span><h2>어디 날씨가 궁금하세요?</h2></div><button id="dialogClose" aria-label="닫기">✕</button></div><form method="dialog" id="searchForm"><label for="locationSearch">지역 통합검색</label><div class="search-box"><span>⌕</span><input id="locationSearch" type="search" autocomplete="off" inputmode="search" spellcheck="false" maxlength="100" placeholder="예: 광명, 옥길동, 부천 소사구 옥길로 38" /><button type="submit">검색</button></div><p id="regionSearchHelp"><strong>가장 알맞은 주소 단계</strong> · 동·리가 있으면 동·리를, 없으면 확인 가능한 시·군·구를 먼저 표시해요.</p><section id="regionSearchPanel" class="region-search-panel" aria-label="지역 통합검색 결과" hidden><div class="region-search-summary"><p class="dialog-subtitle">검색 결과</p><p id="regionSearchSource">전국 법정동·읍·면·리 자료 준비 중…</p></div><div id="searchResults" class="search-results"><p class="muted-text">검색어를 입력하면 바로 여기에 표시됩니다.</p></div></section></form><button id="geoButton" class="geo-option">⌖ 현재 위치로 날씨 보기 <span>권한 필요 →</span></button>
-  <div class="favorite-title"><p class="dialog-subtitle">★ 내 관심 지역</p><button id="saveCurrentLocation" type="button" class="favorite-save">☆ 현재 지역 저장</button></div>
-  <div id="favoriteLocations" class="favorite-list" aria-label="저장된 관심 지역"></div>
-  <div id="favoriteMessage" role="status" aria-live="polite"></div>
-  <div id="geoLocationStatus" role="status" aria-live="polite" class="location-permission-status">현재 위치는 선택할 때만 조회합니다.</div>
-  <p class="favorite-help">집·직장·농장 등 최대 10곳을 이 기기에만 저장합니다. 이름은 언제든 수정할 수 있습니다.</p>
-  <p class="dialog-subtitle">빠른 지역 선택</p><div id="presetCities" class="city-presets"></div></dialog>
+  <dialog id="locationDialog" class="location-hub-dialog" aria-labelledby="locationDialogTitle">
+    <div class="location-dialog-top">
+      <div class="dialog-head location-dialog-head"><div><span class="section-overline">MY REGIONS</span><h2 id="locationDialogTitle">지역 관리</h2></div><button id="dialogClose" type="button" aria-label="지역 관리 닫기"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
+      <form method="dialog" id="searchForm" class="location-search-form">
+        <label for="locationSearch">지역 검색</label>
+        <div class="search-box"><span class="material-symbols-outlined" aria-hidden="true">search</span><input id="locationSearch" type="search" autocomplete="off" inputmode="search" spellcheck="false" maxlength="100" placeholder="지역명 검색 (예: 오이도, 옥길동)" /><button type="submit" aria-label="지역 검색"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span><span class="search-submit-label">검색</span></button></div>
+        <section id="regionSearchPanel" class="region-search-panel" aria-label="지역 검색 결과" hidden><div class="region-search-summary"><p class="dialog-subtitle">검색 결과</p></div><div id="searchResults" class="search-results"><p class="muted-text">지역명을 입력해 주세요.</p></div></section>
+      </form>
+    </div>
+    <div class="location-browse-view">
+      <button id="geoButton" type="button" class="geo-option"><span class="geo-option-icon material-symbols-outlined" aria-hidden="true">my_location</span><span class="geo-option-copy"><strong>현재 위치로 보기</strong><small>기기 위치를 확인해 이 지역으로 전환</small></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
+      <section class="managed-current" aria-labelledby="managedCurrentTitle">
+        <div class="managed-current-copy"><span id="managedCurrentTitle" class="section-overline">현재 보는 지역</span><strong id="managedCurrentName">선택 지역</strong><small id="managedCurrentAddress">현재 날씨의 기준 지역</small></div>
+        <button id="saveCurrentLocation" type="button" class="favorite-save">☆ 내 지역에 저장</button>
+      </section>
+      <section class="saved-location-section" aria-labelledby="favoriteLocationsTitle">
+        <div class="favorite-title"><p id="favoriteLocationsTitle" class="dialog-subtitle">내 지역 <span id="favoriteCount" class="favorite-count">0 / 10</span></p></div>
+        <div id="favoriteLocations" class="favorite-list" aria-label="저장된 지역"></div>
+        <div id="favoriteMessage" role="status" aria-live="polite"></div>
+      </section>
+      <div id="geoLocationStatus" role="status" aria-live="polite" class="location-permission-status">현재 위치는 선택할 때만 조회합니다.</div>
+      <section class="location-preset-section" aria-labelledby="presetCitiesTitle"><div class="location-section-heading"><p id="presetCitiesTitle" class="dialog-subtitle">빠른 선택</p><small>주요 도시</small></div><div id="presetCities" class="city-presets"></div></section>
+    </div>
+  </dialog>
   <dialog id="weatherLocationWelcome" class="location-onboarding" aria-labelledby="weatherLocationWelcomeTitle" aria-describedby="welcomeHelp">
     <div class="onboard-illustration" aria-hidden="true">📍</div>
     <span class="section-overline">MY LOCATION WEATHER</span>

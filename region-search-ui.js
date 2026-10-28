@@ -14,6 +14,7 @@
   function setPanelVisible(visible){
     const panel=$("regionSearchPanel");
     if(panel)panel.hidden=!visible;
+    $("locationDialog")?.classList?.toggle("is-searching",Boolean(visible));
   }
   function renderHint(text,visible=true){
     const target=$("searchResults");
@@ -21,10 +22,6 @@
     setPanelVisible(visible);
     target.innerHTML='<div class="region-search-hint">'+safe(text)+'</div>';
     $("locationSearch")?.setAttribute("aria-expanded","false");
-  }
-  function showSource(){
-    const label=$("regionSearchSource");
-    if(label)label.innerHTML='전국 법정동·읍·면·리 (2026.02 기준) · <a href="https://github.com/swuhalee/korea-regions-with-coords" target="_blank" rel="noopener noreferrer">데이터 출처</a> · 지역 대표 좌표';
   }
   function getIndex(){
     if(index)return Promise.resolve(index);
@@ -38,21 +35,18 @@
       return resp.json();
     }).then(data=>{
       index=core.load(data);
-      showSource();
       return index;
     }).finally(()=>{if(tid!==null)clearTimeout(tid);loading=false;});
     return loadPromise.catch(err=>{loadPromise=null;throw err;});
   }
   function itemHtml(entry,i){
-    const kind=entry.label;
-    const address=entry.full;
-    const suffix=entry.kind==="ri"?"리 단위":entry.kind==="dong"?"법정동":entry.kind==="eup"||entry.kind==="myeon"?"읍·면":"행정구역";
-    const aliasNote=entry.matchedAlias?safe(entry.matchedAlias)+" 검색 결과 · ":"";
-    const best=i===0?'<em class="region-result-best">가장 적합</em>':"";
+    const parts=String(entry.full||entry.name||"").split(/\s+/).filter(Boolean);
+    const primary=parts.length>=3?parts.slice(-2).join(" "):entry.name;
+    const parent=parts.length>=3?parts.slice(0,-2).join(" "):parts.slice(0,-1).join(" ");
     return '<button class="region-result" type="button" role="option" id="regionOption'+i+'" aria-selected="false" data-region-choice="'+i+'">'+
-      '<span class="region-result-icon" aria-hidden="true">⌖</span>'+
-      '<span class="region-result-body"><span class="region-result-heading"><b>'+safe(entry.name)+'</b>'+best+'</span><span>'+safe(address)+'</span><small>'+aliasNote+safe(suffix)+' 대표 좌표 · 정확한 번지 위치 아님</small></span>'+
-      '<span class="region-result-kind">'+safe(kind)+'</span></button>';
+      '<span class="region-result-icon material-symbols-outlined" aria-hidden="true">location_on</span>'+
+      '<span class="region-result-body"><b>'+safe(primary)+'</b><small>'+safe(parent)+'</small></span>'+
+      '<span class="region-result-arrow material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>';
   }
   function renderResults(entries,rawQuery){
     results=entries||[];
@@ -71,9 +65,8 @@
       return;
     }
     const top=results.slice(0,MAX_RESULTS);
-    area.innerHTML='<p class="region-search-count">입력에서 확인되는 가장 구체적인 주소를 먼저 표시했어요 · 후보 '+results.length+'개</p>'+
-      numericNote+'<div class="region-result-list" role="group" aria-label="지역 검색 결과">'+top.map(itemHtml).join("")+'</div>'+
-      '<p class="region-search-note">행정구역의 중심 좌표로 예보를 조회합니다. 도로명주소·건물·필지의 실제 위치와 다를 수 있습니다.</p>';
+    area.innerHTML=numericNote+'<div class="region-result-list" role="group" aria-label="지역 검색 결과">'+top.map(itemHtml).join("")+'</div>'+
+      '<p class="region-search-note">선택한 행정구역의 대표 위치를 기준으로 날씨를 조회합니다.</p>';
     $("locationSearch")?.setAttribute("aria-expanded","true");
   }
   async function runSearch(force){
@@ -99,7 +92,7 @@
     if(!place)return;
     const dialog=$("locationDialog");
     if(dialog?.open)dialog.close();
-    const input=$("locationSearch");if(input){input.value=item.full;input.setAttribute("aria-expanded","false");}
+    const input=$("locationSearch");if(input){input.value="";input.setAttribute("aria-expanded","false");}
     window.dispatchEvent(new CustomEvent("weatherhannun:change-location",{detail:place}));
   }
   function onSelectClick(event){
@@ -126,22 +119,21 @@
   function init(){
     const field=$("locationSearch"),form=$("searchForm"),resultsBox=$("searchResults"),dialog=$("locationDialog");
     if(!field||!form||!resultsBox)return;
-    field.placeholder="예: 광명, 옥길동, 부천 소사구 옥길로 38";
+    field.placeholder="지역명 검색 (예: 오이도, 옥길동)";
     field.setAttribute("role","combobox");
     field.setAttribute("aria-autocomplete","list");
     field.setAttribute("aria-controls","searchResults");
     field.setAttribute("aria-expanded","false");
     resultsBox.setAttribute("aria-label","전국 지역 검색 결과");
     resultsBox.setAttribute("role","listbox");
-    showSource();
     form.addEventListener("submit",event=>{event.preventDefault();runSearch(true);});
     field.addEventListener("input",()=>runSearch(false));
     field.addEventListener("focus",()=>{if(!index)getIndex().catch(()=>{});if(field.value.trim().length>=2)runSearch(false);});
     field.addEventListener("keydown",onKey);
     resultsBox.addEventListener("click",onSelectClick);
     resultsBox.addEventListener("keydown",onResultKey);
-    dialog?.addEventListener("close",()=>{revision++;results=[];setPanelVisible(false);});
-    renderHint("지역명을 입력하면 가장 알맞은 주소를 바로 보여드려요.",false);
+    dialog?.addEventListener("close",()=>{revision++;results=[];field.value="";field.setAttribute("aria-expanded","false");setPanelVisible(false);});
+    renderHint("지역명을 입력해 주세요.",false);
   }
   window.WeatherRegionSearch={search:runSearch};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();

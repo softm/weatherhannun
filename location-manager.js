@@ -38,17 +38,25 @@
     if(!initialized)return;
     updateHeader();
     const activeSaved=places.some(p=>core.same(p,active));
+    const activeLine=active?.address&&active.address!==active.name?active.address:
+      active?.source==="gps"?"GPS로 선택한 지역":"현재 날씨의 기준 지역";
+    const managedName=$("managedCurrentName");
+    const managedAddress=$("managedCurrentAddress");
+    const favoriteCount=$("favoriteCount");
+    if(managedName)managedName.textContent=currentName();
+    if(managedAddress)managedAddress.textContent=activeLine;
+    if(favoriteCount)favoriteCount.textContent=places.length+" / "+core.MAX_SAVED;
     const holder=$("favoriteLocations");
     if(holder){
       holder.innerHTML=places.length?places.map((p,index)=>{
         const selected=core.same(active,p);
-        return '<div class="location-place-row'+(selected?" is-active":"")+'"><button type="button" data-location-select="'+esc(p.id)+'" class="location-place-select" aria-label="'+esc(p.name)+' 날씨 보기"><span class="location-place-symbol">📍</span><span class="location-place-text"><span class="location-place-name">'+esc(p.name)+'</span>'+(p.address&&p.address!==p.name?'<small class="location-place-address">'+esc(p.address)+(p.regionCenter?" · 지역 대표 좌표":" · 추정주소")+'</small>':'')+'</span>'+(selected?'<span class="location-place-current">보는 중</span>':'')+'</button><span class="location-order-buttons" role="group" aria-label="'+esc(p.name)+' 순서 변경"><button type="button" data-location-move="up" data-location-id="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 위로 이동" title="위로 이동"'+(index===0?' disabled':'')+'>↑</button><button type="button" data-location-move="down" data-location-id="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 아래로 이동" title="아래로 이동"'+(index===places.length-1?' disabled':'')+'>↓</button></span><button type="button" class="location-edit-button" data-location-edit="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 이름 변경" title="이름 변경">수정</button><button type="button" class="location-delete-button" data-location-delete="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 저장 지역 삭제" title="삭제">삭제</button></div>';
-      }).join(""):'<p class="muted-text location-empty">저장된 지역이 없습니다. 위에서 지역을 검색하거나 현재 위치를 선택한 뒤 저장할 수 있습니다.</p>';
+        return '<div class="location-place-row'+(selected?" is-active":"")+'"><button type="button" data-location-select="'+esc(p.id)+'" class="location-place-select" aria-label="'+esc(p.name)+' 날씨 보기"><span class="location-place-symbol material-symbols-outlined" aria-hidden="true">location_on</span><span class="location-place-text"><span class="location-place-name">'+esc(p.name)+'</span>'+(p.address&&p.address!==p.name?'<small class="location-place-address">'+esc(p.address)+'</small>':'')+'</span>'+(selected?'<span class="location-place-current">보는 중</span>':'')+'</button><span class="location-row-actions"><span class="location-order-buttons" role="group" aria-label="'+esc(p.name)+' 순서 변경"><button type="button" data-location-move="up" data-location-id="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 위로 이동" title="위로 이동"'+(index===0?' disabled':'')+'><span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_up</span></button><button type="button" data-location-move="down" data-location-id="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 아래로 이동" title="아래로 이동"'+(index===places.length-1?' disabled':'')+'><span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down</span></button></span><button type="button" class="location-edit-button" data-location-edit="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 이름 변경" title="이름 변경"><span class="material-symbols-outlined" aria-hidden="true">edit</span></button><button type="button" class="location-delete-button" data-location-delete="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 저장 지역 삭제" title="삭제"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></span></div>';
+      }).join(""):'<div class="location-empty"><span class="material-symbols-outlined" aria-hidden="true">bookmark_add</span><p>자주 보는 지역을 저장해 보세요.</p></div>';
     }
     const save=$("saveCurrentLocation");
     if(save){
       save.disabled=activeSaved||!active;
-      save.textContent=activeSaved?"★ 이미 저장됨":"☆ 이 지역 저장";
+      save.textContent=activeSaved?"★ 저장됨":"☆ 내 지역에 저장";
     }
     const quick=$("locationQuickBar");
     if(quick){

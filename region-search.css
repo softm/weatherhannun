@@ -1,107 +1,93 @@
-/* Weather Hannun Korean administrative address search UI (Stitch-aware). */
-#regionSearchSource{margin:0;display:block;color:var(--st-muted,var(--muted));font-size:10px;line-height:1.45;text-align:right}
-#regionSearchSource a{color:var(--st-accent,var(--blue))}
-#locationDialog{scrollbar-width:thin}
-#locationDialog .region-search-panel{margin-top:12px;padding-top:11px;border-top:1px solid var(--st-line,var(--line))}
-#locationDialog .region-search-panel[hidden]{display:none!important}
-#locationDialog .region-search-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-#locationDialog .region-search-summary .dialog-subtitle{margin:0;color:var(--st-fg,var(--text));font-size:12px}
-#locationDialog .search-results{display:block;min-height:48px;border-radius:13px;background:transparent;color:var(--st-fg,var(--text))}
-.region-search-hint{padding:14px 13px;font-size:12px;line-height:1.6;border:1px dashed var(--st-line,var(--line));background:var(--panel2);border-radius:12px;color:var(--st-muted,var(--muted))}
-.region-search-count{font-size:12px;font-weight:750;color:var(--st-fg,var(--text));margin:6px 0 10px}
-.region-search-note{color:var(--st-muted,var(--muted));font-size:11px;line-height:1.5;margin:10px 2px}
-.region-result-list{display:grid;gap:8px;max-height:min(38dvh,340px);overflow-y:auto;overscroll-behavior:contain;padding:2px 1px 6px;scrollbar-width:thin}
-#locationDialog .search-results .region-result{display:flex;align-items:center;gap:11px;padding:12px 13px;width:100%;text-align:left;border:1px solid var(--st-line,var(--line));background:var(--panel2);color:var(--st-fg,var(--text));border-radius:14px;min-width:0;min-height:74px;cursor:pointer;transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease}
-#locationDialog .search-results .region-result:hover,#locationDialog .search-results .region-result:focus-visible{border-color:var(--st-accent,var(--blue));background:color-mix(in srgb,var(--st-accent,var(--blue)) 9%,var(--panel2));box-shadow:0 0 0 2px color-mix(in srgb,var(--st-accent,var(--blue)) 10%,transparent)}
-.region-result-icon{flex:0 0 31px;width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--st-accent,var(--blue)) 12%,var(--panel2));color:var(--st-accent,var(--blue));font-size:18px}
-.region-result-body{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
-.region-result-heading{display:flex;align-items:center;gap:7px;min-width:0}
-.region-result-body b{font-size:13px;letter-spacing:-.1px;line-height:1.5;font-weight:780;overflow-wrap:anywhere;color:var(--st-fg,var(--text))}
-.region-result-best{flex:0 0 auto;border-radius:999px;padding:2px 6px;background:color-mix(in srgb,var(--st-accent,var(--blue)) 14%,var(--panel2));color:var(--st-accent,var(--blue));font-size:9px;font-style:normal;font-weight:850;white-space:nowrap}
-.region-result-body>span{font-size:11px;color:var(--st-muted,var(--muted));line-height:1.35;overflow-wrap:anywhere}
-.region-result-body>small{font-size:10px;color:var(--st-muted,var(--muted));line-height:1.3}
-.region-result-kind{flex:0 0 auto;align-self:center;border-radius:999px;border:1px solid var(--st-line,var(--line));color:var(--st-accent,var(--blue));background:color-mix(in srgb,var(--st-accent,var(--blue)) 8%,var(--panel2));padding:5px 8px;font-size:10px;font-weight:800;white-space:nowrap}
-#regionSearchHelp{color:var(--st-muted,var(--muted));font-size:11px;margin:7px 0 0}
-#regionSearchHelp strong{font-weight:700;color:var(--st-accent,var(--blue))}
-#locationDialog .search-box input{width:100%;line-height:1.6;min-height:32px}
-#locationDialog .search-box input:focus{box-shadow:none}
-@media(max-width:640px){
-  #locationDialog .region-search-summary{align-items:flex-start;flex-direction:column;gap:2px}
-  #regionSearchSource{text-align:left}
-  .region-result-list{max-height:min(35dvh,300px)}
-  #locationDialog .search-results .region-result{padding:11px 9px;gap:9px;min-height:68px}
-  .region-result-kind{font-size:9px;padding:5px}
-  .region-result-body b{font-size:12px}
-  .region-result-body>span{font-size:10px}
-}
-
-/* The legacy dialog was permanently navy. Bind the complete surface to the
-   active app theme so saved-place rows and search results never mix themes. */
+/* WeatherHannun region hub: one search surface, one current region, one saved list. */
 #locationDialog{
-  width:min(480px,calc(100% - 24px));
-  height:auto;
-  max-height:calc(100dvh - 24px);
+  width:min(680px,calc(100% - 32px));
+  max-height:min(820px,calc(100dvh - 32px));
   margin:auto;
-  padding:22px!important;
+  padding:0!important;
+  overflow:auto;
   color:var(--st-fg)!important;
   border:1px solid var(--st-line)!important;
-  border-radius:12px!important;
+  border-radius:22px!important;
   background:var(--st-surface)!important;
-  box-shadow:var(--shadow-raised,var(--shadow))!important;
+  box-shadow:0 28px 90px rgba(9,36,68,.24)!important;
+  scrollbar-width:thin;
 }
-#locationDialog::backdrop{background:rgba(5,15,34,.58);backdrop-filter:blur(5px)}
-#locationDialog .dialog-head{margin-bottom:20px}
-#locationDialog .dialog-head h2{color:var(--st-fg)}
-#locationDialog .dialog-head button{
-  color:var(--st-muted);
-  border:1px solid var(--st-line);
-  border-radius:8px;
-  background:var(--panel2);
-}
-#locationDialog #searchForm label,
-#locationDialog .dialog-subtitle,
-#locationDialog .favorite-help{color:var(--st-muted)}
-#locationDialog .search-box{
-  color:var(--st-fg);
-  border:1px solid var(--st-line);
-  border-radius:8px;
-  background:var(--panel2);
-}
-#locationDialog .search-box>span{color:var(--st-accent)}
-#locationDialog .search-box input{
-  color:var(--st-fg);
-  background:transparent;
-  caret-color:var(--st-accent);
-}
-#locationDialog .search-box input::placeholder{color:var(--st-muted);opacity:.82}
-#locationDialog .search-box button{
-  color:#fff;
-  border:1px solid var(--st-accent);
-  border-radius:6px;
-  background:var(--st-accent);
-}
-#locationDialog .geo-option{
-  color:var(--st-fg);
-  border-color:var(--st-line);
-  border-radius:8px;
-  background:var(--panel2);
-}
-#locationDialog .geo-option span{color:var(--st-accent)}
-#locationDialog .favorite-save{
-  color:#08735c;
-  border-color:rgba(16,185,129,.35);
-  background:rgba(16,185,129,.1);
-}
-#locationDialog .city-presets button{
-  color:var(--st-fg);
-  border-color:var(--st-line);
-  background:var(--panel2);
-}
+#locationDialog::backdrop{background:rgba(5,15,34,.58);backdrop-filter:blur(6px)}
+.location-dialog-top{position:sticky;top:0;z-index:10;padding:23px 26px 18px;background:color-mix(in srgb,var(--st-surface) 96%,transparent);border-bottom:1px solid var(--st-line);backdrop-filter:blur(18px)}
+#locationDialog .location-dialog-head{align-items:center;margin:0 0 18px}
+#locationDialog .location-dialog-head h2{margin:3px 0 0;color:var(--st-fg);font-size:clamp(22px,4vw,27px);letter-spacing:-.7px}
+#locationDialog .location-dialog-head button{display:grid;place-items:center;width:44px;height:44px;padding:0;color:var(--st-muted);border:1px solid var(--st-line);border-radius:50%;background:var(--panel2)}
+#locationDialog .location-dialog-head button:hover{color:var(--st-fg);border-color:var(--st-accent)}
+.location-search-form>label{display:block;margin:0 0 7px;color:var(--st-muted);font-size:12px;font-weight:750}
+#locationDialog .search-box{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;min-height:56px;padding:5px 5px 5px 15px;color:var(--st-fg);border:1px solid var(--st-line);border-radius:16px;background:var(--panel2);transition:border-color .18s ease,box-shadow .18s ease}
+#locationDialog .search-box:focus-within{border-color:var(--st-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--st-accent) 14%,transparent)}
+#locationDialog .search-box>span{color:var(--st-accent);font-size:22px}
+#locationDialog .search-box input{width:100%;min-width:0;min-height:44px;padding:0 8px;color:var(--st-fg);border:0;outline:0;background:transparent;caret-color:var(--st-accent);font-size:15px;font-weight:650;line-height:1.5}
+#locationDialog .search-box input::placeholder{color:var(--st-muted);font-weight:500;opacity:.82}
+#locationDialog .search-box button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:82px;min-height:44px;padding:0 13px;color:#fff;border:1px solid var(--st-accent);border-radius:12px;background:var(--st-accent);font-size:12px;font-weight:800}
+#locationDialog .search-box button:active{transform:translateY(1px)}
+#locationDialog .search-box button .material-symbols-outlined{font-size:18px}
+#locationDialog .region-search-panel{margin-top:18px}
+#locationDialog .region-search-panel[hidden]{display:none!important}
+#locationDialog .region-search-summary{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px}
+#locationDialog .region-search-summary .dialog-subtitle{margin:0;color:var(--st-fg);font-size:12px}
+#locationDialog .search-results{display:block;min-height:54px;color:var(--st-fg)}
+.region-search-hint{padding:18px 14px;color:var(--st-muted);border:1px dashed var(--st-line);border-radius:14px;background:var(--panel2);font-size:12px;line-height:1.6}
+.region-search-note{margin:10px 2px 0;color:var(--st-muted);font-size:11px;line-height:1.55}
+.region-result-list{display:grid;max-height:min(54dvh,470px);overflow-y:auto;overscroll-behavior:contain;border-top:1px solid var(--st-line);scrollbar-width:thin}
+#locationDialog .search-results .region-result{display:grid;grid-template-columns:36px minmax(0,1fr) 28px;align-items:center;gap:12px;width:100%;min-height:68px;padding:11px 4px;color:var(--st-fg);text-align:left;border:0;border-bottom:1px solid var(--st-line);border-radius:0;background:transparent;cursor:pointer;transition:background-color .15s ease,color .15s ease}
+#locationDialog .search-results .region-result:hover,#locationDialog .search-results .region-result:focus-visible{color:var(--st-accent);background:color-mix(in srgb,var(--st-accent) 7%,transparent);outline-offset:-3px}
+.region-result-icon{display:grid;place-items:center;width:36px;height:36px;color:var(--st-accent);border-radius:50%;background:color-mix(in srgb,var(--st-accent) 11%,var(--panel2));font-size:20px}
+.region-result-body{display:flex;min-width:0;flex-direction:column;gap:2px}
+.region-result-body b{overflow:hidden;color:inherit;font-size:14px;font-weight:800;line-height:1.4;text-overflow:ellipsis;white-space:nowrap}
+.region-result-body small{overflow:hidden;color:var(--st-muted);font-size:11px;line-height:1.4;text-overflow:ellipsis;white-space:nowrap}
+.region-result-arrow{color:var(--st-muted);font-size:19px}
+#locationDialog.is-searching .location-browse-view{display:none}
+.location-browse-view{display:grid;gap:18px;padding:18px 26px 27px}
+#locationDialog .geo-option{display:grid;grid-template-columns:42px minmax(0,1fr) 24px;align-items:center;gap:12px;width:100%;min-height:64px;margin:0;padding:9px 12px;color:var(--st-fg);text-align:left;border:1px solid var(--st-line);border-radius:16px;background:var(--panel2)}
+#locationDialog .geo-option:hover{border-color:var(--st-accent);background:color-mix(in srgb,var(--st-accent) 7%,var(--panel2))}
+#locationDialog .geo-option:active{transform:translateY(1px)}
+.geo-option-icon{display:grid!important;place-items:center;width:42px;height:42px;color:var(--st-accent);border-radius:50%;background:color-mix(in srgb,var(--st-accent) 11%,var(--st-surface))}
+#locationDialog .geo-option .geo-option-copy{display:flex;min-width:0;flex-direction:column;gap:2px;color:var(--st-fg)}
+.geo-option-copy strong{font-size:14px;font-weight:800}
+.geo-option-copy small{overflow:hidden;color:var(--st-muted);font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+#locationDialog .geo-option>span:last-child{color:var(--st-muted);font-size:20px}
+.managed-current{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:17px 0;border-top:1px solid var(--st-line);border-bottom:1px solid var(--st-line)}
+.managed-current-copy{display:flex;min-width:0;flex-direction:column;gap:3px}
+.managed-current-copy .section-overline{font-size:9px;letter-spacing:1.8px}
+.managed-current-copy strong{overflow:hidden;color:var(--st-fg);font-size:18px;letter-spacing:-.35px;text-overflow:ellipsis;white-space:nowrap}
+.managed-current-copy small{overflow:hidden;color:var(--st-muted);font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+#locationDialog .favorite-save{min-height:44px;padding:0 14px;color:var(--st-accent);border:1px solid color-mix(in srgb,var(--st-accent) 45%,var(--st-line));border-radius:12px;background:color-mix(in srgb,var(--st-accent) 9%,var(--st-surface));font-size:12px;font-weight:800;white-space:nowrap}
+#locationDialog .favorite-save:disabled{color:var(--st-muted);border-color:var(--st-line);background:var(--panel2);cursor:default;opacity:1}
+.saved-location-section{min-width:0}
+#locationDialog .favorite-title{margin:0 0 5px}
+#locationDialog .favorite-title .dialog-subtitle{display:flex;align-items:center;gap:8px;margin:0;color:var(--st-fg);font-size:13px}
+.favorite-count{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;color:var(--st-accent);border-radius:999px;background:color-mix(in srgb,var(--st-accent) 10%,var(--panel2));font-size:10px;font-weight:850}
+.location-section-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+#locationDialog .location-section-heading .dialog-subtitle{margin:0;color:var(--st-fg);font-size:12px}
+.location-section-heading small{color:var(--st-muted);font-size:10px}
+.location-preset-section{padding-top:3px;border-top:1px solid var(--st-line)}
+#locationDialog .city-presets{display:flex;flex-wrap:wrap;gap:7px}
+#locationDialog .city-presets button{min-height:40px;padding:7px 12px;color:var(--st-fg);border:1px solid var(--st-line);border-radius:999px;background:var(--panel2);font-size:11px;font-weight:700}
 #locationDialog .city-presets button:hover{color:var(--st-accent);border-color:var(--st-accent)}
+#locationDialog .location-permission-status{margin:-9px 2px 0;color:var(--st-muted);font-size:11px}
 html[data-weather-theme="dark"] #locationDialog .search-box button{color:#10223a}
-html[data-weather-theme="dark"] #locationDialog .favorite-save{color:#8ef2d2;background:rgba(84,220,187,.1)}
 html[data-weather-theme="dark"] #locationDialog::backdrop{background:rgba(1,8,21,.72)}
+
 @media(max-width:640px){
-  #locationDialog{max-height:calc(100dvh - 16px);padding:18px!important}
+  #locationDialog{inset:0;width:100%;max-width:none;height:100dvh;max-height:100dvh;margin:0;border:0!important;border-radius:0!important}
+  .location-dialog-top{padding:max(16px,env(safe-area-inset-top)) 18px 15px}
+  #locationDialog .location-dialog-head{margin-bottom:14px}
+  #locationDialog .location-dialog-head h2{font-size:23px}
+  #locationDialog .search-box{min-height:54px;padding-left:13px}
+  #locationDialog .search-box button{min-width:44px;width:44px;padding:0}
+  .search-submit-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  .region-result-list{max-height:calc(100dvh - 210px)}
+  #locationDialog .search-results .region-result{min-height:66px}
+  .location-browse-view{gap:16px;padding:16px 18px calc(25px + env(safe-area-inset-bottom))}
+  .managed-current{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .managed-current-copy strong{font-size:17px}
+  #locationDialog .favorite-save{padding:0 11px;font-size:11px}
+  .geo-option-copy small{white-space:normal}
 }
-@media(prefers-reduced-motion:reduce){#locationDialog .search-results .region-result{transition:none}}
+@media(prefers-reduced-motion:reduce){#locationDialog *{transition:none!important}}
