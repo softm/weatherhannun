@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
+import { deflateSync } from "node:zlib";
 
 const KMA_KEY = process.env.KMA_API_HUB_KEY || "";
 const DATA_KEY = process.env.DATA_GO_KR_SERVICE_KEY || "";
@@ -57,22 +58,79 @@ async function observations(at) {
   return mergeElements(parseElement(ta, "temperature"), parseElement(rn, "precipitation"));
 }
 async function warnings(at) {
-  const text = await fetchOk(kmaUrl("/api/typ01/url/wrn_now_data.php", { fe: "f", tm: compact(at), disp: "0", help: "0" })).then(r => r.text());
+  const text = await fetchOk(kmaUrl("/api/typ01/url/wrn_now_data_new.php", { fe: "f", tm: compact(at), disp: "0", help: "0" })).then(r => r.text());
   return text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith("#")).map(line => {
     const part = line.trim().split(/\s+/);
     if (part.length < 9) return null;
     return { upperRegionCode: part[0], upperRegionName: part[1], regionCode: part[2], regionName: part[3], announcedAt: isoKst(part[4]), effectiveAt: isoKst(part[5]), warningCode: part[6], level: part[7], command: part[8] };
   }).filter(Boolean);
 }
+function crc32(buffer) {
+  let value = 0xffffffff;
+  for (const byte of buffer) {
+    value ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) value = (value >>> 1) ^ ((value & 1) ? 0xedb88320 : 0);
+  }
+  return (value ^ 0xffffffff) >>> 0;
+}
+function pngChunk(type, data) {
+  const name = Buffer.from(type, "ascii"), size = Buffer.alloc(4), checksum = Buffer.alloc(4);
+  size.writeUInt32BE(data.length);
+  checksum.writeUInt32BE(crc32(Buffer.concat([name, data])));
+  return Buffer.concat([size, name, data, checksum]);
+}
+function radarColor(value) {
+  if (value <= -25000) return [0, 0, 0, 0];
+  const dbz = value / 100;
+  if (dbz < 0) return [198, 231, 255, 95];
+  if (dbz < 10) return [99, 181, 255, 145];
+  if (dbz < 20) return [50, 127, 224, 175];
+  if (dbz < 30) return [65, 190, 103, 195];
+  if (dbz < 40) return [245, 211, 69, 215];
+  if (dbz < 50) return [244, 139, 46, 225];
+  if (dbz < 60) return [224, 65, 65, 235];
+  return [151, 70, 189, 245];
+}
+function radarDimensions(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 4) return null;
+  const candidates = [
+    { width: buffer.readUInt16LE(0), height: buffer.readUInt16LE(2), littleEndian: true },
+    { width: buffer.readUInt16BE(0), height: buffer.readUInt16BE(2), littleEndian: false }
+  ];
+  return candidates.find(item => item.width > 10 && item.height > 10 && item.width <= 10000 && item.height <= 10000 && buffer.length >= 4 + item.width * item.height * 2) || null;
+}
+function radarPng(buffer) {
+  const grid = radarDimensions(buffer);
+  if (!grid) throw new Error("KMA radar binary grid header is invalid");
+  const width = Math.min(900, grid.width), height = Math.max(1, Math.round(grid.height * width / grid.width));
+  const pixels = Buffer.alloc((width * 4 + 1) * height);
+  for (let y = 0; y < height; y += 1) {
+    const row = y * (width * 4 + 1); pixels[row] = 0;
+    const sourceY = grid.height - 1 - Math.min(grid.height - 1, Math.floor(y * grid.height / height));
+    for (let x = 0; x < width; x += 1) {
+      const sourceX = Math.min(grid.width - 1, Math.floor(x * grid.width / width));
+      const offset = 4 + (sourceY * grid.width + sourceX) * 2;
+      const value = grid.littleEndian ? buffer.readInt16LE(offset) : buffer.readInt16BE(offset);
+      const color = radarColor(value), target = row + 1 + x * 4;
+      pixels[target] = color[0]; pixels[target + 1] = color[1]; pixels[target + 2] = color[2]; pixels[target + 3] = color[3];
+    }
+  }
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 6;
+  return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]), pngChunk("IHDR", header), pngChunk("IDAT", deflateSync(pixels, { level: 9 })), pngChunk("IEND", Buffer.alloc(0))]);
+}
 async function radar(at) {
   const rounded = new Date(Math.floor((at.getTime() - 10 * 60 * 1000) / (5 * 60 * 1000)) * 5 * 60 * 1000);
   const observedAt = isoKst(compact(rounded));
-  const url = kmaUrl("/api/typ03/cgi/rdr/nph-rdr_cmp1_img", { tm: compact(rounded), cmp: "HSR", qcd: "HSLP", obs: "ECHD", color: "C4", aws: "0", acc: "", map: "HR", grid: "2", legend: "1", size: "800", itv: "5", zoom_level: "0", zoom_x: "0000000", zoom_y: "0000000", gov: "" });
+  const url = kmaUrl("/api/typ01/cgi-bin/url/nph-rdr_cmp1_api", { tm: compact(rounded), cmp: "HSR", qcd: "MSK", obs: "ECHO", map: "HB", disp: "B" });
   const response = await fetchOk(url);
-  const contentType = response.headers.get("content-type") || "";
-  if (!contentType.startsWith("image/")) throw new Error("KMA radar response was not an image");
-  await writeFile(radarFile, Buffer.from(await response.arrayBuffer()));
-  return { status: "ready", kind: "observation", observedAt, imagePath: "./data/official/radar-hsr.png", legendIncluded: true, product: "기상청 HSR 레이더 합성 관측" };
+  const binary = Buffer.from(await response.arrayBuffer());
+  await writeFile(radarFile, radarPng(binary));
+  return {
+    status: "ready", kind: "observation", observedAt, imagePath: "./data/official/radar-hsr.png",
+    legendIncluded: true, legendKind: "weatherhannun-dbz", product: "기상청 HSR 합성 레이더 반사도",
+    legend: [{ minDbz: 0, color: "#63b5ff" }, { minDbz: 10, color: "#327fe0" }, { minDbz: 20, color: "#41be67" }, { minDbz: 30, color: "#f5d345" }, { minDbz: 40, color: "#f48b2e" }, { minDbz: 50, color: "#e04141" }, { minDbz: 60, color: "#9746bd" }]
+  };
 }
 function dataUrl(path, params) {
   const url = new URL(path, "https://apis.data.go.kr");
