@@ -75,6 +75,15 @@ test("multiple searches use a single cached local dataset without typing network
  assert.equal(h.requests.length,1);
  assert.match(h.node("searchResults").innerHTML,/서산시 대산읍 화곡리/);
 });
+test("a place-name search shows its linked administrative weather region",async()=>{
+ const h=createHarness();
+ h.node("locationSearch").value="오이도";
+ await h.window.WeatherRegionSearch.search();
+ const html=h.node("searchResults").innerHTML;
+ assert.match(html,/<b>정왕동<\/b>/);
+ assert.match(html,/경기도 시흥시 정왕동/);
+ assert.match(html,/오이도 검색 결과 · 법정동 대표 좌표/);
+});
 test("road/building address is not falsely geocoded as an exact point",async()=>{
  const h=createHarness();
  h.node("locationSearch").value="세종대로 110";

@@ -97,6 +97,19 @@ test("romanized major-city lookup remains available from the old weather search"
  assert.equal(core.search(index,"Seoul")[0].full,"서울특별시");
 });
 
+test("well-known place names resolve to their weather region without pretending to be a legal dong",()=>{
+ const found=core.search(index,"오이도");
+ assert.equal(found.length,1);
+ assert.equal(found[0].name,"정왕동");
+ assert.equal(found[0].kind,"dong");
+ assert.equal(found[0].full,"경기도 시흥시 정왕동");
+ assert.equal(found[0].matchedAlias,"오이도");
+ const location=core.toLocation(found[0]);
+ assert.equal(location.name,"정왕동");
+ assert.equal(location.administrative,"경기도 시흥시 정왕동");
+ assert.equal(location.address,"경기도 시흥시 정왕동");
+});
+
 test("ambiguous dong search prioritizes the nearest match when a current region is available",()=>{
  const found=core.search(index,"옥길동",{biasLat:37.4678,biasLon:126.823,limit:5});
  assert.equal(found[0].full,"경기도 부천시 소사구 옥길동");

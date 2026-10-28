@@ -13,7 +13,7 @@ test("all six required activities, including irrigation, are explicit",()=>{
 
 test("the browser loads the rule module before the app and exposes irrigation",()=>{
  const html=fs.readFileSync(path.join(__dirname,"../index.html"),"utf8");
- assert.ok(html.indexOf("activity-decision-core.js?v=28")<html.indexOf("app.js?v=34"));
+ assert.ok(html.indexOf("activity-decision-core.js?v=28")<html.indexOf("app.js?v=41"));
  assert.match(html,/data-activity="irrigation">💧 관수 참고/);
 });
 
