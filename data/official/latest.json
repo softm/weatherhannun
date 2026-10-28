@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "unconfigured",
+  "generatedAt": null,
+  "reason": "GitHub Actions secrets KMA_API_HUB_KEY and DATA_GO_KR_SERVICE_KEY are not configured.",
+  "rights": [
+    {
+      "provider": "기상청 API허브",
+      "sourceUrl": "https://apihub.kma.go.kr/",
+      "licenseUrl": "https://apihub.kma.go.kr/policy.do",
+      "license": "공공누리 유형별 출처표시 조건",
+      "approval": "활용신청 및 인증키 필요",
+      "verified": false
+    },
+    {
+      "provider": "한국환경공단 에어코리아",
+      "sourceUrl": "https://www.data.go.kr/data/15073861/openapi.do",
+      "licenseUrl": "https://www.data.go.kr/data/15073861/openapi.do",
+      "license": "공공저작물 출처표시·변경금지(제3유형), 제3자 권리 포함",
+      "approval": "운영계정 활용신청 확인 필요",
+      "verified": false
+    }
+  ],
+  "kma": { "observations": { "current": [], "previous": [] }, "warnings": [], "radar": { "status": "unavailable" } },
+  "airKorea": { "measurements": [] }
+}
