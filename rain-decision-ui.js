@@ -36,7 +36,7 @@
     return card;
   }
   function mount() {
-    var hero = document.querySelector('#stitch-live-dashboard > div > section:first-of-type') || document.querySelector('#view-today .today-layout > .hero-weather');
+    var hero = document.querySelector('#stitch-live-dashboard .stitch-dashboard-hero') || document.querySelector('#stitch-live-dashboard > div > section:first-of-type') || document.querySelector('#view-today .today-layout > .hero-weather');
     if (!hero || !hero.parentNode) return;
     var element = ensureCard();
     if (hero.nextElementSibling !== element) {
