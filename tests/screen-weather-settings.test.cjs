@@ -46,7 +46,7 @@ test("snapshot bridge preserves source and missing-value safety", () => {
 test("Android home widget receives current location and all three size fields", () => {
   const html = read("index.html");
   const script = read("screen-weather-settings.js");
-  for (const field of ["weatherCode", "isDay", "high", "low", "rainGuidance", "updatedAt", "sourceLabel"]) {
+  for (const field of ["weatherCode", "isDay", "high", "low", "humidity", "windSpeed", "rainGuidance", "updatedAt", "sourceLabel"]) {
     assert.ok(script.includes(field), `missing widget field ${field}`);
   }
   assert.match(script, /WeatherHannunWidgets/);
@@ -63,7 +63,7 @@ test("Android home widget receives current location and all three size fields", 
 test("offline shell contains both settings assets", () => {
   const html = read("index.html");
   const worker = read("sw.js");
-  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=36"]) {
+  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=37"]) {
     assert.ok(html.includes(asset));
     assert.ok(worker.includes(asset));
   }
