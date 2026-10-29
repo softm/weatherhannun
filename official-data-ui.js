@@ -16,6 +16,15 @@
     return "좋음";
   }
   function put(selector, value) { document.querySelectorAll(selector).forEach(function (node) { node.textContent = value; }); }
+  function warningSummary() {
+    var place = weather && weather.loc && weather.loc.name || "현재 지역";
+    var local = resolved && Array.isArray(resolved.localWarnings) ? resolved.localWarnings : [];
+    var all = resolved && Array.isArray(resolved.warnings) ? resolved.warnings : [];
+    if (!resolved || !resolved.warningFeedReady) return { state: "unavailable", text: "공식 특보 연동 확인 중 · 기상청 원문 확인" };
+    if (local.length) return { state: "local", text: place + " 적용 특보 " + local.length + "건 · 원문 확인" };
+    if (all.length) return { state: "elsewhere", text: place + " 적용 특보 없음 · 전국 다른 지역 " + all.length + "건" };
+    return { state: "clear", text: "현재 스냅샷 기준 " + place + " 적용 특보 없음" };
+  }
   function renderHome() {
     if (!resolved) return;
     var current = resolved.current, air = resolved.air;
@@ -34,7 +43,9 @@
       put("[data-official-pm10]", "미세 " + (Number.isFinite(air.pm10) ? air.pm10 + "㎍/㎥" : "없음"));
       put("[data-official-pm25]", "초미세 " + (Number.isFinite(air.pm25) ? air.pm25 + "㎍/㎥" : "없음"));
     } else put("[data-official-air-source]", "에어코리아 실측 미확보 · 모델 예측과 구분");
-    put("[data-official-warning]", resolved.warnings.length ? ("전국 발효 특보 " + resolved.warnings.length + "건 · 내 지역 적용 여부 원문 확인") : "발효 특보는 기상청 원문에서 확인");
+    var warning = warningSummary();
+    put("[data-official-warning]", warning.text);
+    document.querySelectorAll(".official-glance-line").forEach(function (node) { node.dataset.warningState = warning.state; });
   }
   function renderPanel() {
     var status = document.getElementById("officialMapLayerStatus");

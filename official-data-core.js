@@ -8,6 +8,7 @@
   var AIR_MAX_KM = 50;
   var KMA_MAX_AGE_MS = 2 * 60 * 60 * 1000;
   var AIR_MAX_AGE_MS = 4 * 60 * 60 * 1000;
+  var WARNING_MAX_AGE_MS = 30 * 60 * 1000;
 
   function finite(value) { return typeof value === "number" && Number.isFinite(value); }
   function radians(value) { return value * Math.PI / 180; }
@@ -48,8 +49,22 @@
       precipitation: finite(row.precipitation) ? row.precipitation : null
     };
   }
+  function compactRegion(value) {
+    return typeof value === "string" ? value.replace(/\s+/g, "").replace(/특별자치도|특별자치시|특별시|광역시/g, "").trim() : "";
+  }
+  function warningApplies(row, location) {
+    if (!row || !location) return false;
+    var region = compactRegion(row.regionName), upper = compactRegion(row.upperRegionName);
+    if (region.includes("전국") || upper.includes("전국")) return true;
+    var locationText = compactRegion([location.name, location.address].filter(Boolean).join(" "));
+    if (!locationText) return false;
+    return [region, upper].filter(function (token) { return token.length >= 2; }).some(function (token) {
+      var shortToken = token.replace(/(?:도|시|군|구|읍|면|동)$/g, "");
+      return locationText.includes(token) || shortToken.length >= 2 && locationText.includes(shortToken);
+    });
+  }
   function resolve(feed, location, now) {
-    var unavailable = { status: "unavailable", reason: "official_snapshot_unavailable", observations: null, current: null, air: null, warnings: [], radar: null, rights: [] };
+    var unavailable = { status: "unavailable", reason: "official_snapshot_unavailable", observations: null, current: null, air: null, warnings: [], localWarnings: [], warningFeedReady: false, radar: null, rights: [] };
     if (!feed || feed.schemaVersion !== 1 || feed.status !== "ready") return unavailable;
     var lat = location && Number(location.lat), lon = location && Number(location.lon);
     if (!finite(lat) || !finite(lon)) return Object.assign(unavailable, { reason: "location_unavailable", rights: feed.rights || [] });
@@ -62,6 +77,8 @@
     var airPicked = nearest(feed.airKorea && feed.airKorea.measurements, lat, lon, AIR_MAX_KM);
     var air = airPicked && fresh(airPicked.row.measuredAt, now, AIR_MAX_AGE_MS)
       ? Object.assign({}, airPicked.row, { distanceKm: airPicked.distanceKm }) : null;
+    var warnings = Array.isArray(feed.kma && feed.kma.warnings) ? feed.kma.warnings : [];
+    var warningFeedReady = fresh(feed.generatedAt, now, WARNING_MAX_AGE_MS);
     return {
       status: current ? "ready" : "partial",
       reason: current ? null : picked ? "official_observation_stale" : "nearby_fresh_observation_unavailable",
@@ -69,11 +86,13 @@
       latestAvailable: !current && picked ? { observedAt: picked.row.observedAt, stationName: picked.row.stationName || picked.row.stationId, distanceKm: picked.distanceKm } : null,
       observations: current && previous ? { current: observation(current, lat, lon), previous: observation(previous, lat, lon) } : null,
       air: air,
-      warnings: Array.isArray(feed.kma && feed.kma.warnings) ? feed.kma.warnings : [],
+      warnings: warnings,
+      localWarnings: warningFeedReady ? warnings.filter(function (row) { return warningApplies(row, location); }) : [],
+      warningFeedReady: warningFeedReady,
       radar: feed.kma && feed.kma.radar && feed.kma.radar.status === "ready" ? feed.kma.radar : null,
       rights: Array.isArray(feed.rights) ? feed.rights : [],
       generatedAt: feed.generatedAt || null
     };
   }
-  return { resolve: resolve, distanceKm: distanceKm, nearest: nearest, constants: { KMA_MAX_KM: KMA_MAX_KM, AIR_MAX_KM: AIR_MAX_KM } };
+  return { resolve: resolve, distanceKm: distanceKm, nearest: nearest, warningApplies: warningApplies, constants: { KMA_MAX_KM: KMA_MAX_KM, AIR_MAX_KM: AIR_MAX_KM, WARNING_MAX_AGE_MS: WARNING_MAX_AGE_MS } };
 });
