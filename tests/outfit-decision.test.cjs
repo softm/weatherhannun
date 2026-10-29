@@ -121,9 +121,9 @@ test('page and offline shell load the complete outfit guide', () => {
   const root = path.join(__dirname, '..');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  for (const asset of ['outfit-decision.css?v=24', 'outfit-decision-core.js?v=31', 'outfit-decision-ui.js?v=24']) {
+  for (const asset of ['outfit-decision.css?v=24', 'outfit-decision-core.js?v=31', 'outfit-decision-ui.js?v=25']) {
     assert.ok(html.includes(asset), `page must load ${asset}`);
     assert.ok(worker.includes(asset), `offline shell must warm ${asset}`);
   }
-  assert.ok(html.indexOf('rain-decision-ui.js?v=21') < html.indexOf('outfit-decision-ui.js?v=24'));
+  assert.ok(html.indexOf('rain-decision-ui.js?v=22') < html.indexOf('outfit-decision-ui.js?v=25'));
 });
