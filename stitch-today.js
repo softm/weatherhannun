@@ -81,6 +81,31 @@
   if(save)new MutationObserver(sync).observe(save,{attributes:true,childList:true,subtree:true});
   sync();
  }
+ function createWeeklyRail(){
+  var section=document.createElement('section');
+  section.className='stitch-week-rail';
+  section.innerHTML='<div class="stitch-rail-heading"><div><span>7-DAY FORECAST</span><h2>주간예보</h2></div><button type="button">전체 보기 <span aria-hidden="true">›</span></button></div><div class="stitch-week-list" aria-live="polite"><p>주간 예보를 불러오는 중…</p></div>';
+  section.querySelector('button').addEventListener('click',()=>go('weekly'));
+  return section;
+ }
+ function arrangeDashboard(section,noteSource,weekly){
+  var [hero,air,brief,actions,hour,metrics,notice]=section,root=hero.parentElement;
+  var items=[[hero,'hero'],[noteSource,'source'],[air,'air'],[brief,'brief'],[actions,'actions'],[hour,'hourly'],[metrics,'metrics'],[weekly,'weekly'],[notice,'notice']];
+  items.forEach(([node,name])=>node.classList.add('stitch-dashboard-'+name));
+  var main=document.createElement('div'),rail=document.createElement('aside');
+  main.className='stitch-dashboard-main';rail.className='stitch-dashboard-rail';rail.setAttribute('aria-label','오늘의 상세 날씨 정보');
+  var media=window.matchMedia('(min-width: 1024px)');
+  function apply(){
+   var extras=[...root.querySelectorAll('.rain-decision-card,.outfit-decision-card')];
+   if(media.matches){
+    main.replaceChildren(hero,...extras,noteSource,actions,hour);
+    rail.replaceChildren(air,brief,weekly,metrics,notice);
+    root.replaceChildren(main,rail);
+   }else root.replaceChildren(hero,...extras,noteSource,air,brief,actions,hour,metrics,weekly,notice);
+  }
+  root.classList.add('stitch-dashboard-grid');
+  apply();media.addEventListener?.('change',apply);
+ }
  function setup(section){
   var [hero,air,brief,actions,hour,metrics,notice]=section;
   var cards=[...actions.querySelectorAll('article')];
@@ -119,6 +144,9 @@
   var noteSource=document.createElement('p');
   noteSource.className='stitch-source-note';noteSource.textContent='Open-Meteo 모델 예보 · 관측소 실측 아님';
   hero.insertAdjacentElement('afterend',noteSource);
+  var weekly=createWeeklyRail();
+  nodes.weekly=weekly;nodes.weekList=weekly.querySelector('.stitch-week-list');
+  arrangeDashboard(section,noteSource,weekly);
   hour.querySelector('h2')?.addEventListener('click',()=>go('hourly'));
   if(notice){
    notice.tabIndex=0;notice.setAttribute('role','button');notice.style.cursor='pointer';
@@ -217,6 +245,21 @@
    var diff=Math.max(0,endMinutes[0]*60+endMinutes[1]-nowMinutes[0]*60-nowMinutes[1]);
    put(nodes.daylight,Math.floor(diff/60)+'시간 '+(diff%60)+'분');
   }else put(nodes.daylight,'정보 없음');
+  if(nodes.weekList){
+   var dates=d.time||[],days=Math.min(7,dates.length);
+   nodes.weekList.replaceChildren();
+   if(!days){var empty=document.createElement('p');empty.textContent='주간 예보 정보 없음';nodes.weekList.append(empty);}
+   for(var i=0;i<days;i++){
+    var dayCondition=condition(cell(d.weather_code,i),1),button=document.createElement('button');
+    button.type='button';button.className='stitch-week-row';button.setAttribute('aria-label',dates[i]+' '+dayCondition.name+', 최저 '+fmt(cell(d.temperature_2m_min,i))+'도, 최고 '+fmt(cell(d.temperature_2m_max,i))+'도, 비 '+fmt(cell(d.precipitation_probability_max,i))+'퍼센트');
+    var date=document.createElement('span');date.className='stitch-week-date';date.innerHTML='<b></b><small></small>';
+    date.querySelector('b').textContent=i===0?'오늘':new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',weekday:'short'}).format(new Date(dates[i]+'T12:00:00+09:00'));date.querySelector('small').textContent=dates[i].slice(5).replace('-','.');
+    var icon=document.createElement('span');icon.className='stitch-week-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML=window.WeatherIcons?window.WeatherIcons.markup(cell(d.weather_code,i),1,'weather-glyph--tile'):'?';
+    var rain=document.createElement('span');rain.className='stitch-week-rain';rain.textContent='비 '+fmt(cell(d.precipitation_probability_max,i))+'%';
+    var range=document.createElement('span');range.className='stitch-week-range';range.innerHTML='<small></small><b></b>';range.querySelector('small').textContent=fmt(cell(d.temperature_2m_min,i))+'°';range.querySelector('b').textContent=fmt(cell(d.temperature_2m_max,i))+'°';
+    button.append(date,icon,rain,range);button.addEventListener('click',()=>go('weekly'));nodes.weekList.append(button);
+   }
+  }
   put(nodes.community,'강수·저온·돌풍 알림 조건 설정 · 앱이 열려 있는 동안 알림');
  }
  function init(){

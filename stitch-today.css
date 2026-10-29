@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 /* Exact requested Stitch screen as a scoped mobile-first component. */
-#stitch-live-dashboard{width:100%;max-width:640px;margin:0 auto;color:#0f1b2d;font-family:'DM Sans',Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;}
+#stitch-live-dashboard{width:100%;max-width:1180px;margin:0 auto;color:#0f1b2d;font-family:'DM Sans',Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;}
 #stitch-live-dashboard,#stitch-live-dashboard *{box-sizing:border-box}
 #stitch-live-dashboard h1,#stitch-live-dashboard h2,#stitch-live-dashboard h3,#stitch-live-dashboard p{margin:0}
 #stitch-live-dashboard img{display:block;max-width:100%}
@@ -54,8 +54,24 @@
 #stitch-live-dashboard .stitch-source-note{font-size:11px;text-align:center;color:#667589}
 #stitch-live-dashboard .stitch-weather-icon{width:116px;height:94px;margin:0 auto;object-fit:contain}
 #stitch-live-dashboard .stitch-state-error{color:#b91c1c!important}
+#stitch-live-dashboard .stitch-dashboard-grid{display:flex;flex-direction:column}
+#stitch-live-dashboard .stitch-dashboard-main,#stitch-live-dashboard .stitch-dashboard-rail{display:contents}
+#stitch-live-dashboard .stitch-week-rail{padding:16px;border:1px solid var(--st-line);border-radius:10px;background:var(--st-surface);box-shadow:0 3px 12px rgba(29,78,135,.07)}
+#stitch-live-dashboard .stitch-rail-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+#stitch-live-dashboard .stitch-rail-heading>div>span{display:block;color:var(--st-green-ink);font-size:10px;font-weight:800;letter-spacing:.08em}
+#stitch-live-dashboard .stitch-rail-heading h2{margin-top:2px;font-size:17px;color:var(--st-fg)}
+#stitch-live-dashboard .stitch-rail-heading button{display:inline-flex;min-height:44px;align-items:center;gap:3px;padding:0 8px;border:0;background:transparent;color:var(--st-accent-ink);font-size:11px;font-weight:700}
+#stitch-live-dashboard .stitch-week-list{display:grid;gap:2px}
+#stitch-live-dashboard .stitch-week-list>p{padding:18px 4px;color:var(--st-muted);font-size:12px;text-align:center}
+#stitch-live-dashboard .stitch-week-row{display:grid;grid-template-columns:58px 32px minmax(52px,1fr) 76px;align-items:center;gap:7px;width:100%;min-height:48px;padding:6px 4px;border:0;border-top:1px solid var(--st-line);background:transparent;color:var(--st-fg);text-align:left}
+#stitch-live-dashboard .stitch-week-row:first-child{border-top:0;background:#f1f7ff;border-radius:8px}
+#stitch-live-dashboard .stitch-week-row:hover{background:#f5f9fd}
+#stitch-live-dashboard .stitch-week-date{display:flex;flex-direction:column}#stitch-live-dashboard .stitch-week-date b{font-size:12px}#stitch-live-dashboard .stitch-week-date small{color:var(--st-muted);font-size:10px}
+#stitch-live-dashboard .stitch-week-icon{display:grid;place-items:center;width:30px;height:30px}#stitch-live-dashboard .stitch-week-icon .weather-glyph{width:29px;height:29px}
+#stitch-live-dashboard .stitch-week-rain{color:var(--st-accent-ink);font-size:10px;font-weight:700}
+#stitch-live-dashboard .stitch-week-range{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-variant-numeric:tabular-nums}#stitch-live-dashboard .stitch-week-range small{color:var(--st-accent-ink);font-size:11px}#stitch-live-dashboard .stitch-week-range b{font-size:13px}
 html[data-stitch-live=true] .intro{display:none!important}
-html[data-stitch-live=true][data-weather-view=today] #view-today{width:min(1180px,calc(100% - 32px));padding:0}
+html[data-stitch-live=true][data-weather-view=today] #view-today{width:min(1180px,100%);padding:0}
 html[data-stitch-live=true] #stitchLegacyToday{display:none!important}
 html[data-stitch-live=true] .topbar,html[data-stitch-live=true] .top-inner{height:68px}
 html[data-stitch-live=true] .location-button{border-radius:999px;background:var(--st-surface);border-color:var(--st-line);color:var(--st-fg)}
@@ -67,7 +83,16 @@ html[data-stitch-live=true] .mobile-nav .stitch-tab-icon{width:25px;height:26px;
 html[data-stitch-live=true] .mobile-nav .stitch-tab-icon .material-symbols-outlined{font-family:'Material Symbols Outlined';font-size:24px}
 @media(max-width:600px){html[data-stitch-live=true] .topbar .brand{display:none}html[data-stitch-live=true] .top-inner{justify-content:flex-end}html[data-stitch-live=true] .top-inner{padding-inline:12px;gap:8px}html[data-stitch-live=true] .top-actions{gap:5px}html[data-stitch-live=true] .brand{font-size:18px}html[data-stitch-live=true] .brand small{display:none}html[data-stitch-live=true] #locationTitle{max-width:135px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;display:inline-block;vertical-align:middle}html[data-stitch-live=true] .location-button{padding:8px}}
 @media(max-width:710px){#stitch-live-dashboard{max-width:390px}#stitch-live-dashboard>div{gap:16px;padding-top:8px}}
-@media(min-width:900px){#stitch-live-dashboard{max-width:760px}}
+@media(min-width:711px) and (max-width:1023px){#stitch-live-dashboard{max-width:760px}}
+@media(min-width:1024px){
+ #stitch-live-dashboard .stitch-dashboard-grid{display:grid;grid-template-columns:minmax(0,2.05fr) minmax(340px,.95fr);align-items:start;gap:20px;padding-top:18px}
+ #stitch-live-dashboard .stitch-dashboard-main,#stitch-live-dashboard .stitch-dashboard-rail{display:flex;min-width:0;flex-direction:column;gap:20px}
+ #stitch-live-dashboard .stitch-dashboard-main>.stitch-dashboard-hero{min-height:410px;display:grid;align-content:center}
+ #stitch-live-dashboard .stitch-dashboard-air{align-items:flex-start;flex-direction:column;gap:12px}
+ #stitch-live-dashboard .stitch-dashboard-air>div:last-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+ #stitch-live-dashboard .stitch-dashboard-brief .justify-between{align-items:flex-start;flex-wrap:wrap;gap:6px}
+ #stitch-live-dashboard .stitch-dashboard-hourly #stitchHourlyTrack{padding-inline:0;margin-inline:0}
+}
 @media(prefers-reduced-motion:reduce){#stitch-live-dashboard *{animation:none!important;transition:none!important}}
 
 /* The Stitch Today markup is intentionally kept close to the source design.
@@ -117,6 +142,10 @@ html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-source-note{color
 html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-hour-cell{color:var(--st-fg);border-color:var(--st-line);background:var(--st-surface)}
 html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-hour-current{color:#fff!important;border-color:#72adf4!important;background:linear-gradient(145deg,#1765d3,#0f478f)!important}
 html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-hour-selected:not(.stitch-hour-current){color:var(--st-fg)!important;border-color:#9dcaff!important;background:#17375c!important}
+html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-week-rail{background:var(--st-surface);border-color:var(--st-line)}
+html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-rail-heading h2,html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-week-row{color:var(--st-fg)}
+html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-week-row{border-color:var(--st-line)}
+html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-week-row:first-child,html[data-weather-theme="dark"] #stitch-live-dashboard .stitch-week-row:hover{background:var(--panel2)}
 html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-slate-300"],
 html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-slate-400"]{color:#52657b!important}
 html[data-weather-theme="light"] #stitch-live-dashboard [class~="text-primary"],
