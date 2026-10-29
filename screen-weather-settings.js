@@ -185,6 +185,8 @@
       isDay: finite(current.is_day) ? current.is_day : null,
       high: finite(daily?.temperature_2m_max?.[0]) ? daily.temperature_2m_max[0] : null,
       low: finite(daily?.temperature_2m_min?.[0]) ? daily.temperature_2m_min[0] : null,
+      humidity: finite(current.relative_humidity_2m) ? current.relative_humidity_2m : null,
+      windSpeed: finite(current.wind_speed_10m) ? current.wind_speed_10m : null,
       rainGuidance: String(rain && rain.title || '').trim().slice(0, 120),
       updatedAt: latestWeather.at,
       sourceLabel: 'Open-Meteo 모델 예보'
