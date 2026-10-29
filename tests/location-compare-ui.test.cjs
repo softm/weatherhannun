@@ -46,9 +46,19 @@ test("forecast-only yesterday view is explicit and never invents an observation 
   const script = read("daily-delta-ui.js");
   assert.match(html, /data-daily-delta/);
   assert.match(template, /data-daily-delta/);
-  assert.match(script, /현재 연결된 값은 모델 예보입니다/);
+  assert.match(script, /관측 자료 대기/);
+  assert.match(script, /모델 예보로 대신 계산하지 않습니다/);
   assert.match(script, /core\.compare\(latest && latest\.observations\)/);
   assert.match(script, /weatherhannun:stitch-ready/);
   assert.doesNotMatch(script, /MutationObserver/);
   assert.doesNotMatch(script, /weather\.current\.temperature_2m\s*-/);
+});
+
+test("unavailable yesterday comparison is compact instead of a dominant error card", () => {
+  const styles = read("location-compare.css");
+  assert.match(styles, /daily-delta-block\[data-state="unavailable"\][^{]*\{[^}]*padding:9px 12px/);
+  assert.match(styles, /data-state="unavailable"[^}]*daily-delta-copy\{[^}]*grid-template-columns:minmax\(0,1fr\) auto/);
+  assert.match(styles, /data-state="unavailable"[^}]*daily-delta-copy>b\{[^}]*white-space:nowrap/);
+  assert.match(styles, /data-state="unavailable"[^}]*daily-delta-copy>p\{[^}]*text-overflow:ellipsis/);
+  assert.match(styles, /data-state="unavailable"\]>small\{display:none\}/);
 });

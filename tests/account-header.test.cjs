@@ -25,6 +25,6 @@ test("account integration uses a compact menu and separates status feedback", ()
 
 test("offline shell includes the account header integration", () => {
   const worker = read("sw.js");
-  assert.match(worker, /weatherhannun-shell-v57-account-header-weather-dashboard/);
+  assert.match(worker, /weatherhannun-shell-v59-official-status/);
   assert.match(worker, /account-header\.js\?v=8/);
 });

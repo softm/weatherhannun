@@ -42,3 +42,20 @@ test("never substitutes stale, distant or unconfigured data for an observation",
 test("distance is calculated in kilometers", () => {
   assert.ok(core.distanceKm(37.5665, 126.978, 35.1796, 129.0756) > 300);
 });
+
+test("official warnings are matched to the selected region only while the snapshot is fresh", () => {
+  const source = feed();
+  source.kma.warnings = [
+    { upperRegionName: "충청남도", regionName: "서산시", warningCode: "WIND" },
+    { upperRegionName: "서울특별시", regionName: "서울 동북권", warningCode: "RAIN" }
+  ];
+  const local = core.resolve(source, { name: "서산", address: "충청남도 서산시", lat: 36.78, lon: 126.45 }, "2026-10-28T01:20:00Z");
+  assert.equal(local.warningFeedReady, true);
+  assert.equal(local.warnings.length, 2);
+  assert.equal(local.localWarnings.length, 1);
+  assert.equal(local.localWarnings[0].regionName, "서산시");
+
+  const stale = core.resolve(source, { name: "서산", address: "충청남도 서산시", lat: 36.78, lon: 126.45 }, "2026-10-28T02:00:01Z");
+  assert.equal(stale.warningFeedReady, false);
+  assert.deepEqual(stale.localWarnings, []);
+});

@@ -25,7 +25,7 @@ test("official data is resolved from a key-free licensed snapshot and cached off
  assert.match(ui,/visibilitychange/);
  assert.match(ui,/resolved\.latestAvailable/);
  assert.match(ui,/weatherhannun:official-data/);
- for(const asset of ["official-data-core.js?v=39","official-data.css?v=39","official-data-ui.js?v=39","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
+ for(const asset of ["official-data-core.js?v=40","official-data.css?v=40","official-data-ui.js?v=40","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
 });
 
 test("deployment sync keeps credentials server-side and publishes evidence metadata",()=>{
