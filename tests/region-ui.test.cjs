@@ -61,7 +61,8 @@ test("region management follows search, current location, current region, and sa
  assert.match(page,/id="locationDialogTitle">지역 관리/);
  assert.match(page,/id="geoButton"[\s\S]*?현재 위치로 보기/);
  assert.match(page,/id="managedCurrentName"/);
- assert.match(page,/id="favoriteCount"[^>]*>0 \/ 10/);
+ assert.match(page,/id="favoriteLocationsTitle"[^>]*>저장한 지역/);
+ assert.doesNotMatch(page,/favoriteCount|0 \/ 10/);
  assert.match(page,/id="presetCities"/);
 });
 test("typing a suffix-free city name shows the city immediately in the visible panel",async()=>{
@@ -83,7 +84,8 @@ test("clicking the matching hierarchy row applies correct district's centroid wi
  assert.equal(h.events[0].detail.name,"옥길동");
  assert.equal(h.events[0].detail.address,"경기도 부천시 소사구 옥길동");
  assert.equal(h.events[0].detail.regionCenter,true);
- assert.equal(h.node("locationDialog").open,false);
+ assert.equal(h.node("locationDialog").open,true);
+ assert.match(h.node("geoLocationStatus").textContent,/이 지역 저장/);
 });
 test("multiple searches use a single cached local dataset without typing network requests",async()=>{
  const h=createHarness();

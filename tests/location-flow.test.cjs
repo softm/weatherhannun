@@ -124,8 +124,7 @@ test("saved regions stay visible as one-tap chips and put the current region fir
  await t.settle();
  const html=t.node("locationQuickBar").innerHTML;
  assert.equal(t.node("managedCurrentName").textContent,"서울");
- assert.equal(t.node("favoriteCount").textContent,"2 / 10");
- assert.match(html,/등록 지역 <b>2<\/b>/);
+ assert.doesNotMatch(html,/등록 지역|2 \/ 10/);
  assert.match(html,/aria-label="등록한 지역 선택"/);
  assert.match(html,/aria-current="location"/);
  assert.ok(html.indexOf(">서울<")<html.indexOf(">서산<"));
@@ -161,6 +160,7 @@ test("an unsaved active region exposes a direct register action",async()=>{
  const t=boot({initial:{weatherhannun_location:{...SEOSAN,source:"manual"}}});
  await t.settle();
  assert.match(t.node("locationQuickBar").innerHTML,/data-location-save-current/);
+ assert.match(t.node("locationQuickBar").innerHTML,/이 지역 저장/);
  const button={hasAttribute:name=>name==="data-location-save-current",getAttribute:()=>null};
  t.node("locationQuickBar").handlers.get("click")({target:{closest:()=>button}});
  const saved=JSON.parse(t.localStorage.getItem("weatherhannun_places_v2"));
