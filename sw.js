@@ -1,8 +1,8 @@
 "use strict";
-const CACHE="weatherhannun-shell-v64-header-controls";
+const CACHE="weatherhannun-shell-v65-hamburger-menu";
 const BASE=self.registration.scope;
 const SHELL=[
-  "./","./index.html","./styles.css","./action-progress.css?v=40","./action-progress.js?v=40","./day-flow.css?v=2","./day-flow-core.js?v=2","./day-flow-ui.js?v=2","./national-map.css?v=41","./startup-briefing.css?v=45","./startup-briefing-core.js?v=45","./startup-briefing.js?v=45","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
+  "./","./index.html","./styles.css","./header-menu.css?v=1","./header-menu.js?v=1","./action-progress.css?v=40","./action-progress.js?v=40","./day-flow.css?v=2","./day-flow-core.js?v=2","./day-flow-ui.js?v=2","./national-map.css?v=41","./startup-briefing.css?v=45","./startup-briefing-core.js?v=45","./startup-briefing.js?v=45","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
   "./settings.css?v=34","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=38","./account-header.js?v=8",
   "./agriculture-planner.css?v=34","./agriculture-planner-core.js?v=34","./agriculture-planner.js?v=34",
   "./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",
