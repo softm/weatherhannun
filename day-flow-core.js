@@ -29,8 +29,8 @@
   }
   function build(payload){
     var weather=payload&&payload.weather,items=rows(weather,24),c=weather&&weather.current||{},change=nextChange(items),labels={rain:'비 가능성',wind:'강한 바람',cold:'추위',heat:'더위',good:'활동하기 무난한 날씨'};
-    var now=finite(c.temperature_2m)?'지금 '+number(c.temperature_2m,1)+'℃'+(finite(c.apparent_temperature)?' · 체감 '+number(c.apparent_temperature,1)+'℃':''):'현재 기온 자료를 확인할 수 없습니다.';
-    var changeText=change?hour(change.row.time)+'부터 '+labels[change.to]+' 구간으로 바뀔 가능성이 있습니다.':items.length>=12?'앞으로 12시간 큰 날씨 변화 신호가 낮습니다.':'시간별 자료가 부족해 다음 변화를 단정하지 않습니다.';
+    var now=finite(c.temperature_2m)?number(c.temperature_2m,1)+'℃'+(finite(c.apparent_temperature)?' · 체감 '+number(c.apparent_temperature,1)+'℃':''):'현재 기온 자료 없음';
+    var changeText=change?hour(change.row.time)+' '+labels[change.to]+' 전환':items.length>=12?'12시간 큰 변화 없음':'다음 변화 판단 불가';
     var sample=items.slice(0,12),complete=sample.length===12&&sample.every(function(r){return finite(r.temp)&&finite(r.rain)&&finite(r.mm)&&finite(r.wind);});
     return {now:now,change:changeText,action:action(items,c),confidence:{level:complete?'보통':'낮음',detail:complete?'시간별 모델 예보 자료 완전':'12시간 자료 일부 누락'},source:'모델 예보 · 관측소 실측 아님',timeline:items.map(function(r){return Object.assign({},r,{kind:kind(r),label:hour(r.time)});})};
   }

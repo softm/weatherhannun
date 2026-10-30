@@ -42,10 +42,8 @@
       active?.source==="gps"?"GPS로 선택한 지역":"현재 날씨의 기준 지역";
     const managedName=$("managedCurrentName");
     const managedAddress=$("managedCurrentAddress");
-    const favoriteCount=$("favoriteCount");
     if(managedName)managedName.textContent=currentName();
     if(managedAddress)managedAddress.textContent=activeLine;
-    if(favoriteCount)favoriteCount.textContent=places.length+" / "+core.MAX_SAVED;
     const holder=$("favoriteLocations");
     if(holder){
       holder.innerHTML=places.length?places.map((p,index)=>{
@@ -56,7 +54,7 @@
     const save=$("saveCurrentLocation");
     if(save){
       save.disabled=activeSaved||!active;
-      save.textContent=activeSaved?"★ 저장됨":"☆ 내 지역에 저장";
+      save.textContent=activeSaved?"✓ 저장된 지역":"+ 이 지역 저장";
     }
     const quick=$("locationQuickBar");
     if(quick){
@@ -70,13 +68,13 @@
         const detail=p.address&&p.address!==p.name?p.address+(p.regionCenter?" · 지역 대표 좌표":" · 추정주소"):p.name+" 날씨 보기";
         return '<button type="button" class="location-fast-place'+(selected?" active":"")+'" data-location-select="'+esc(p.id)+'" aria-pressed="'+String(selected)+'" aria-current="'+(selected?"location":"false")+'" title="'+esc(detail)+'"><span class="location-fast-check" aria-hidden="true">✓</span><span class="location-fast-name">'+esc(p.name)+'</span></button>';
       }).join("");
-      quick.innerHTML='<div class="location-switcher-head"><span class="location-switcher-heading">등록 지역 <b>'+places.length+'</b></span><span class="location-current-label"><span aria-hidden="true">📍</span><span class="location-label-stack"><strong>'+esc(currentName())+'</strong>'+(locationLine?'<span class="location-address-line" title="'+esc(locationLine)+'">'+esc(locationLine)+'</span>':'')+'</span><small id="locationModeLabel">'+(active?.source==="gps"?"GPS 선택":"현재 선택")+'</small></span></div>'+
+      quick.innerHTML='<div class="location-switcher-head"><span class="location-current-label"><span aria-hidden="true">📍</span><span class="location-label-stack"><strong>'+esc(currentName())+'</strong>'+(locationLine?'<span class="location-address-line" title="'+esc(locationLine)+'">'+esc(locationLine)+'</span>':'')+'</span></span></div>'+
       '<div class="location-fast-items" role="group" aria-label="등록한 지역 선택">'+
-      (placeButtons||'<span class="location-fast-empty">아직 등록한 지역이 없습니다.</span>')+
-      (!activeSaved&&active?'<button type="button" class="location-fast-save" data-location-save-current>☆ 현재 지역 등록</button>':'')+
+      placeButtons+
+      (!activeSaved&&active?'<button type="button" class="location-fast-save" data-location-save-current>+ 이 지역 저장</button>':'')+
       '<button type="button" class="location-fast-gps" data-geo-quick>⌖ 현위치</button>'+
       '<button type="button" class="location-fast-compare" data-location-compare>⇄ 지역 비교</button>'+
-      '<button type="button" class="location-fast-manage" data-location-manage aria-label="지역 추가 및 관리">+ 지역 추가·관리</button></div>';
+      '<button type="button" class="location-fast-manage" data-location-manage aria-label="지역 검색 및 저장 관리">+ 지역 찾기</button></div>';
     }
   }
   function choose(raw,source="manual",keepDialogOpen=false){

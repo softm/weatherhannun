@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="./stitch-theme.css?v=18">
   <link rel="stylesheet" href="./stitch-today.utilities.css">
   <link rel="stylesheet" href="./stitch-today.css?v=18">
-  <link rel="stylesheet" href="./location-manager.css?v=17">
+  <link rel="stylesheet" href="./location-manager.css?v=18">
   <link rel="stylesheet" href="./region-search.css?v=17">
   <link rel="stylesheet" href="./startup-briefing.css?v=45">
   <link rel="stylesheet" href="./stitch-mobile.css?v=16">
@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="./location-compare.css?v=29">
   <link rel="stylesheet" href="./official-data.css?v=40">
   <link rel="stylesheet" href="./action-progress.css?v=40">
-  <link rel="stylesheet" href="./day-flow.css?v=1">
+  <link rel="stylesheet" href="./day-flow.css?v=2">
   <link rel="stylesheet" href="./national-map.css?v=41">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -62,17 +62,17 @@
   <script defer src="./activity-decision-core.js?v=28"></script>
   <script defer src="./agriculture-planner-core.js?v=34"></script>
   <script defer src="./action-progress.js?v=40"></script>
-  <script defer src="./day-flow-core.js?v=1"></script>
-  <script defer src="./day-flow-ui.js?v=1"></script>
+  <script defer src="./day-flow-core.js?v=2"></script>
+  <script defer src="./day-flow-ui.js?v=2"></script>
   <script defer src="./app.js?v=41"></script>
   <script defer src="./official-data-ui.js?v=40"></script>
   <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
-  <script defer src="./location-manager.js?v=17"></script>
+  <script defer src="./location-manager.js?v=18"></script>
   <script defer src="./daily-delta-ui.js?v=28"></script>
   <script defer src="./location-compare-ui.js?v=32"></script>
   <script defer src="./region-search-core.js?v=16"></script>
-  <script defer src="./region-search-ui.js?v=18"></script>
+  <script defer src="./region-search-ui.js?v=19"></script>
   <script defer src="./rain-decision-core.js?v=31"></script>
   <script defer src="./outfit-decision-core.js?v=31"></script>
   <script defer src="./stitch-today.js?v=33"></script>
@@ -414,10 +414,10 @@
       <button id="geoButton" type="button" class="geo-option"><span class="geo-option-icon material-symbols-outlined" aria-hidden="true">my_location</span><span class="geo-option-copy"><strong>현재 위치로 보기</strong><small>기기 위치를 확인해 이 지역으로 전환</small></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
       <section class="managed-current" aria-labelledby="managedCurrentTitle">
         <div class="managed-current-copy"><span id="managedCurrentTitle" class="section-overline">현재 보는 지역</span><strong id="managedCurrentName">선택 지역</strong><small id="managedCurrentAddress">현재 날씨의 기준 지역</small></div>
-        <button id="saveCurrentLocation" type="button" class="favorite-save">☆ 내 지역에 저장</button>
+        <button id="saveCurrentLocation" type="button" class="favorite-save">+ 이 지역 저장</button>
       </section>
       <section class="saved-location-section" aria-labelledby="favoriteLocationsTitle">
-        <div class="favorite-title"><p id="favoriteLocationsTitle" class="dialog-subtitle">내 지역 <span id="favoriteCount" class="favorite-count">0 / 10</span></p></div>
+        <div class="favorite-title"><p id="favoriteLocationsTitle" class="dialog-subtitle">저장한 지역</p></div>
         <div id="favoriteLocations" class="favorite-list" aria-label="저장된 지역"></div>
         <div id="favoriteMessage" role="status" aria-live="polite"></div>
       </section>

@@ -90,10 +90,13 @@
   function select(id){
     const item=results[Number(id)],place=core.toLocation(item);
     if(!place)return;
-    const dialog=$("locationDialog");
-    if(dialog?.open)dialog.close();
     const input=$("locationSearch");if(input){input.value="";input.setAttribute("aria-expanded","false");}
     window.dispatchEvent(new CustomEvent("weatherhannun:change-location",{detail:place}));
+    results=[];setPanelVisible(false);
+    const status=$("geoLocationStatus");
+    if(status)status.textContent=place.name+" 날씨로 변경했습니다. 계속 보려면 ‘이 지역 저장’을 누르세요.";
+    const save=$("saveCurrentLocation");
+    if(save){save.classList?.add?.("save-attention");setTimeout(()=>save.focus?.(),0);}
   }
   function onSelectClick(event){
     const btn=event.target?.closest?.("[data-region-choice]");

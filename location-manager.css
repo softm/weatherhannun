@@ -18,6 +18,8 @@
 .location-fast-place.active .location-fast-check{display:grid}
 html[data-weather-theme="dark"] .location-fast-items .location-fast-place.active{color:#10223a}
 .location-fast-items .location-fast-save{color:var(--st-accent);border-color:rgba(75,169,255,.5);background:rgba(75,169,255,.09)}
+.favorite-save.save-attention{box-shadow:0 0 0 4px color-mix(in srgb,var(--st-accent) 20%,transparent);animation:save-region-pulse 1.2s ease-out 2}
+@keyframes save-region-pulse{50%{transform:translateY(-1px);box-shadow:0 0 0 8px color-mix(in srgb,var(--st-accent) 8%,transparent)}}
 .location-fast-items .location-fast-manage{background:transparent;border-style:dashed;color:var(--st-accent)}
 .location-fast-empty{flex:0 0 auto;color:var(--st-muted);font-size:11px;padding:0 3px}
 .favorite-list{display:grid;border-top:1px solid var(--st-line)}
