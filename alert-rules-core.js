@@ -7,14 +7,14 @@
   const DEFAULTS = Object.freeze({
     version: 2,
     configured: false,
-    rain: false,
+    rain: true,
     rainThreshold: 65,
-    dry: false,
+    dry: true,
     dryThreshold: 80,
-    clear: false,
+    clear: true,
     clearHours: 3,
-    frost: false,
-    wind: false,
+    frost: true,
+    wind: true,
     morning: true,
     morningTime: "07:00",
     evening: true,
@@ -35,14 +35,14 @@
     if (!saved || typeof saved !== "object") return out;
     const legacy = !Object.prototype.hasOwnProperty.call(saved, "version");
     out.configured = boolean(saved.configured, true);
-    out.rain = boolean(saved.rain, false);
+    out.rain = boolean(saved.rain, out.rain);
     out.rainThreshold = number(saved.rainThreshold, 65, 20, 100);
-    out.dry = boolean(saved.dry, false);
+    out.dry = boolean(saved.dry, out.dry);
     out.dryThreshold = number(saved.dryThreshold, 80, 50, 100);
-    out.clear = boolean(saved.clear, false);
+    out.clear = boolean(saved.clear, out.clear);
     out.clearHours = number(saved.clearHours, 3, 2, 8);
-    out.frost = boolean(saved.frost, false);
-    out.wind = boolean(saved.wind, false);
+    out.frost = boolean(saved.frost, out.frost);
+    out.wind = boolean(saved.wind, out.wind);
     // Legacy users opted into event rules only; do not silently add daily alerts.
     out.morning = legacy ? false : boolean(saved.morning, true);
     out.morningTime = time(saved.morningTime, "07:00");

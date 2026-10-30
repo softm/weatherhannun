@@ -37,6 +37,7 @@
   <link rel="stylesheet" href="./location-compare.css?v=29">
   <link rel="stylesheet" href="./official-data.css?v=40">
   <link rel="stylesheet" href="./action-progress.css?v=40">
+  <link rel="stylesheet" href="./day-flow.css?v=1">
   <link rel="stylesheet" href="./national-map.css?v=41">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -45,7 +46,7 @@
   <script defer src="./briefing-highlights.js?v=20"></script>
   <script defer src="./briefing-ui.js?v=20"></script>
   <script defer src="./weather-icons.js?v=17"></script>
-  <script defer src="./alert-rules-core.js?v=31"></script>
+  <script defer src="./alert-rules-core.js?v=32"></script>
   <script defer src="./forecast-insights.js?v=32"></script>
   <script defer src="./stitch-layout.js?v=18"></script>
   <script defer src="./daily-delta-core.js?v=27"></script>
@@ -61,6 +62,8 @@
   <script defer src="./activity-decision-core.js?v=28"></script>
   <script defer src="./agriculture-planner-core.js?v=34"></script>
   <script defer src="./action-progress.js?v=40"></script>
+  <script defer src="./day-flow-core.js?v=1"></script>
+  <script defer src="./day-flow-ui.js?v=1"></script>
   <script defer src="./app.js?v=41"></script>
   <script defer src="./official-data-ui.js?v=40"></script>
   <script defer src="./location-core.js?v=18"></script>
@@ -351,11 +354,11 @@
             <div class="notification-preview-actions" aria-label="알림에서 열 수 있는 화면"><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span>시간별</span><span><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>활동 추천</span><span><span class="material-symbols-outlined" aria-hidden="true">tune</span>알림 설정</span></div>
           </article>
           <div class="watch-choices watch-rule-grid">
-            <label><span><input id="watchRain" type="checkbox">☂ 12시간 내 비</span><span class="watch-value">강수확률 <select id="rainThreshold" aria-label="비 알림 강수확률"><option value="30">30%</option><option value="50">50%</option><option value="65">65%</option><option value="70">70%</option><option value="80">80%</option></select> 이상</span></label>
-            <label><span><input id="watchDry" type="checkbox">🌂 비 가능성 낮음</span><span class="watch-value">안 올 가능성 <select id="dryThreshold" aria-label="비 안 올 가능성 기준"><option value="70">70%</option><option value="80">80%</option><option value="90">90%</option></select> 이상</span></label>
-            <label><span><input id="watchClear" type="checkbox">☀ 맑은 시간</span><span class="watch-value"><select id="clearHours" aria-label="맑은 시간 지속 기준"><option value="2">2시간</option><option value="3">3시간</option><option value="4">4시간</option><option value="6">6시간</option></select> 이상 지속</span></label>
-            <label><span><input id="watchFrost" type="checkbox">❄ 저온·서리</span><span class="watch-value">48시간 내 2°C 이하</span></label>
-            <label><span><input id="watchWind" type="checkbox">🌬 돌풍</span><span class="watch-value">24시간 내 35km/h 이상</span></label>
+            <label><span><input id="watchRain" type="checkbox" checked>☂ 12시간 내 비</span><span class="watch-value">강수확률 <select id="rainThreshold" aria-label="비 알림 강수확률"><option value="30">30%</option><option value="50">50%</option><option value="65">65%</option><option value="70">70%</option><option value="80">80%</option></select> 이상</span></label>
+            <label><span><input id="watchDry" type="checkbox" checked>🌂 비 가능성 낮음</span><span class="watch-value">안 올 가능성 <select id="dryThreshold" aria-label="비 안 올 가능성 기준"><option value="70">70%</option><option value="80">80%</option><option value="90">90%</option></select> 이상</span></label>
+            <label><span><input id="watchClear" type="checkbox" checked>☀ 맑은 시간</span><span class="watch-value"><select id="clearHours" aria-label="맑은 시간 지속 기준"><option value="2">2시간</option><option value="3">3시간</option><option value="4">4시간</option><option value="6">6시간</option></select> 이상 지속</span></label>
+            <label><span><input id="watchFrost" type="checkbox" checked>❄ 저온·서리</span><span class="watch-value">48시간 내 2°C 이하</span></label>
+            <label><span><input id="watchWind" type="checkbox" checked>🌬 돌풍</span><span class="watch-value">24시간 내 35km/h 이상</span></label>
           </div>
           <div class="watch-subheading"><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span><b>정기 요약 받을 시각</b></span><small>선택 시각부터 시스템이 실행 가능한 첫 시점에 하루 한 번 보냅니다.</small></div>
           <div class="watch-schedule-grid" aria-label="정기 날씨 요약">
