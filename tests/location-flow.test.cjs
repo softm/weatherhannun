@@ -125,7 +125,7 @@ test("saved regions stay visible as one-tap chips and put the current region fir
  const html=t.node("locationQuickBar").innerHTML;
  assert.equal(t.node("managedCurrentName").textContent,"서울");
  assert.doesNotMatch(html,/등록 지역|2 \/ 10/);
- assert.match(html,/aria-label="등록한 지역 선택"/);
+ assert.match(html,/aria-label="저장 지역 전환 및 지역 관리"/);
  assert.match(html,/aria-current="location"/);
  assert.ok(html.indexOf(">서울<")<html.indexOf(">서산<"));
  const seosanId=core.key(SEOSAN);
@@ -203,8 +203,8 @@ test("GPS coordinates resolve to approximate Korean address in header, quick bar
  assert.equal(last?.name,"부천시 소사구 옥길동");
  assert.equal(last?.address,"경기도 부천시 소사구 옥길동 · 옥길로 인근");
  assert.equal(last?.source,"gps");
- assert.match(t.node("locationQuickBar").innerHTML,/GPS 기준 추정주소/);
- assert.match(t.node("locationQuickBar").innerHTML,/옥길로 인근/);
+ assert.match(t.node("managedCurrentAddress").textContent,/옥길로 인근/);
+ assert.doesNotMatch(t.node("locationQuickBar").innerHTML,/GPS 기준 추정주소|옥길로 인근/);
  assert.equal(JSON.parse(t.localStorage.getItem("weatherhannun_location")).address,last.address);
 });
 test("a pending address lookup cannot override a newly selected manual place",async()=>{

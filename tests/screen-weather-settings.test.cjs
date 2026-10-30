@@ -63,7 +63,7 @@ test("Android home widget receives current location and all three size fields", 
 test("offline shell contains both settings assets", () => {
   const html = read("index.html");
   const worker = read("sw.js");
-  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=37"]) {
+  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=38"]) {
     assert.ok(html.includes(asset));
     assert.ok(worker.includes(asset));
   }
