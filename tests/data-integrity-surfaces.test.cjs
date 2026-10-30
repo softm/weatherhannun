@@ -40,7 +40,7 @@ test("hourly and weekly views keep missing aggregates unknown", () => {
 test("cache-busted shell ships the data-integrity implementations", () => {
   const page = read("index.html");
   const worker = read("sw.js");
-  for (const asset of ["app.js?v=41", "stitch-today.js?v=33", "forecast-insights.js?v=32", "alert-rules-core.js?v=32"]) {
+  for (const asset of ["app.js?v=41", "stitch-today.js?v=34", "forecast-insights.js?v=32", "alert-rules-core.js?v=32"]) {
     assert.match(page, new RegExp(asset.replace(/[.?]/g, "\\$&")));
     assert.ok(worker.includes(asset));
   }
