@@ -32,5 +32,5 @@ test("진행 표시 자산이 페이지와 오프라인 셸에 포함된다",()=
   assert.match(html,/action-progress\.css\?v=40/);
   assert.match(sw,/action-progress\.js\?v=40/);
   assert.match(sw,/action-progress\.css\?v=40/);
-  assert.match(sw,/weatherhannun-shell-v59-official-status/);
+  assert.match(sw,/weatherhannun-shell-v60-day-flow/);
 });
