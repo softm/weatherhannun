@@ -59,17 +59,13 @@
     const quick=$("locationQuickBar");
     if(quick){
       quick.hidden=false;
-      const locationLine=active?.address?
-        active.address+(active.regionCenter?" · 행정구역 대표 좌표":active.source==="gps"&&active.approximate?" · GPS 기준 추정주소":""):
-        active?.source==="gps"?"행정주소 확인 중 · 좌표 약 "+Number(active.lat).toFixed(3)+", "+Number(active.lon).toFixed(3):"";
       const orderedPlaces=[...places].sort((a,b)=>Number(core.same(b,active))-Number(core.same(a,active)));
       const placeButtons=orderedPlaces.map(p=>{
         const selected=core.same(p,active);
         const detail=p.address&&p.address!==p.name?p.address+(p.regionCenter?" · 지역 대표 좌표":" · 추정주소"):p.name+" 날씨 보기";
         return '<button type="button" class="location-fast-place'+(selected?" active":"")+'" data-location-select="'+esc(p.id)+'" aria-pressed="'+String(selected)+'" aria-current="'+(selected?"location":"false")+'" title="'+esc(detail)+'"><span class="location-fast-check" aria-hidden="true">✓</span><span class="location-fast-name">'+esc(p.name)+'</span></button>';
       }).join("");
-      quick.innerHTML='<div class="location-switcher-head"><span class="location-current-label"><span aria-hidden="true">📍</span><span class="location-label-stack"><strong>'+esc(currentName())+'</strong>'+(locationLine?'<span class="location-address-line" title="'+esc(locationLine)+'">'+esc(locationLine)+'</span>':'')+'</span></span></div>'+
-      '<div class="location-fast-items" role="group" aria-label="등록한 지역 선택">'+
+      quick.innerHTML='<div class="location-fast-items" role="group" aria-label="저장 지역 전환 및 지역 관리">'+
       placeButtons+
       (!activeSaved&&active?'<button type="button" class="location-fast-save" data-location-save-current>+ 이 지역 저장</button>':'')+
       '<button type="button" class="location-fast-gps" data-geo-quick>⌖ 현위치</button>'+

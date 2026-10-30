@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="./stitch-theme.css?v=18">
   <link rel="stylesheet" href="./stitch-today.utilities.css">
   <link rel="stylesheet" href="./stitch-today.css?v=18">
-  <link rel="stylesheet" href="./location-manager.css?v=18">
+  <link rel="stylesheet" href="./location-manager.css?v=19">
   <link rel="stylesheet" href="./region-search.css?v=17">
   <link rel="stylesheet" href="./startup-briefing.css?v=45">
   <link rel="stylesheet" href="./stitch-mobile.css?v=16">
@@ -68,17 +68,17 @@
   <script defer src="./official-data-ui.js?v=40"></script>
   <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
-  <script defer src="./location-manager.js?v=18"></script>
+  <script defer src="./location-manager.js?v=19"></script>
   <script defer src="./daily-delta-ui.js?v=28"></script>
   <script defer src="./location-compare-ui.js?v=32"></script>
   <script defer src="./region-search-core.js?v=16"></script>
   <script defer src="./region-search-ui.js?v=19"></script>
   <script defer src="./rain-decision-core.js?v=31"></script>
   <script defer src="./outfit-decision-core.js?v=31"></script>
-  <script defer src="./stitch-today.js?v=33"></script>
+  <script defer src="./stitch-today.js?v=34"></script>
   <script defer src="./rain-decision-ui.js?v=22"></script>
   <script defer src="./outfit-decision-ui.js?v=25"></script>
-  <script defer src="./screen-weather-settings.js?v=37"></script>
+  <script defer src="./screen-weather-settings.js?v=38"></script>
   <script defer src="./agriculture-planner.js?v=34"></script>
   <script defer src="./startup-briefing.js?v=45"></script>
   <script defer src="./account-header.js?v=8"></script>
@@ -97,10 +97,9 @@
           <button class="nav-button" data-view="compare">지역비교</button>
         </nav>
         <div id="siteAccountSlot" class="top-actions topbar-actions" aria-label="계정 및 보관소">
-          <button type="button" id="locationButton" class="location-button" aria-label="지역 검색"><span aria-hidden="true">⌖</span> <span id="locationTitle">서산</span> <span class="small-chevron">⌄</span></button>
-          <button type="button" id="favoriteButton" class="icon-button material-button" title="관심 지역" aria-label="관심 지역 열기"><span class="material-symbols-outlined" aria-hidden="true">star</span></button>
-          <button type="button" id="settingsButton" class="icon-button material-button settings-button" data-view="settings" title="설정" aria-label="설정 열기"><span class="material-symbols-outlined" aria-hidden="true">settings</span></button>
-          <button type="button" id="refreshButton" class="icon-button" title="데이터 새로고침" aria-label="새로고침">↻</button>
+          <button type="button" id="locationButton" class="location-button" aria-label="현재 지역 변경"><span class="material-symbols-outlined" aria-hidden="true">location_on</span><span id="locationTitle">서산</span><span class="small-chevron material-symbols-outlined" aria-hidden="true">expand_more</span></button>
+          <button type="button" id="refreshButton" class="icon-button material-button" title="날씨 새로고침" aria-label="날씨 새로고침"><span class="material-symbols-outlined" aria-hidden="true">refresh</span></button>
+          <button type="button" id="settingsButton" class="icon-button material-button settings-button" data-view="settings" title="앱 설정" aria-label="앱 설정 열기"><span class="material-symbols-outlined" aria-hidden="true">settings</span></button>
         </div>
       </div>
     </header>
@@ -311,7 +310,7 @@
             <p>잠금 해제 뒤 작은 날씨 카드를 표시합니다. 잠금화면을 교체하거나 광고를 표시하지 않으며, 기능 사용 중 Android 실행 상태 알림이 유지됩니다.</p>
             <label class="screen-weather-toggle"><span><b>화면 켤 때 표시</b><small>기본 ON · 첫 실행에서 오버레이 권한 안내</small></span><input id="screenWeatherEnabled" type="checkbox" role="switch" aria-describedby="screenWeatherSupportNote"></label>
             <div class="screen-weather-options">
-              <label>표시 시간<select id="screenWeatherDuration"><option value="3">3초</option><option value="5" selected>5초</option><option value="10">10초</option><option value="0">직접 닫기</option></select></label>
+              <label>표시 시간<select id="screenWeatherDuration"><option value="0" selected>직접 닫기</option><option value="3">3초</option><option value="5">5초</option><option value="10">10초</option></select></label>
               <label>재표시 제한<select id="screenWeatherCooldown"><option value="0">매번</option><option value="15">15분</option><option value="30" selected>30분</option><option value="60">60분</option></select></label>
             </div>
             <div class="settings-actions screen-weather-actions"><button type="button" id="screenWeatherPermission"><span class="material-symbols-outlined" aria-hidden="true">layers</span>오버레이 권한</button><button type="button" id="screenWeatherPreview" class="secondary"><span class="material-symbols-outlined" aria-hidden="true">preview</span>미리보기</button></div>

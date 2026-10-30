@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var STORAGE_KEY = 'weatherhannun:screen-weather:v1';
-  var defaults = {enabled: true, displaySeconds: 5, cooldownMinutes: 30};
+  var defaults = {enabled: true, displaySeconds: 0, cooldownMinutes: 30};
   var nativeState = null;
   var nativeWidgetState = null;
   var latestWeather = null;
@@ -26,7 +26,7 @@
     value = value && typeof value === 'object' ? value : {};
     return {
       enabled: value.enabled !== false,
-      displaySeconds: allowed(value.displaySeconds, [0, 3, 5, 10], 5),
+      displaySeconds: allowed(value.displaySeconds, [0, 3, 5, 10], 0),
       cooldownMinutes: allowed(value.cooldownMinutes, [0, 15, 30, 60], 30)
     };
   }

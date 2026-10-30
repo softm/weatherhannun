@@ -59,28 +59,6 @@
    if(icon&&map[b.dataset.view])icon.innerHTML='<span class="material-symbols-outlined" aria-hidden="true">'+map[b.dataset.view]+'</span>';
   });
  }
- function favourite(){
-  var actions=document.querySelector('.top-actions');
-  if(!actions||document.getElementById('stitchFavourite'))return;
-  var button=document.getElementById('favoriteButton')||document.createElement('button');
-  button.id='stitchFavourite';button.type='button';button.className='stitch-favourite-button';button.textContent='☆';
-  function sync(){
-   var saved=document.getElementById('saveCurrentLocation')?.disabled;
-   button.classList.toggle('saved',!!saved);button.textContent=saved?'★':'☆';
-   button.title=saved?'저장된 지역 관리':'이 지역 관심지역 추가';
-   button.setAttribute('aria-label',button.title);
-  }
-  button.onclick=()=>{
-   var save=document.getElementById('saveCurrentLocation');
-   if(save&&!save.disabled)save.click();
-   else document.getElementById('locationButton')?.click();
-   setTimeout(sync,20);
-  };
-  if(!button.parentNode)actions.insertBefore(button,document.getElementById('refreshButton'));
-  var save=document.getElementById('saveCurrentLocation');
-  if(save)new MutationObserver(sync).observe(save,{attributes:true,childList:true,subtree:true});
-  sync();
- }
  function createWeeklyRail(){
   var section=document.createElement('section');
   section.className='stitch-week-rail';
@@ -264,7 +242,7 @@
  }
  function init(){
   var oldView=document.getElementById('view-today');if(!oldView)return;
-  decorateNav();favourite();
+  decorateNav();
   fetch('./stitch-today.template.html?v=39').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
    var host=document.createElement('div');host.id='stitch-live-dashboard';host.innerHTML=html;
    var group=[...host.firstElementChild.children].filter(x=>x.tagName==='SECTION');
