@@ -1,0 +1,60 @@
+/* Dense, calm information hierarchy: one surface, thin dividers, weather first. */
+html[data-stitch-live="true"] body{background:#f4f6f8}
+html[data-stitch-live="true"] .topbar{border-bottom:1px solid #e5e9ee;background:rgba(255,255,255,.97);box-shadow:none}
+html[data-stitch-live="true"] .header-menu-button{border:0;background:transparent}
+html[data-stitch-live="true"] .top-inner>.brand{font-size:20px;letter-spacing:-.7px}
+html[data-stitch-live="true"] .top-inner>.brand .brand-symbol{width:34px;height:34px;border-radius:10px;box-shadow:none}
+html[data-stitch-live="true"] #content{padding-top:10px}
+html[data-stitch-live="true"] #stitch-live-dashboard{max-width:840px}
+html[data-stitch-live="true"] #stitch-live-dashboard>div{gap:0;padding-top:0}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-grid{display:flex;gap:0;padding-top:0}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-main,
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-rail{display:contents}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-grid>*,
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-main>*,
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-rail>*{margin:0;border-radius:0;border-width:0 0 1px;border-color:#e7ebef;box-shadow:none}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero{padding:22px 20px 18px;background:#fff}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>[class*="blur-3xl"]{display:none}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-current-weather-visual{margin:0;transform:scale(.84)}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-weather-icon{height:76px}
+html[data-stitch-live="true"] #stitch-live-dashboard .daily-delta-block{margin-top:14px;border:0;border-top:1px solid #edf0f3;border-radius:0;background:transparent}
+html[data-stitch-live="true"] #stitch-live-dashboard .official-glance-line{margin-top:0;border:0;border-top:1px solid #edf0f3;border-radius:0;background:transparent}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-air{padding:13px 18px;background:#fff}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-brief{padding:17px 18px;background:#fff}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-brief>div:first-child{display:none}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-brief img{width:38px;height:38px}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-brief p{line-height:1.55}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-actions{padding:17px 18px;background:#fff}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-actions>div:last-child{gap:0;border-top:1px solid #edf0f3}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-action-card{min-height:64px;padding:10px 2px;border:0;border-bottom:1px solid #edf0f3;border-radius:0;box-shadow:none}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-action-card:last-child{border-bottom:0}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hourly{padding:17px 18px;background:#fff}
+html[data-stitch-live="true"] #stitch-live-dashboard #stitchHourlyTrack{gap:0;margin:0;padding:4px 0 7px}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-hour-cell{min-width:64px;height:116px;border:0;border-right:1px solid #edf0f3;border-radius:0;box-shadow:none}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-hour-current{border-radius:8px!important;border:0!important;box-shadow:none!important}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-metrics{padding:17px 18px;background:#fff}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-metrics article{border-radius:7px;box-shadow:none}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-week-rail{padding:17px 18px;background:#fff}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-week-row{min-height:46px;padding:5px 2px}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-week-row:first-child{border-radius:0;background:transparent}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-notice{padding:14px 18px;background:#fff}
+html[data-stitch-live="true"] #stitch-live-dashboard .section-overline{display:none}
+html[data-stitch-live="true"] .location-shortcuts{margin-bottom:8px;border:0;border-radius:0;background:transparent;box-shadow:none}
+html[data-stitch-live="true"] .status-footer{margin-top:8px;border-top:1px solid #e5e9ee}
+html[data-stitch-live="true"] .site-footer{background:#f4f6f8;border-top:1px solid #e5e9ee}
+html[data-weather-theme="dark"][data-stitch-live="true"] body{background:#0b1524}
+html[data-weather-theme="dark"][data-stitch-live="true"] .topbar{border-color:var(--st-line);background:rgba(13,27,48,.97)}
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-air,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-brief,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-actions,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hourly,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-metrics,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-week-rail,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-notice{background:var(--st-surface)}
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-grid>*,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-main>*,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-rail>*,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-action-card,
+html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard .stitch-hour-cell{border-color:var(--st-line)}
+@media(max-width:710px){html[data-stitch-live="true"] #content{padding-top:0}html[data-stitch-live="true"] #view-today{width:100%;max-width:none}html[data-stitch-live="true"] #stitch-live-dashboard{max-width:none}html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero{padding-top:16px}html[data-stitch-live="true"] .location-shortcuts{width:100%;padding-inline:14px}}
