@@ -24,7 +24,7 @@ test('햄버거 메뉴는 바깥 클릭과 ESC 및 기능 선택으로 닫힌다
 
 test('햄버거 메뉴 자산은 오프라인 셸에 포함된다',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/weatherhannun-shell-v65-hamburger-menu/);
+  assert.match(sw,/weatherhannun-shell-v66-clean-weather/);
   assert.match(sw,/header-menu\.css\?v=1/);
   assert.match(sw,/header-menu\.js\?v=1/);
 });
