@@ -11,7 +11,7 @@ const SHELL=[
   "./stitch-today.template.html?v=43","./stitch-today.js?v=42","./stitch-today.css?v=22",
   "./stitch-today.utilities.css","./rain-decision-core.js?v=31","./rain-decision-ui.js?v=22",
   "./rain-decision.css?v=21","./outfit-decision-core.js?v=31","./outfit-decision-ui.js?v=25",
-  "./outfit-decision.css?v=24","./daily-delta-core.js?v=27","./daily-delta-ui.js?v=28",
+  "./outfit-decision.css?v=24","./daily-delta-core.js?v=27","./daily-delta-ui.js?v=29",
   "./location-compare-core.js?v=32","./location-compare-ui.js?v=33","./location-compare.css?v=30",
   "./weather-provider-core.js?v=41","./monetization-core.js?v=32","./monetization-settings.js?v=34","./plus-personalization-core.js?v=34","./plus-personalization.js?v=35","./product-metrics-core.js?v=33","./product-metrics.js?v=33","./activity-decision-core.js?v=28","./official-data-core.js?v=40","./official-data.css?v=40","./official-data-ui.js?v=41","./data/official/latest.json",
   "./assets/stitch/today-presenter.jpg","./assets/stitch/sun.svg",

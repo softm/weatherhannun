@@ -24,16 +24,16 @@
         value.textContent = "기온 " + signed(result.temperatureDelta, "°C");
         reason.textContent = finite(result.precipitationDelta)
           ? "강수량 " + signed(result.precipitationDelta, " mm")
-          : "강수 관측값은 비교할 수 없습니다.";
-        meta.textContent = result.providerName + " · " + result.stationName + " · 동일 관측소/시각";
+          : "강수 비교 자료 없음";
+        meta.textContent = result.providerName + " · " + result.stationName;
       } else {
         var stale = latest && latest.reason === "official_observation_stale";
         node.dataset.detail = stale ? "waiting" : "missing";
-        value.textContent = stale ? "관측 자료 대기" : "공식 관측 미확보";
+        value.textContent = stale ? "관측 자료 대기" : "비교 자료 없음";
         reason.textContent = stale
-          ? "마지막 관측 "+(latest.latestAvailable?.observedAt||"시각 확인 필요")+" · 새 자료가 들어오면 자동 비교합니다."
-          : "동일 관측소의 오늘·전일 같은 시각 자료가 있을 때만 비교합니다.";
-        meta.textContent = "모델 예보로 대신 계산하지 않습니다.";
+          ? "마지막 관측 "+(latest.latestAvailable?.observedAt||"시각 확인 필요")+""
+          : "오늘·어제 관측 자료 필요";
+        meta.textContent = "공식 관측 기준";
       }
     });
   }
