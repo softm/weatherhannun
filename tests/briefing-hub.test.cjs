@@ -35,7 +35,8 @@ test("브리핑 전용 메뉴와 예약·알림·자동재생 UI가 오프라인
   const html=read("index.html"),worker=read("sw.js"),ui=read("briefing-hub.js");
   assert.match(html,/data-view="briefing"/);assert.match(html,/id="view-briefing"/);
   for(const label of ["한눈 요약","출근·외출","생활 준비","안전 기상","농작업","취침 전"])assert.match(html,new RegExp(label));
-  assert.match(html,/알림만/);assert.match(html,/알림을 누르면 재생/);assert.match(html,/시간에 바로 재생/);
+  assert.match(html,/알림만/);assert.match(html,/알림을 누르면 재생/);assert.match(html,/바로 재생/);
   assert.match(ui,/weatherhannun:briefing-settings/);assert.match(ui,/new Notification/);assert.match(ui,/setInterval\(runSchedule,30000\)/);
-  for(const asset of ["briefing-hub.css?v=1","briefing-hub-core.js?v=1","briefing-hub.js?v=1"])assert.match(worker,new RegExp(asset.replace(/[.?]/g,"\\$&")));
+  assert.match(html,/지금 듣기/);assert.match(html,/MY AUDIO ROUTINE/);assert.match(html,/data-brief-time-value="07:00"/);assert.match(html,/id="briefScheduleSummary"/);
+  for(const asset of ["briefing-hub.css?v=2","briefing-hub-core.js?v=1","briefing-hub.js?v=2"])assert.match(worker,new RegExp(asset.replace(/[.?]/g,"\\$&")));
 });
