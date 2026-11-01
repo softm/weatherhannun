@@ -90,6 +90,6 @@
     $("briefingPlay")?.addEventListener("click",playBriefing);
   }
   window.addEventListener("weatherhannun:data",event=>renderBriefing(event.detail));
-  window.WeatherHannunBriefingPlayer={play(){document.querySelector('[data-view="today"]')?.click();setTimeout(()=>{$("briefingText")?.scrollIntoView({block:"center",behavior:"smooth"});playBriefing();},180);},stop:stopBriefing};
+  window.WeatherHannunBriefingPlayer={play(){document.querySelector('[data-view="today"]')?.click();setTimeout(()=>{const visible=document.querySelector('[data-stitch-brief-play]');if(visible){visible.scrollIntoView({block:"center",behavior:"smooth"});visible.click();return;}$("briefingText")?.scrollIntoView({block:"center",behavior:"smooth"});playBriefing();},180);},stop:stopBriefing};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();

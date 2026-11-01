@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v70-current-location";
+const CACHE="weatherhannun-shell-v71-visible-briefing";
 const BASE=self.registration.scope;
 const SHELL=[
   "./activity-interests-core.js?v=1",
@@ -7,7 +7,7 @@ const SHELL=[
   "./settings.css?v=34","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=38","./account-header.js?v=8",
   "./agriculture-planner.css?v=34","./agriculture-planner-core.js?v=34","./agriculture-planner.js?v=34",
   "./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",
-  "./stitch-today.template.html?v=39","./stitch-today.js?v=35","./stitch-today.css?v=18",
+  "./stitch-today.template.html?v=40","./stitch-today.js?v=36","./stitch-today.css?v=19",
   "./stitch-today.utilities.css","./rain-decision-core.js?v=31","./rain-decision-ui.js?v=22",
   "./rain-decision.css?v=21","./outfit-decision-core.js?v=31","./outfit-decision-ui.js?v=25",
   "./outfit-decision.css?v=24","./daily-delta-core.js?v=27","./daily-delta-ui.js?v=28",
@@ -20,8 +20,8 @@ const SHELL=[
   "./assets/brand/weatherhannun-192.png?v=18","./assets/brand/weatherhannun-512.png?v=18",
   "./data/korea-regions-202602.json","./region-search-core.js?v=16","./region-search-ui.js?v=19",
   "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=20",
-  "./location-manager.css?v=20","./briefing-core.js?v=31","./briefing-highlights.js?v=20","./briefing-ui.js?v=21",
-  "./briefing-ui.css?v=21","./briefing-highlights.css?v=20","./app.js?v=42","./alert-rules-core.js?v=32",
+  "./location-manager.css?v=20","./briefing-core.js?v=31","./briefing-highlights.js?v=20","./briefing-ui.js?v=22",
+  "./briefing-ui.css?v=22","./briefing-highlights.css?v=20","./app.js?v=42","./alert-rules-core.js?v=32",
   "./forecast-insights.js?v=32","./forecast-insights.css?v=26","./manifest.webmanifest?v=18",
   "./icon.svg?v=18","./data-status.html","./official-rights.html"
 ].map(x=>new URL(x,BASE).href);

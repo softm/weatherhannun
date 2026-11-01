@@ -52,6 +52,7 @@
 #stitch-live-dashboard .stitch-action-card{cursor:pointer}
 #stitch-live-dashboard .stitch-action-card:hover{border-color:#97beed}
 #stitch-live-dashboard .stitch-source-note{font-size:11px;text-align:center;color:#667589}
+#stitch-live-dashboard .stitch-briefing-player{display:flex;align-items:center;gap:9px;margin-top:10px}#stitch-live-dashboard .stitch-briefing-player button{display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 12px;border:1px solid #b9d8fa;border-radius:999px;background:#eef6ff;color:#1559b3;font-size:12px;font-weight:800}#stitch-live-dashboard .stitch-briefing-player button.is-playing{border-color:#acdccc;background:#e8faf4;color:#08735c}#stitch-live-dashboard .stitch-briefing-player small{color:var(--st-muted);font-size:10px}#stitch-live-dashboard .stitch-brief-sentence{padding:2px;border-radius:5px;box-decoration-break:clone;-webkit-box-decoration-break:clone}#stitch-live-dashboard .stitch-brief-sentence.is-speaking{color:#182b3f;background:#ffe39f;box-shadow:0 0 0 2px #ffe39f}
 #stitch-live-dashboard .stitch-weather-icon{width:116px;height:94px;margin:0 auto;object-fit:contain}
 #stitch-live-dashboard .stitch-state-error{color:#b91c1c!important}
 #stitch-live-dashboard .stitch-dashboard-grid{display:flex;flex-direction:column}

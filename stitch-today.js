@@ -4,13 +4,17 @@
  */
 (function(){
  'use strict';
- var latest=null, view=null, nodes=null;
+ var latest=null, view=null, nodes=null, stitchSpeech=null, stitchSentence='';
  var fmt=(v,d=0)=>v===null||v===undefined||v===''||!Number.isFinite(Number(v))?'--':Number(v).toFixed(d).replace(/\.0+$/,'');
  var cell=(a,i)=>Array.isArray(a)?a[i]:undefined;
  var short=t=>t&&t.includes('T')?t.slice(11,16):'--:--';
  var clock=t=>t?new Date(t).toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit'}):'--:--';
  var leaf=(parent,text)=>Array.from(parent.querySelectorAll('span,div,p,b,strong')).find(e=>!e.children.length&&e.textContent.replace(/\s+/g,' ').trim()===text)||null;
  var put=(node,value)=>{if(node)node.textContent=value};
+ function stitchSpeaking(index){nodes?.briefMessage?.querySelectorAll('.stitch-brief-sentence').forEach((node,i)=>node.classList.toggle('is-speaking',i===index));}
+ function stopStitchSpeech(message){if('speechSynthesis' in window)window.speechSynthesis.cancel();stitchSpeech=null;stitchSpeaking(-1);if(nodes?.briefPlay){nodes.briefPlay.classList.remove('is-playing');nodes.briefPlay.setAttribute('aria-pressed','false');nodes.briefPlay.querySelector('.material-symbols-outlined').textContent='volume_up';nodes.briefPlay.querySelector('span:last-child').textContent='브리핑 듣기';}put(nodes?.briefStatus,message||'10초 요약 음성');}
+ function playStitchSpeech(){if(stitchSpeech){stopStitchSpeech('재생을 멈췄습니다.');return;}if(!stitchSentence||!('speechSynthesis' in window)){put(nodes?.briefStatus,'음성 재생을 지원하지 않습니다.');return;}var utterance=new SpeechSynthesisUtterance(stitchSentence);utterance.lang='ko-KR';utterance.rate=1;utterance.onboundary=function(event){var list=[...nodes.briefMessage.querySelectorAll('.stitch-brief-sentence')],index=0;list.forEach((node,i)=>{if(Number(node.dataset.start)<=event.charIndex)index=i;});stitchSpeaking(index);put(nodes.briefStatus,(index+1)+' / '+list.length+' 문장 재생 중');};utterance.onend=function(){stopStitchSpeech('브리핑 재생 완료');};utterance.onerror=function(){stopStitchSpeech('재생하지 못했습니다. 다시 눌러 주세요.');};stitchSpeech=utterance;stitchSpeaking(0);nodes.briefPlay.classList.add('is-playing');nodes.briefPlay.setAttribute('aria-pressed','true');nodes.briefPlay.querySelector('.material-symbols-outlined').textContent='stop';nodes.briefPlay.querySelector('span:last-child').textContent='재생 멈춤';put(nodes.briefStatus,'브리핑 재생 중');window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);}
+ function renderStitchBrief(text,context){if(!nodes?.briefMessage)return;stitchSentence=String(text||'');var parts=stitchSentence.match(/[^.!?。！？]+[.!?。！？]?\s*/g)||[stitchSentence],highlighter=window.WeatherBriefingHighlights;nodes.briefMessage.replaceChildren();parts.forEach((part,index)=>{var span=document.createElement('span');span.className='stitch-brief-sentence';span.dataset.start=String(parts.slice(0,index).join('').length);if(highlighter)highlighter.render(span,part,context);else span.textContent=part;nodes.briefMessage.append(span);});}
  function condition(code,day){
   if(window.WeatherIcons)return window.WeatherIcons.describe(code,day);
   return {name:'날씨 정보 없음',key:'unknown'};
@@ -93,7 +97,7 @@
    temperature:hero.querySelector('[data-official-temp]')||leaf(hero,'22'),sky:leaf(hero,'대체로 맑음'),feels:leaf(hero,'체감 23.5°'),
    high:leaf(hero,'최고 25°'),low:leaf(hero,'최저 14°'),updated:leaf(hero,'조회 중'),
    source:hero.querySelector('[data-official-source]')||leaf(hero,'기상 모델 예보 연결'),airText:air.querySelector('[data-official-air-grade]'),
-   briefName:leaf(brief,'삼청동 기상브리핑'),briefMessage:brief.querySelector('p'),
+   briefName:leaf(brief,'삼청동 기상브리핑'),briefMessage:brief.querySelector('p'),briefPlay:brief.querySelector('[data-stitch-brief-play]'),briefStatus:brief.querySelector('[data-stitch-brief-status]'),
    actionPlace:leaf(actions,'삼청동 기준'),
    hourlyBanner:leaf(hour,'강수 예보 확인 중'),
    sunset:leaf(metrics,'오후 7시 28분 (19:28)'),daylight:leaf(metrics,'9시간 47분'),
@@ -106,6 +110,7 @@
   [nodes.temperature,nodes.high,nodes.low,nodes.feels,nodes.updated].forEach(n=>put(n,'--'));
   put(nodes.airText,'대기질 예측을 불러오는 중…');
   put(nodes.briefMessage,'현재 지역의 기상 예보를 분석 중입니다.');
+  nodes.briefPlay?.addEventListener('click',playStitchSpeech);
   if(nodes.matrix)[...nodes.matrix.children].forEach(card=>{
    put(card.querySelector('.font-tabular-metric'),'--');
    put(card.querySelector('p'),'예보 연결 중…');
@@ -156,11 +161,8 @@
   var fallback=current.name+' · 시간별 예보를 확인해 주세요.';
   var sentence=summary||fallback;
   var briefing=window.WeatherHannunBriefingCore?.analyse(data);
-  var highlighter=window.WeatherBriefingHighlights;
   nodes.briefMessage?.classList.add('stitch-caster-briefing');
-  if(highlighter&&nodes.briefMessage){
-    highlighter.render(nodes.briefMessage,sentence,{where:loc,events:briefing?.events||[]});
-  }else put(nodes.briefMessage,sentence);
+  renderStitchBrief(sentence,{where:loc,events:briefing?.events||[]});
   put(nodes.actionPlace,loc+' 기준');
   var rainWindow=h.slice(0,12),rainComplete=rainWindow.length===12&&rainWindow.every(x=>Number.isFinite(x.rain)&&Number.isFinite(x.mm));
   var next=rainWindow.find(x=>Number.isFinite(x.rain)&&x.rain>=50||Number.isFinite(x.mm)&&x.mm>=.3);
@@ -228,7 +230,7 @@
  function init(){
   var oldView=document.getElementById('view-today');if(!oldView)return;
   decorateNav();
-  fetch('./stitch-today.template.html?v=39').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
+  fetch('./stitch-today.template.html?v=40').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
    var host=document.createElement('div');host.id='stitch-live-dashboard';host.innerHTML=html;
    var group=[...host.firstElementChild.children].filter(x=>x.tagName==='SECTION');
    if(group.length!==7)throw Error('Stitch 원본 섹션 변경: '+group.length);
