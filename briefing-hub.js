@@ -11,7 +11,11 @@
   function renderSettings(value=settings()){
     if(!$("briefScheduleEnabled"))return;$("briefScheduleEnabled").checked=value.enabled;$("briefMorningTime").value=value.morning;$("briefEveningTime").value=value.evening;
     document.querySelectorAll("[data-brief-setting-type]").forEach(x=>x.checked=value.types.includes(x.value));document.querySelectorAll("[name=briefDelivery]").forEach(x=>x.checked=x.value===value.delivery);
-    $("briefScheduleStatus").textContent=value.enabled?`매일 ${value.morning} · ${value.evening} / ${value.delivery==="auto"?"바로 재생":value.delivery==="notice"?"알림만":"알림을 누르면 재생"}`:"예약 브리핑 꺼짐";
+    const delivery=value.delivery==="auto"?"바로 재생":value.delivery==="notice"?"알림만":"눌러서 듣기",names={summary:"한눈 요약",commute:"출근·외출",life:"생활 준비",safety:"안전 기상",farming:"농작업",sleep:"취침 전"};
+    $("briefScheduleStatus").textContent=value.enabled?`매일 ${value.morning} · ${value.evening} / ${delivery}`:"예약 브리핑 꺼짐";
+    $("briefScheduleSummary").textContent=value.enabled?`${value.types.map(x=>names[x]).join(" · ")} / ${value.morning}, ${value.evening} / ${delivery}`:"예약을 켜면 선택 내용이 여기에 표시됩니다.";
+    $("briefingSettings").classList.toggle("is-active",value.enabled);
+    document.querySelectorAll("[data-brief-time-target]").forEach(button=>button.classList.toggle("active",$(button.dataset.briefTimeTarget)?.value===button.dataset.briefTimeValue));
   }
   function sentenceNodes(text){return (String(text).match(/[^.!?。！？]+[.!?。！？]?\s*/g)||[text]).filter(Boolean);}
   function paintText(item){
@@ -19,12 +23,13 @@
   }
   function highlight(index){document.querySelectorAll(".brief-hub-sentence").forEach((x,i)=>x.classList.toggle("is-speaking",i===index));}
   function choose(id){selected=items.some(x=>x.id===id)?id:"summary";const item=items.find(x=>x.id===selected);if(!item)return;document.querySelectorAll("[data-brief-type]").forEach(x=>{const on=x.dataset.briefType===selected;x.classList.toggle("active",on);x.setAttribute("aria-pressed",String(on));});$("briefHubTitle").textContent=item.title;$("briefHubCaption").textContent=item.caption;paintText(item);$("briefHubEvidence").innerHTML=(item.evidence||[]).map(x=>`<span><small>${esc(x.label)}</small><b>${esc(x.value)}</b></span>`).join("");}
-  function stop(message="재생을 멈췄습니다."){window.WeatherHannunCloudTTS?.stop?.();window.speechSynthesis?.cancel?.();playing=false;highlight(-1);const b=$("briefHubPlay");b?.classList.remove("is-playing");if(b)b.innerHTML='<span class="material-symbols-outlined" aria-hidden="true">play_arrow</span><span>이 브리핑 듣기</span>';if($("briefHubPlayStatus"))$("briefHubPlayStatus").textContent=message;}
+  function setPlaying(active){const b=$("briefHubPlay");if(!b)return;b.classList.toggle("is-playing",active);b.querySelector(".brief-play-icon").textContent=active?"stop":"play_arrow";b.querySelector(".brief-play-label b").textContent=active?"재생 멈춤":"지금 듣기";b.querySelector(".brief-play-label small").textContent=active?"브리핑을 읽는 중":"HD 날씨 브리핑";}
+  function stop(message="재생을 멈췄습니다."){window.WeatherHannunCloudTTS?.stop?.();window.speechSynthesis?.cancel?.();playing=false;highlight(-1);setPlaying(false);if($("briefHubPlayStatus"))$("briefHubPlayStatus").textContent=message;}
   function devicePlay(item){
     if(!("speechSynthesis" in window))return stop("이 기기에서는 음성 재생을 지원하지 않습니다.");const parts=sentenceNodes(item.text),utterance=new SpeechSynthesisUtterance(item.text);utterance.lang="ko-KR";utterance.rate=.96;utterance.onboundary=e=>{let count=0,index=0;parts.forEach((p,i)=>{if(count<=e.charIndex)index=i;count+=p.length;});highlight(index);};utterance.onend=()=>stop("브리핑 재생 완료");utterance.onerror=()=>stop("음성을 재생하지 못했습니다.");window.speechSynthesis.speak(utterance);
   }
   async function play(itemOverride){
-    const item=itemOverride?.text?itemOverride:items.find(x=>x.id===selected);if(!item)return;if(playing)return stop();playing=true;const b=$("briefHubPlay");b.classList.add("is-playing");b.innerHTML='<span class="material-symbols-outlined" aria-hidden="true">stop</span><span>재생 멈춤</span>';
+    const item=itemOverride?.text?itemOverride:items.find(x=>x.id===selected);if(!item)return;if(playing)return stop();playing=true;setPlaying(true);
     const cloud=window.WeatherHannunCloudTTS;if(!cloud?.configured?.())return devicePlay(item);
     try{await cloud.play(item.text,{onSentence:highlight,onStatus:message=>$("briefHubPlayStatus").textContent=message});stop("HD 브리핑 재생 완료");}catch(error){if(error?.name==="AbortError")return;$("briefHubPlayStatus").textContent="HD 음성 연결 실패 · 기기 음성으로 전환";devicePlay(item);}
   }
@@ -37,7 +42,7 @@
     if(value.delivery==="auto"){document.querySelector('[data-view="briefing"]')?.click();try{await play(item);}catch(_){await notify(item,true);}}else await notify(item,value.delivery==="tap");
   }
   function init(){
-    $("briefHubTypes")?.addEventListener("click",e=>{const b=e.target.closest("[data-brief-type]");if(b)choose(b.dataset.briefType);});$("briefHubPlay")?.addEventListener("click",()=>play());$("briefingSettings")?.addEventListener("change",saveSettings);renderSettings();setInterval(runSchedule,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)runSchedule();});
+    $("briefHubTypes")?.addEventListener("click",e=>{const b=e.target.closest("[data-brief-type]");if(b)choose(b.dataset.briefType);});$("briefHubPlay")?.addEventListener("click",()=>play());$("briefingSettings")?.addEventListener("change",saveSettings);document.querySelectorAll("[data-brief-time-target]").forEach(button=>button.addEventListener("click",()=>{const input=$(button.dataset.briefTimeTarget);if(!input)return;input.value=button.dataset.briefTimeValue;saveSettings();}));renderSettings();setInterval(runSchedule,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)runSchedule();});
   }
   window.addEventListener("weatherhannun:data",e=>render(e.detail));window.addEventListener("weatherhannun:view",e=>{if(e.detail.view==="briefing"&&e.detail.data)render(e.detail.data);});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();

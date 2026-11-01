@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v77-briefing-hub";
+const CACHE="weatherhannun-shell-v78-briefing-player-ui";
 const BASE=self.registration.scope;
 const SHELL=[
   "./activity-interests-core.js?v=1",
@@ -21,7 +21,7 @@ const SHELL=[
   "./data/korea-regions-202602.json","./region-search-core.js?v=16","./region-search-ui.js?v=19",
   "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=22",
   "./location-manager.css?v=22","./briefing-core.js?v=31","./briefing-highlights.js?v=20","./briefing-cloud-tts.js?v=1","./briefing-ui.js?v=22",
-  "./briefing-ui.css?v=22","./briefing-hub.css?v=1","./briefing-hub-core.js?v=1","./briefing-hub.js?v=1","./briefing-highlights.css?v=20","./app.js?v=43","./alert-rules-core.js?v=32",
+  "./briefing-ui.css?v=22","./briefing-hub.css?v=2","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=43","./alert-rules-core.js?v=32",
   "./forecast-insights.js?v=32","./forecast-insights.css?v=26","./manifest.webmanifest?v=18",
   "./icon.svg?v=18","./data-status.html","./official-rights.html"
 ].map(x=>new URL(x,BASE).href);
