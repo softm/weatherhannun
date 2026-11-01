@@ -93,7 +93,8 @@ test('mobile reading contrast, touch targets and navigation clearance',async({pa
  await start(page);
  const contrast=await page.locator('.quick-badge').first().evaluate(e=>{const c=getComputedStyle(e);const lum=s=>{const rgb=s.match(/[\d.]+/g).slice(0,3).map(Number).map(x=>x/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;};const a=lum(c.color),b=lum(c.backgroundColor);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);});
  expect(contrast).toBeGreaterThanOrEqual(4.5);
- for(const selector of ['[data-brief-mode="detail"]','[data-stitch-brief-play]','.mobile-nav button'])expect((await page.locator(selector).first().boundingBox()).height).toBeGreaterThanOrEqual(44);
+ for(const selector of ['[data-stitch-brief-play]','.mobile-nav button'])expect((await page.locator(selector).first().boundingBox()).height).toBeGreaterThanOrEqual(44);
+ for(const mode of ['short','detail'])expect((await page.locator('[data-brief-mode="'+mode+'"]').boundingBox()).height).toBe(36);
  await view(page,'hourly');await page.locator('.hourly-alert').scrollIntoViewIfNeeded();const box=await page.locator('.hourly-alert').boundingBox(),nav=await page.locator('.mobile-nav').boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(nav.y);
 });
 
