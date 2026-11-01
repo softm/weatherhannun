@@ -150,3 +150,6 @@ html[data-weather-theme="dark"] .site-footer{background:var(--st-surface);color:
 html[data-weather-theme="dark"] .site-footer p,html[data-weather-theme="dark"] .site-footer span{color:var(--ux-muted)}
 html[data-weather-theme="dark"] .site-footer a{color:var(--st-accent)}
 html #stitch-live-dashboard .stitch-current-briefing .stitch-briefing-actions button{min-height:44px}
+
+/* A complete low-risk rain forecast needs no extra home card. */
+html .rain-decision-card[hidden]{display:none!important}

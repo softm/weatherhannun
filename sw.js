@@ -2,7 +2,7 @@
 const CACHE="weatherhannun-shell-v96-date-nowrap";
 const BASE=self.registration.scope;
 const SHELL=[
-  "./hourly-explorer-core.js?v=2","./hourly-explorer.js?v=2","./mobile-experience.css?v=1",
+  "./hourly-explorer-core.js?v=2","./hourly-explorer.js?v=2","./mobile-experience.css?v=2",
   "./national-weather-core.js?v=1",
   "./activity-interests-core.js?v=1",
   "./","./index.html","./styles.css","./header-menu.css?v=1","./header-menu.js?v=2","./clean-weather.css?v=5","./action-progress.css?v=40","./action-progress.js?v=40","./day-flow.css?v=7","./day-flow-core.js?v=3","./day-flow-ui.js?v=6","./national-map.css?v=43","./startup-briefing.css?v=45","./startup-briefing-core.js?v=45","./startup-briefing.js?v=45","./stitch-theme.css?v=18","./stitch-mobile.css?v=19",
@@ -10,7 +10,7 @@ const SHELL=[
   "./agriculture-planner.css?v=34","./agriculture-planner-core.js?v=34","./agriculture-planner.js?v=35",
   "./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",
   "./stitch-today.template.html?v=43","./stitch-today.js?v=45","./stitch-today.css?v=25",
-  "./stitch-today.utilities.css","./rain-decision-core.js?v=31","./rain-decision-ui.js?v=23",
+  "./stitch-today.utilities.css","./rain-decision-core.js?v=31","./rain-decision-ui.js?v=24",
   "./rain-decision.css?v=21","./outfit-decision-core.js?v=31","./outfit-decision-ui.js?v=26",
   "./outfit-decision.css?v=24","./daily-delta-core.js?v=27","./daily-delta-ui.js?v=29",
   "./location-compare-core.js?v=33","./location-compare-ui.js?v=34","./location-compare.css?v=30",

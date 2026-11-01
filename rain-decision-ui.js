@@ -21,6 +21,7 @@
   function ensureCard() {
     if (card) return card;
     card = node('article','rain-decision-card rain-decision-card--unknown');
+    card.hidden=true;
     card.setAttribute('aria-label','앞으로 12시간 비·우산 판단');
     var symbol = node('span','rain-decision-icon','☂');
     symbol.setAttribute('aria-hidden','true');
@@ -52,8 +53,9 @@
     var answer = window.WeatherHannunRainDecision.summarise(data.weather);
     var age = data.at ? Date.now() - Date.parse(data.at) : NaN;
     var stale = data.status === 'cached-error' || Number.isFinite(age) && age > 180 * 60000;
-    card.className = 'rain-decision-card rain-decision-card--' + answer.state;
-    bits.title.textContent = answer.title;
+    card.hidden = answer.state === 'low' && !stale;
+    card.className = 'rain-decision-card rain-decision-card--' + (stale && answer.state === 'low' ? 'unknown' : answer.state);
+    bits.title.textContent = stale && answer.state === 'low' ? '저장된 강수 예보 · 새로고침 필요' : answer.title;
     bits.detail.textContent = answer.detail;
     bits.caution.textContent = (stale ? '오래된 저장 예보 · 새로고침 필요. ' : '') + (answer.caution || '시간 단위 모델 예보 · 실제 관측과 다를 수 있습니다.');
   }
