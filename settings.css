@@ -16,11 +16,11 @@
   font-variation-settings: "FILL" 1;
 }
 
-#view-settings {
+:is(#view-settings,#view-notifications) {
   padding-bottom: 48px;
 }
 
-#view-settings .settings-page-header {
+:is(#view-settings,#view-notifications) .settings-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -221,7 +221,7 @@
   font-size: 18px;
 }
 
-#view-settings .watch-settings {
+:is(#view-settings,#view-notifications) .watch-settings {
   margin: 18px 0;
   scroll-margin-top: 88px;
 }
@@ -814,11 +814,11 @@ html[data-weather-theme="light"] .notification-preview-actions > span {
 }
 
 @media (max-width: 720px) {
-  #view-settings {
+  :is(#view-settings,#view-notifications) {
     padding-bottom: 24px;
   }
 
-  #view-settings .settings-page-header {
+  :is(#view-settings,#view-notifications) .settings-page-header {
     margin-top: 17px;
     padding: 17px 18px;
   }

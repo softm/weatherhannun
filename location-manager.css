@@ -113,3 +113,15 @@ html .topbar .top-inner{justify-content:flex-start}
 html .topbar .header-save-location{flex:0 0 40px;width:40px;min-height:44px;margin-left:4px;padding:0;border:0;background:transparent;color:var(--st-muted,#65758a);font-size:26px;cursor:pointer}
 html .topbar .header-save-location:disabled{color:#b77c16;opacity:1;cursor:default}
 html[data-weather-theme="dark"] .topbar .header-save-location:disabled{color:#f3c76b}
+
+html .topbar .header-find-location{display:grid;place-items:center;flex:0 0 40px;width:40px;min-height:44px;margin-left:4px;padding:0;border:0;background:transparent;color:var(--st-accent,#2563eb);cursor:pointer}
+html .topbar .header-find-location .material-symbols-outlined{font-size:21px}
+html .topbar .header-find-location:disabled{opacity:.45;cursor:wait}
+@media(max-width:360px){html .topbar .header-current-button{gap:3px}html .topbar .header-current-button>.material-symbols-outlined:first-child{display:none}html .topbar .header-save-location,html .topbar .header-find-location{margin-left:0}}
+
+/* Keep header controls centered below the device's safe area. */
+html[data-stitch-live="true"] .topbar{display:flex;flex-direction:column;height:calc(57px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px)}
+html[data-stitch-live="true"] .topbar .top-inner{width:100%;height:56px;min-height:56px;flex:0 0 56px;padding-block:0;align-items:center}
+html .topbar #locationQuickBar.header-current-location{align-items:center;align-self:center}
+html .topbar .header-current-button,html .topbar .header-find-location,html .topbar .header-save-location,html .topbar #headerMenuButton{height:44px;min-height:44px;align-self:center;line-height:1}
+html .topbar .header-save-location{display:grid;place-items:center}

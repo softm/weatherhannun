@@ -166,6 +166,7 @@
     renderState();
   }
   function updateSnapshot(detail, previewRequested) {
+    if(detail?.loc?.temporary)return false;
     latestWeather = detail || latestWeather;
     var android = bridge();
     var widgetAndroid = widgetBridge();

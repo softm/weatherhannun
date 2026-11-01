@@ -32,7 +32,7 @@
   function currentName(){return active?.name||"선택 지역";}
   function updateHeader(){
     const badge=$("locationModeLabel");
-    if(badge)badge.textContent=active?.source==="gps"?"GPS로 선택됨":"선택 지역 저장됨";
+    if(badge)badge.textContent=active?.temporary?"전국 지역 임시 조회":active?.source==="gps"?"GPS로 선택됨":"선택 지역 저장됨";
   }
   function render(){
     if(!initialized)return;
@@ -64,6 +64,7 @@
       const shortName=fullName.length>14&&parts.length>1?parts.slice(-2).join(" "):fullName;
       const gps=active?.source==="gps";
       quick.innerHTML='<button type="button" class="header-current-button" data-location-manage aria-haspopup="dialog" aria-controls="locationDialog" aria-label="현재 날씨 지역 '+esc(fullName)+(gps?' · GPS 기준 추정 위치':'')+' 변경" title="'+esc(active?.address||fullName)+'"><span class="material-symbols-outlined" aria-hidden="true">'+(gps?'my_location':'location_on')+'</span><strong>'+esc(shortName)+'</strong><span class="material-symbols-outlined" aria-hidden="true">expand_more</span></button>'+
+        '<button type="button" class="header-find-location" data-geo-quick aria-label="현위치 찾기" title="현위치 찾기"'+(busy?' disabled':'')+'><span class="material-symbols-outlined" aria-hidden="true">my_location</span></button>'+
         '<button type="button" class="header-save-location" data-location-save-current aria-label="'+esc(fullName)+(activeSaved?' · 저장된 지역':' 지역 저장')+'" title="'+(activeSaved?'저장된 지역':'이 지역 저장')+'"'+(activeSaved||!active?' disabled':'')+'><span aria-hidden="true">'+(activeSaved?'★':'☆')+'</span></button>';
     }
   }
@@ -293,7 +294,7 @@
   window.addEventListener("weatherhannun:location-applied",ev=>{
     const p=core.cleanPlace(ev.detail);
     if(!p)return;
-    active={...p,source:ev.detail?.source==="gps"?"gps":"manual"};
+    active={...p,temporary:ev.detail?.temporary===true,source:ev.detail?.source==="gps"?"gps":"manual"};
     if(active.source!=="gps")reverseVersion++; // Cancel stale GPS address response.
     render();
   });

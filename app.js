@@ -42,15 +42,15 @@
     return {icon:'<span class="weather-glyph-fallback" aria-hidden="true">?</span>',name:"날씨 정보 없음",key:"unknown",family:"unknown"};
   }
   function validLocation(loc) { return loc && typeof loc.name==="string" && loc.name.length<90 && finite(Number(loc.lat)) && finite(Number(loc.lon)) && Math.abs(Number(loc.lat))<=90 && Math.abs(Number(loc.lon))<=180; }
-  function applyLocation(loc, updateUrl) {
+  function applyLocation(loc, updateUrl, temporary) {
     if(!validLocation(loc))return;
-    var previous=STATE.loc,changed=Number(previous.lat)!==Number(loc.lat)||Number(previous.lon)!==Number(loc.lon);
+    var previous=STATE.loc,modeChanged=!!previous.temporary!==!!temporary,changed=Number(previous.lat)!==Number(loc.lat)||Number(previous.lon)!==Number(loc.lon);
     var source=loc.source==="gps"?"gps":"manual";
-    STATE.loc={name:String(loc.name).trim().slice(0,75)||"선택 지역",lat:Number(loc.lat),lon:Number(loc.lon),source:source,
+    STATE.loc={temporary:!!temporary,name:String(loc.name).trim().slice(0,75)||"선택 지역",lat:Number(loc.lat),lon:Number(loc.lon),source:source,
       address:typeof loc.address==="string"?loc.address.slice(0,170):"",
       administrative:typeof loc.administrative==="string"?loc.administrative.slice(0,145):"",
       approximate:loc.approximate===true,regionCenter:loc.regionCenter===true};
-    if(changed){
+    if(changed||modeChanged){
       STATE.weather=null;STATE.air=null;STATE.hourly=[];STATE.fetchedAt=null;
       text("currentTemp","--");text("weatherSummary","새 지역 예보 연결 중");
     }
@@ -61,7 +61,8 @@
       STATE.loc.source==="gps"?"기기의 현재 위치 기준":STATE.loc.regionCenter?"행정구역 대표 위치 기준":"선택한 지역의 예보 기준"
     );
     $("heroLocation").textContent=STATE.loc.name;
-    storeSet("weatherhannun_location",STATE.loc);
+    if(!temporary)storeSet("weatherhannun_location",STATE.loc);
+    if($("temporaryLocationNotice"))$("temporaryLocationNotice").hidden=!temporary;
     if(updateUrl){
       // Only the explicit Share action may generate a URL with coordinates.
       // Selecting a saved/manual place must not silently publish lat/lon in browser history.
@@ -72,7 +73,7 @@
       history.replaceState(null,"",url.pathname+url.search+url.hash);
     }
     window.dispatchEvent(new CustomEvent("weatherhannun:location-applied",{detail:STATE.loc}));
-    if(changed||!STATE.weather)loadWeather();
+    if(changed||modeChanged||!STATE.weather)loadWeather();
     else renderAll();
   }
   function forecastUrl(loc,short) {
@@ -131,8 +132,8 @@
       STATE.dataStatus="live";
       STATE.fetchedAt=new Date().toISOString();
       STATE.hourly=makeHours(weather);
-      storeSet("weatherhannun_last",{loc:loc,at:STATE.fetchedAt,weather:weather,air:air});
-      storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:PROVIDER&&PROVIDER.PROVIDER.id});
+      if(!loc.temporary)storeSet("weatherhannun_last",{loc:loc,at:STATE.fetchedAt,weather:weather,air:air});
+      if(!loc.temporary)storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:PROVIDER&&PROVIDER.PROVIDER.id});
       renderAll();
       window.dispatchEvent(new CustomEvent("weatherhannun:forecast-result",{detail:{ok:true}}));
       if(!air) toast("대기질 API 연결이 불안정합니다. 날씨는 정상 표시됩니다.");
@@ -353,7 +354,7 @@
   }
   function renderAir(){
     var a=STATE.air&&STATE.air.current;
-    if(!a){text("airGrade","대기질 제공 지연");text("airStatement","예측값을 가져오지 못했습니다. 새로고침 해보세요.");text("airMetrics","현재 이용할 수 있는 대기질 데이터가 없습니다.");if($("airSummaryGrade"))text("airSummaryGrade","예측 정보 지연");return;}
+    if(!a){text("airGrade","대기질 제공 지연");text("airStatement","예측값을 가져오지 못했습니다. 새로고침 해보세요.");text("airMetrics","현재 이용할 수 있는 대기질 데이터가 없습니다.");if($("airSummaryGrade")){text("airSummaryGrade","예측 정보 지연");text("airSummarySource","대기질 연결 지연");text("airSummaryAdvice","공기질 정보를 다시 확인해 주세요.");}return;}
     var values=[
       {name:"미세먼지 PM10",value:a.pm10,thresholds:[30,80,150]},
       {name:"초미세먼지 PM2.5",value:a.pm2_5,thresholds:[15,35,75]}
@@ -361,15 +362,16 @@
     var statuses=values.map(function(v){return airLevel(v.value,v.thresholds);});
     var worst=statuses.reduce(function(p,c){return c.rank>p.rank?c:p;},statuses[0]);
     var label=$("airGrade");label.className="air-grade "+worst.color;label.textContent=worst.grade;
-    if($("airSummaryGrade")){text("airSummaryGrade","공기 "+worst.grade);text("airPm10",num(a.pm10));text("airPm25",num(a.pm2_5));$("airSummaryGrade").className="air-summary-grade "+worst.color;}
+    if($("airSummaryGrade")){text("airSummarySource","모델 예측 · "+a.time.replace("T"," "));text("airSummaryGrade","공기 "+worst.grade);text("airPm10",num(a.pm10));text("airPm25",num(a.pm2_5));text("airSummaryAdvice",worst.rank<=1?"환기와 야외활동에 무난해요.":worst.rank===2?"민감군은 오래 머무는 야외활동을 줄이세요.":"외출 전 마스크를 준비하고 환기는 짧게 하세요.");$("airSummaryGrade").className="air-summary-grade "+worst.color;}
     text("airStatement",worst.rank<=1?"대기질 예측이 비교적 양호한 편이에요.":"대기질 예측이 좋지 않습니다. 야외활동 전 공식 관측값도 확인하세요.");
     text("airTime","예측 기준 "+a.time.replace("T"," ")+" (KST) · 모델 추정치");
     $("airMetrics").innerHTML=values.map(function(v,i){var st=statuses[i];var percent=finite(v.value)?clamp(v.value/(v.thresholds[2]*1.5)*100,1,100):0;return '<div><div class="air-row-head"><b>'+v.name+'</b><span>'+st.grade+' <strong>'+num(v.value,1)+'</strong></span></div><div class="air-bar"><div style="width:'+percent+'%"></div></div></div>';}).join("");
   }
   function setView(view){
-    if(!["today","briefing","hourly","weekly","activity","air","map","compare","settings"].includes(view))return;
+    if(!["today","briefing","hourly","weekly","activity","air","map","compare","settings","notifications"].includes(view))return;
     if(view!=="map")setMapFocus(false);
     STATE.view=view;
+    if($("temporaryLocationNotice"))$("temporaryLocationNotice").hidden=!STATE.loc.temporary||view!=="today";
     document.querySelectorAll(".screen").forEach(function(el){el.classList.toggle("active",el.id==="view-"+view);});
     document.querySelectorAll("[data-view]").forEach(function(el){var a=el.dataset.view===view;el.classList.toggle("active",a);if(el.classList.contains("nav-button"))el.setAttribute("aria-current",a?"page":"false");});
     window.scrollTo({top:0,behavior:"instant"});
@@ -444,7 +446,7 @@
   }
   function chooseCity(i){
     var city=STATE.cityData&&STATE.cityData[i];if(!city)return;
-    setMapFocus(false);applyLocation(city,true);setView("today");toast(city.name+"의 날씨를 불러옵니다.");
+    setMapFocus(false);applyLocation(city,false,true);setView("today");toast(city.name+"의 날씨를 불러옵니다.");
   }
   function updateMapMarkers(){
     if(!STATE.cityData||!initMap())return;
@@ -465,6 +467,7 @@
     refreshMapLayout(true);
   }
   async function showMap(){
+    loadNationalWeather();
     initMap();
     refreshMapLayout(true);
     if(STATE.cityData){renderNationalOverview();renderCities();updateMapMarkers();return;}
@@ -485,6 +488,32 @@
       STATE.mapBusy=false;
       window.WeatherActionProgress?.end(progressId);
     }
+  }
+  var nationalPayloads=null,nationalFetched=0,nationalFailed=false,nationalBusy=false,nationalDate=null,nationalPeriod="current",nationalDays=[];
+  function renderNationalWeather(){
+    var core=window.WeatherNationalCore;if(!core)return;
+    nationalDays=core.dates();
+    if(!nationalDays.includes(nationalDate))nationalDate=nationalDays[0];
+    $("nationalDates").innerHTML=nationalDays.map(function(day,i){var d=localDate(day);return '<button type="button" data-national-date="'+day+'" aria-pressed="'+(day===nationalDate)+'"><span>'+new Intl.DateTimeFormat('ko-KR',{weekday:'short',timeZone:'Asia/Seoul'}).format(d)+'</span><small>'+(i===0?'오늘':day.slice(5).replace('-','.'))+'</small></button>';}).join('');
+    document.querySelectorAll('[data-national-period]').forEach(function(b){b.disabled=b.dataset.nationalPeriod==='current'&&nationalDate!==nationalDays[0];b.setAttribute('aria-pressed',String(b.dataset.nationalPeriod===nationalPeriod));});
+    var missing=0;
+    $("nationalPins").innerHTML=core.cities.map(function(city,i){var v=core.sample(nationalPayloads?.[i],nationalDate,nationalPeriod,nationalDays[0]);var valid=v&&finite(v.temperature_2m);if(!valid)missing++;var sym=weatherSymbol(valid?v.weather_code:undefined,v?.is_day);return '<button type="button" class="national-city" data-national-city="'+i+'" style="left:'+city.x+'%;top:'+city.y+'%" aria-label="'+safe(city.name+' '+(valid?num(v.temperature_2m,1)+'도 '+sym.name:'자료 없음')+' 상세 날씨 임시 조회')+'"><span class="national-icon" aria-hidden="true">'+sym.icon+'</span><span>'+safe(city.name)+'</span><b>'+(valid?num(v.temperature_2m,1)+'°':'--')+'</b></button>';}).join('');
+    $("nationalTime").textContent=nationalDate+' · '+(nationalPeriod==='current'?'현재 시각':nationalPeriod==='morning'?'오전 9시':'오후 3시')+' 모델 예보'+(missing?' · '+missing+'곳 자료 없음':'')+(nationalFetched?' · 조회 '+new Date(nationalFetched).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Seoul'}):'')+(nationalFailed?' · 갱신 실패, 이전 자료':'');
+  }
+  async function loadNationalWeather(force){
+    if(!window.WeatherNationalCore||nationalBusy)return;
+    if(nationalPayloads&&!force&&Date.now()-nationalFetched<15*60000){renderNationalWeather();return;}
+    nationalBusy=true;$("nationalReload").disabled=true;renderNationalWeather();$("nationalTime").textContent='전국 예보를 불러오는 중…';
+    try{
+      var cities=window.WeatherNationalCore.cities,url=new URL(forecastUrl(cities[0],true));
+      url.searchParams.set('latitude',cities.map(function(c){return c.lat;}).join(','));
+      url.searchParams.set('longitude',cities.map(function(c){return c.lon;}).join(','));
+      url.searchParams.set('hourly','temperature_2m,weather_code,is_day');url.searchParams.set('forecast_days','7');
+      var result=await getJson(url.href);
+      if(!Array.isArray(result)||result.length!==cities.length)throw new Error('전국 예보 응답을 확인할 수 없습니다.');
+      nationalPayloads=result;nationalFetched=Date.now();nationalFailed=false;renderNationalWeather();
+    }catch(e){nationalFailed=true;$("nationalTime").textContent='전국 예보 연결 실패'+(nationalPayloads?' · 이전 조회 자료 표시':' · 다시 시도해 주세요');}
+    finally{nationalBusy=false;$("nationalReload").disabled=false;}
   }
   function searchDialogOpen(){
     $("locationDialog").showModal();
@@ -594,6 +623,11 @@
     $("mapCurrent").addEventListener("click",getGeo);
     document.querySelectorAll("[data-map-metric]").forEach(function(button){button.addEventListener("click",function(){selectMapMetric(button.dataset.mapMetric);});});
     document.addEventListener("keydown",function(e){if(e.key==="Escape")setMapFocus(false);});
+    $("nationalDates").addEventListener('click',function(e){var b=e.target.closest('[data-national-date]');if(!b)return;nationalDate=b.dataset.nationalDate;if(nationalDate!==nationalDays[0]&&nationalPeriod==='current')nationalPeriod='morning';renderNationalWeather();});
+    document.querySelectorAll('[data-national-period]').forEach(function(b){b.addEventListener('click',function(){nationalPeriod=b.dataset.nationalPeriod;renderNationalWeather();});});
+    $("nationalPins").addEventListener('click',function(e){var b=e.target.closest('[data-national-city]');if(!b)return;var city=window.WeatherNationalCore.cities[Number(b.dataset.nationalCity)];applyLocation(city,false,true);setView('today');toast(city.name+' 임시 조회 · 현위치는 변경하지 않습니다.');});
+    $("nationalReload").addEventListener('click',function(){loadNationalWeather(true);});
+    $("restoreLocation").addEventListener('click',function(){var saved=storeGet('weatherhannun_location');applyLocation(validLocation(saved)?saved:CITY_LIST[0],false);setView('today');});
     renderPresets();
     applyLocation(l,false);
     if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=41").catch(function(){});

@@ -108,7 +108,12 @@
       {label:"예보 유효 시각",value:typeof c.time==="string"?c.time.replace("T"," ")+" KST":"정보 없음"}
     ];
     var air=payload&&payload.air&&payload.air.current;
-    if(air&&finite(air.pm2_5))evidence.push({label:"PM2.5 (모델 예측)",value:asNumber(air.pm2_5,1)+" μg/m³"});
+    if(air&&finite(air.pm2_5)){
+      evidence.push({label:"PM2.5 (모델 예측)",value:asNumber(air.pm2_5,1)+" μg/m³"});
+      if(air.pm2_5>75)detail+=" 초미세먼지 모델 예측은 매우 나쁨 구간입니다. 야외활동을 줄이고 보건용 마스크를 착용하세요.";
+      else if(air.pm2_5>35)detail+=" 초미세먼지 모델 예측은 나쁨 구간입니다. 외출 전 마스크를 준비하고 환기는 짧게 하세요.";
+      else if(air.pm2_5<=15)detail+=" 초미세먼지 모델 예측은 좋음 구간으로 환기와 야외활동에 무난합니다.";
+    }
     return {valid:true,headline:lead?lead.title:riskCoverageComplete?"가까운 시간의 뚜렷한 위험 신호 낮음":"주요 위험 판단 자료 부족",short:short,detail:detail,events:events.slice(0,5),evidence:evidence,freshness:fresh,source:"Open-Meteo 모델 예보",where:where,validAt:c.time||null};
   }
   return Object.freeze({analyse:analyse,hoursOf:hoursOf,dataFreshness:dataFreshness,dateText:dateText});

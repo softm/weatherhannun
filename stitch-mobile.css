@@ -100,10 +100,13 @@ body {
 .air-summary-copy small, .air-summary-copy strong { display: block; }
 .air-summary-copy small { font-size: 11px; color: #c0c7d3; }
 .air-summary-copy strong { margin-top: 2px; font-size: 15px; font-weight: 500; }
+.air-summary-copy > span { display: block; margin-top: 3px; color: #c0c7d3; font-size: 11px; line-height: 1.35; }
 .air-summary-grade.good { color: #54dcbb; }
 .air-summary-grade.bad, .air-summary-grade.very-bad { color: #ff9852; }
 .air-summary-values { display: flex; gap: 6px; }
 .air-summary-values > span { padding: 4px 7px; border-radius: 7px; background: rgba(33,185,154,.12); color: #9ce7d6; font-size: 10px; white-space: nowrap; }
+.air-summary-values b { margin-left: 2px; font-size: 13px; }
+.air-summary-values small { display: block; margin-top: 1px; font-size: 8px; opacity: .72; text-align: right; }
 .air-summary-values > span + span { background: rgba(246,184,75,.12); color: #ffd28a; }
 .air-summary-arrow { color: #8a919d; }
 

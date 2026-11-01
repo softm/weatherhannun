@@ -39,9 +39,18 @@
     }
     if (air) {
       put("[data-official-air-source]", "에어코리아 실측 · " + air.stationName + " · " + formatTime(air.measuredAt));
-      put("[data-official-air-grade]", grade(air.pm10, air.pm25));
+      var airGrade = grade(air.pm10, air.pm25);
+      put("[data-official-air-grade]", airGrade);
       put("[data-official-pm10]", "미세 " + (Number.isFinite(air.pm10) ? air.pm10 + "㎍/㎥" : "없음"));
       put("[data-official-pm25]", "초미세 " + (Number.isFinite(air.pm25) ? air.pm25 + "㎍/㎥" : "없음"));
+      put("#airSummarySource", "에어코리아 실측 · " + air.stationName + " · " + formatTime(air.measuredAt));
+      put("#airSummaryGrade", "공기 " + airGrade);
+      put("#airPm10", Number.isFinite(air.pm10) ? air.pm10 : "--");
+      put("#airPm25", Number.isFinite(air.pm25) ? air.pm25 : "--");
+      put("#airSummaryAdvice", airGrade === "좋음" ? "환기와 야외활동에 좋아요." : airGrade === "보통" ? "일상 활동은 무난하고 민감군은 상태를 살펴보세요." : airGrade === "나쁨" ? "외출 전 마스크를 준비하고 환기는 짧게 하세요." : "야외활동을 줄이고 보건용 마스크를 착용하세요.");
+      put("[data-official-air-advice]", airGrade === "좋음" ? "환기와 야외활동에 좋아요." : airGrade === "보통" ? "일상 활동은 무난하고 민감군은 상태를 살펴보세요." : airGrade === "나쁨" ? "외출 전 마스크를 준비하고 환기는 짧게 하세요." : "야외활동을 줄이고 보건용 마스크를 착용하세요.");
+      var summaryGrade = document.getElementById("airSummaryGrade");
+      if (summaryGrade) summaryGrade.className = "air-summary-grade " + (airGrade === "좋음" ? "good" : airGrade === "보통" ? "normal" : airGrade === "나쁨" ? "bad" : "very-bad");
     } else put("[data-official-air-source]", "에어코리아 실측 미확보 · 모델 예측과 구분");
     var warning = warningSummary();
     put("[data-official-warning]", warning.text);

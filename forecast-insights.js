@@ -182,6 +182,7 @@
     try{return nativeBridge()?.notificationPermissionState?.()||"unknown";}catch(_){return "unknown";}
   }
   function syncWithAndroid(){
+    if(data?.loc?.temporary)return false;
     const bridge=nativeBridge();
     if(!bridge||!latestLocation||!finite(Number(latestLocation.lat))||!finite(Number(latestLocation.lon)))return false;
     const payload={version:2,configured:!!prefs.configured,location:{name:String(latestLocation.name||"선택 지역").slice(0,75),lat:Number(latestLocation.lat),lon:Number(latestLocation.lon)},rules:{rain:!!prefs.rain,rainThreshold:prefs.rainThreshold,dry:!!prefs.dry,dryThreshold:prefs.dryThreshold,clear:!!prefs.clear,clearHours:prefs.clearHours,frost:!!prefs.frost,wind:!!prefs.wind},schedules:{morning:!!prefs.morning,morningTime:prefs.morningTime,evening:!!prefs.evening,eveningTime:prefs.eveningTime},quietHours:{enabled:!!prefs.quiet,start:prefs.quietStart,end:prefs.quietEnd}};
@@ -242,7 +243,7 @@
     notifyIfAllowed();
   }
   function notifyIfAllowed(){
-    if(nativeBridge()||!data||!("Notification" in window)||Notification.permission!=="granted"||document.visibilityState!=="visible")return;
+    if(data?.loc?.temporary||nativeBridge()||!data||!("Notification" in window)||Notification.permission!=="granted"||document.visibilityState!=="visible")return;
     const hours=rows(),now=hours[0]?.time||"";
     const soon=pickNotices().filter(x=>x.time.slice(0,13)<=hours[Math.min(hours.length-1,3)]?.time?.slice(0,13));
     soon.forEach(a=>{
@@ -268,6 +269,16 @@
       rangeStart=start.value;rangeEnd=end.value;period="custom";updateButtons();rainSummary();
     });
     const save=el("saveWatch");if(save)save.addEventListener("click",saveAlertPreferences);
+    const preview=el("previewNotification");if(preview)preview.addEventListener("click",()=>{
+      const status=el("previewNotificationStatus"),bridge=nativeBridge();
+      if(!bridge||typeof bridge.previewNotification!=="function"){
+        status.textContent=bridge?"앱 업데이트 후 미리보기 알림을 사용할 수 있습니다.":"실제 미리보기 알림은 Android 앱에서 사용할 수 있습니다. 위 예시로 내용을 확인하세요.";return;
+      }
+      try{
+        const result=bridge.previewNotification();
+        status.textContent=result==="sent"?"미리보기 알림을 보냈습니다. 화면 위에서 아래로 내려 알림창을 확인하세요.":result==="blocked"?"알림이 차단되어 있습니다. 알림 권한과 휴대폰의 날씨한눈 알림 설정을 확인하세요.":"알림을 보내지 못했습니다. 잠시 후 다시 시도하세요.";
+      }catch(_){status.textContent="미리보기 알림을 보내지 못했습니다.";}
+    });
     const allow=el("allowNotify");if(allow)allow.addEventListener("click",async()=>{
       const bridge=nativeBridge();
       if(bridge){

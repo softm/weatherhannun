@@ -97,7 +97,7 @@
    weatherVisual:hero.querySelector('[data-weather-visual]'),
    temperature:hero.querySelector('[data-official-temp]')||leaf(hero,'22'),sky:leaf(hero,'대체로 맑음'),feels:leaf(hero,'체감 23.5°'),
    high:leaf(hero,'최고 25°'),low:leaf(hero,'최저 14°'),updated:leaf(hero,'조회 중'),
-   source:hero.querySelector('[data-official-source]')||leaf(hero,'기상 모델 예보 연결'),airText:air.querySelector('[data-official-air-grade]'),
+   source:hero.querySelector('[data-official-source]')||leaf(hero,'기상 모델 예보 연결'),airText:air.querySelector('[data-official-air-grade]'),airAdvice:air.querySelector('[data-official-air-advice]'),
    briefName:leaf(brief,'삼청동 기상브리핑'),briefMessage:brief.querySelector('p'),briefPlay:brief.querySelector('[data-stitch-brief-play]'),briefStatus:brief.querySelector('[data-stitch-brief-status]'),
    actionPlace:leaf(actions,'삼청동 기준'),
    hourlyBanner:leaf(hour,'강수 예보 확인 중'),
@@ -110,6 +110,9 @@
   // Turn non-live original demo numbers into placeholders before displaying.
   [nodes.temperature,nodes.high,nodes.low,nodes.feels,nodes.updated].forEach(n=>put(n,'--'));
   put(nodes.airText,'대기질 예측을 불러오는 중…');
+  put(nodes.airAdvice,'PM10·PM2.5 정보를 확인하고 있습니다.');
+  var openAir=function(){go('air');};
+  air.addEventListener('click',openAir);air.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openAir();}});
   put(nodes.briefMessage,'현재 지역의 기상 예보를 분석 중입니다.');
   nodes.briefPlay?.addEventListener('click',playStitchSpeech);
   if(nodes.matrix)[...nodes.matrix.children].forEach(card=>{
@@ -128,7 +131,7 @@
   hour.querySelector('h2')?.addEventListener('click',()=>go('hourly'));
   if(notice){
    notice.tabIndex=0;notice.setAttribute('role','button');notice.style.cursor='pointer';
-   var alerts=()=>{go('settings');setTimeout(()=>document.querySelector('.watch-settings')?.scrollIntoView({behavior:'smooth',block:'center'}),80);};
+   var alerts=()=>{go('notifications');setTimeout(()=>document.querySelector('.watch-settings')?.scrollIntoView({behavior:'smooth',block:'center'}),80);};
    notice.addEventListener('click',alerts);
    notice.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();alerts();}});
   }
@@ -151,6 +154,7 @@
   if(nodes.weatherVisual&&window.WeatherIcons)window.WeatherIcons.render(nodes.weatherVisual,c.weather_code,c.is_day,'weather-glyph--hero');
   var air=data.air?.current||{},pm=airGrade(air.pm10,[30,80,150]),fine=airGrade(air.pm2_5,[15,35,75]);
   put(nodes.airText,pm==='정보 없음'?'대기질 예측 정보 없음':pm.includes('나쁨')||fine.includes('나쁨')?'대기질 주의 · 활동 전 확인':'대기질 모델 예측 · 실외 활동 참고');
+  put(nodes.airAdvice,pm==='정보 없음'?'대기질 정보를 다시 확인해 주세요.':pm.includes('나쁨')||fine.includes('나쁨')?'외출 전 마스크를 준비하고 환기는 짧게 하세요.':'환기와 야외활동에 무난해요.');
   // Retain original colored 2-chip presentation while replacing fictional values.
   var chips=[...nodes.air.querySelectorAll('div')].filter(x=>x.childElementCount<=1&&/^(미세|초미세)\s/.test(x.textContent.trim()));
   chips.slice(-2).forEach((el,i)=>{el.textContent=(i?'초미세 ':'미세 ')+(i?fine:pm)+' '+fmt(i?air.pm2_5:air.pm10)+'㎍/㎥';el.title='Open-Meteo 대기질 모델 예측값';});
@@ -231,7 +235,7 @@
  function init(){
   var oldView=document.getElementById('view-today');if(!oldView)return;
   decorateNav();
-  fetch('./stitch-today.template.html?v=41').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
+  fetch('./stitch-today.template.html?v=42').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
    var host=document.createElement('div');host.id='stitch-live-dashboard';host.innerHTML=html;
    var group=[...host.firstElementChild.children].filter(x=>x.tagName==='SECTION');
    if(group.length!==7)throw Error('Stitch 원본 섹션 변경: '+group.length);
