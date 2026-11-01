@@ -42,7 +42,7 @@
   <link rel="stylesheet" href="./header-menu.css?v=1">
   <link rel="stylesheet" href="./day-flow.css?v=5">
   <link rel="stylesheet" href="./clean-weather.css?v=5">
-  <link rel="stylesheet" href="./national-map.css?v=42">
+  <link rel="stylesheet" href="./national-map.css?v=43">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="./briefing-core.js?v=32"></script>
@@ -285,9 +285,11 @@
       <section id="view-map" class="screen content-bound" aria-label="전국날씨 지도">
         <div class="page-header"><div><span class="section-overline">KOREA WEATHER SITUATION</span><h2>전국 날씨</h2><p>지역을 누르면 상세 날씨로 이동합니다. 현위치와 저장 지역은 바뀌지 않습니다.</p></div></div>
         <section class="national-weather-board" aria-label="전국 날짜별 날씨">
+          <div class="national-board-heading"><div><span class="national-eyebrow">날씨한눈 · 전국</span><h3>어디 날씨가 궁금하세요?</h3></div><span class="national-map-badge">지역 둘러보기</span></div>
+          <div class="national-controls"><div class="national-period-tabs" aria-label="대표 시각"><button type="button" data-national-period="current" aria-pressed="true">현재</button><button type="button" data-national-period="morning" aria-pressed="false">오전</button><button type="button" data-national-period="afternoon" aria-pressed="false">오후</button></div><span class="national-control-hint">지역 카드로 바로 이동 ↗</span></div>
           <div id="nationalDates" class="national-date-tabs" aria-label="예보 날짜"></div>
           <div class="national-canvas">
-            <div class="national-period-tabs" aria-label="대표 시각"><button type="button" data-national-period="current" aria-pressed="true">현재</button><button type="button" data-national-period="morning" aria-pressed="false">오전</button><button type="button" data-national-period="afternoon" aria-pressed="false">오후</button></div>
+
             <svg class="national-land" viewBox="0 0 360 500" aria-hidden="true"><path d="M202 65 L214 90 232 103 242 126 261 147 270 173 280 196 286 220 280 243 293 270 287 293 292 314 276 338 258 351 245 371 229 378 217 364 204 380 187 373 172 390 154 381 144 395 127 389 115 403 98 392 84 397 91 376 78 363 90 350 85 334 96 325 89 306 102 295 99 276 88 263 103 249 111 231 102 218 115 204 109 187 123 182 117 165 131 158 143 165 153 153 147 140 163 126 176 119 183 101 196 98 Z"/><path d="M52 450 Q70 433 98 438 L108 448 Q81 464 53 460Z M45 153l9 -3 5 7 -9 4Z M312 169l6 -3 4 6 -7 4Z M329 180l4 -2 2 3 -4 2Z"/><g fill="none" stroke="#d9e9ed" stroke-width="1.2"><path d="M122 183L179 193 239 144 M111 232L167 233 179 193 270 203 M100 277L163 279 167 233 225 252 280 243 M96 326L155 328 163 279 225 252 245 371 M155 328L172 390 M155 328L231 334"/></g></svg>
             <div id="nationalPins" class="national-pins"></div>
           </div>
