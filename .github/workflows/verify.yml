@@ -36,3 +36,16 @@ jobs:
           for file in *.js; do
             node --check "$file"
           done
+      - name: Install browser test dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Mobile UI regression
+        run: npx playwright test tests/e2e/mobile-experience.spec.mjs
+      - name: Upload UI screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-ui-results
+          path: test-results/
+          retention-days: 7
