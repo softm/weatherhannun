@@ -32,7 +32,7 @@
     var now=finite(c.temperature_2m)?number(c.temperature_2m,1)+'℃'+(finite(c.apparent_temperature)?' · 체감 '+number(c.apparent_temperature,1)+'℃':''):'현재 기온 자료 없음';
     var changeText=change?hour(change.row.time)+' '+labels[change.to]+' 전환':items.length>=12?'12시간 큰 변화 없음':'다음 변화 판단 불가';
     var sample=items.slice(0,12),complete=sample.length===12&&sample.every(function(r){return finite(r.temp)&&finite(r.rain)&&finite(r.mm)&&finite(r.wind);});
-    return {now:now,change:changeText,action:action(items,c),confidence:{level:complete?'보통':'낮음',detail:complete?'시간별 모델 예보 자료 완전':'12시간 자료 일부 누락'},source:'모델 예보 · 관측소 실측 아님',timeline:items.map(function(r){return Object.assign({},r,{kind:kind(r),label:hour(r.time)});})};
+    return {now:now,change:changeText,action:action(items,c),currentTime:c.time||'',confidence:{level:complete?'보통':'낮음',detail:complete?'시간별 모델 예보 자료 완전':'12시간 자료 일부 누락'},source:'모델 예보 · 관측소 실측 아님',timeline:items.map(function(r){return Object.assign({},r,{kind:kind(r),label:hour(r.time)});})};
   }
   return Object.freeze({build:build,rows:rows,kind:kind});
 });
