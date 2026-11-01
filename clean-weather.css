@@ -61,16 +61,18 @@ html[data-weather-theme="dark"][data-stitch-live="true"] #stitch-live-dashboard 
 
 /* Compact current weather: illustration beside readings, evidence below. */
 html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero{min-height:0;padding:14px 16px;display:block}
-html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative{display:grid;grid-template-columns:88px minmax(0,1fr);gap:4px 12px;text-align:left;align-items:center}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative{display:grid;grid-template-columns:72px max-content minmax(0,1fr);gap:4px 10px;text-align:left;align-items:center}
 html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative>div:first-child{grid-column:1/-1;justify-self:start;flex-wrap:wrap;max-width:100%;margin:0 0 6px;padding:0;border:0;background:transparent;box-shadow:none}
-html[data-stitch-live="true"] #stitch-live-dashboard .stitch-current-weather-visual{grid-column:1;grid-row:2/5;align-self:center;width:88px;height:88px;transform:none;margin:0}
-html[data-stitch-live="true"] #stitch-live-dashboard .stitch-current-weather-visual .weather-glyph{width:88px;height:88px}
-html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative>div:nth-child(3){grid-column:2;justify-content:flex-start;line-height:1}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-current-weather-visual{grid-column:1;grid-row:2/4;align-self:center;width:72px;height:72px;transform:none;margin:0}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-current-weather-visual .weather-glyph{width:72px;height:72px}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative>div:nth-child(3){grid-column:2;grid-row:2;justify-content:flex-start;line-height:1}
 html[data-stitch-live="true"] #stitch-live-dashboard [data-official-temp]{font-size:52px;line-height:1.05}
-html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative>div:nth-child(4){grid-column:2;justify-content:flex-start;flex-wrap:wrap;margin:0;font-size:16px;gap:5px}
-html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative>div:nth-child(5){grid-column:2;justify-self:start;flex-direction:column;align-items:flex-start;gap:3px;margin:0;padding:0;border:0;background:transparent;box-shadow:none;font-size:12px}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative>div:nth-child(4){grid-column:2/4;grid-row:3;justify-content:flex-start;flex-wrap:wrap;margin:0;font-size:16px;gap:5px}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative>div:nth-child(5){grid-column:3;grid-row:2;justify-self:start;flex-direction:column;align-items:flex-start;gap:3px;margin:0;padding:0;border:0;background:transparent;box-shadow:none;font-size:12px}
 html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero .daily-delta-block{grid-column:1/-1;width:100%;margin:8px 0 0;padding:8px 0;gap:8px;text-align:left}
 html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero .official-glance-line{grid-column:1/-1;width:100%;margin:0;padding:7px 0 0;text-align:left}
-@media(min-width:711px){html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative{grid-template-columns:100px minmax(0,1fr)}html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero{padding:16px 20px}}
+@media(min-width:711px){html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative{grid-template-columns:88px max-content minmax(0,1fr)}html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero{padding:16px 20px}}
 
 html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative>div:nth-child(5)>span{display:none}
+
+@media(max-width:360px){html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero>.relative{grid-template-columns:56px max-content minmax(0,1fr);column-gap:8px}html[data-stitch-live="true"] #stitch-live-dashboard [data-official-temp]{font-size:42px}html[data-stitch-live="true"] #stitch-live-dashboard .stitch-current-weather-visual,html[data-stitch-live="true"] #stitch-live-dashboard .stitch-current-weather-visual .weather-glyph{width:56px;height:56px}}
