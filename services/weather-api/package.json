@@ -1,0 +1,14 @@
+{
+  "name": "weatherhannun-weather-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.mjs",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-functions": "^7.4.0",
+    "firebase-admin": "^13.0.0"
+  }
+}
