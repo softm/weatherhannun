@@ -14,7 +14,7 @@ test("location comparison is a dedicated same-time screen reachable from locatio
   for (const token of [
     'id="view-compare"', 'id="compareDestination"', 'id="compareTime"',
     'id="compareResults"', 'data-view="compare"', "50% 이상 또는 0.3 mm/h 이상",
-    "같은 유효시각과 같은 12시간"
+    "현재 지역과 목적지의 같은 시간"
   ]) assert.ok(html.includes(token), `missing comparison control ${token}`);
   assert.match(app, /"map","compare","settings"/);
   assert.match(app, /weatherhannun:view/);
@@ -26,6 +26,7 @@ test("location comparison is a dedicated same-time screen reachable from locatio
 test("comparison preserves the selected origin and guards destination request races", () => {
   const script = read("location-compare-ui.js");
   const styles = read("location-compare.css");
+  const html = read("index.html");
   assert.match(script, /requestTicket/);
   assert.match(script, /AbortController/);
   assert.match(script, /ticket !== requestTicket/);
@@ -35,6 +36,10 @@ test("comparison preserves the selected origin and guards destination request ra
   assert.match(script, /강수 자료 부족 · 없음으로 단정하지 않음/);
   assert.match(styles, /\.compare-period-grid\{display:grid;grid-template-columns:1fr 1fr/);
   assert.match(styles, /\.compare-place-grid,\.compare-period-grid\{grid-template-columns:1fr\}/);
+  assert.match(script, /function timelineMarkup/);
+  assert.match(script, /compare-timeline-row/);
+  assert.match(styles, /\.compare-timeline-row\{display:grid/);
+  assert.match(html, /어디가 더 나을까요\?/);
   assert.doesNotMatch(script, /weatherhannun:change-location/);
   assert.doesNotMatch(script, /history\.(pushState|replaceState)/);
   assert.doesNotMatch(script, /searchParams\.set\("(?:lat|lon|name)"/);
