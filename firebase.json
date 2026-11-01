@@ -4,7 +4,25 @@
       "source": "services/google-tts",
       "codebase": "weather-briefing-tts",
       "runtime": "nodejs22",
-      "ignore": ["node_modules", ".git", "*.log", ".env*", "test"]
+      "ignore": [
+        "node_modules",
+        ".git",
+        "*.log",
+        ".env*",
+        "test"
+      ]
+    },
+    {
+      "source": "services/weather-api",
+      "codebase": "weather-api",
+      "runtime": "nodejs22",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "*.log",
+        ".env*",
+        "test"
+      ]
     }
   ]
 }
