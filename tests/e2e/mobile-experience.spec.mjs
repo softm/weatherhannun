@@ -102,3 +102,23 @@ test('rain card appears only when rain needs attention and still opens hourly de
  await start(page,false,true);await expect(page.locator('.rain-decision-card')).toBeVisible();
  await page.locator('.rain-decision-link').click();await expect(page.locator('#view-hourly')).toHaveClass(/active/);
 });
+
+test('briefing includes alerts and persists all notification styles',async({page},info)=>{
+ await start(page);
+ await page.evaluate(()=>document.querySelector('[data-view="notifications"]').click());
+ await expect(page.locator('#view-briefing')).toHaveClass(/active/);
+ await expect(page.locator('#watchSettings')).toBeVisible();
+ await expect(page.locator('#view-notifications')).toHaveCount(0);
+ for(const mode of ['hub','headsup','standard']){
+  await page.locator(`[name=notificationMode][value=${mode}]`).check();
+  await page.locator('#saveWatch').click();
+  await page.reload();
+  await page.evaluate(()=>document.querySelector('[data-view="notifications"]').click());
+  await expect(page.locator(`[name=notificationMode][value=${mode}]`)).toBeChecked();
+ }
+ for(const width of [320,360,375,390,430,768,1280]){
+  await page.setViewportSize({width,height:900});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+  await page.screenshot({path:info.outputPath(`briefing-alerts-${width}.png`),fullPage:true});
+ }
+});
