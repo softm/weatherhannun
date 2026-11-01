@@ -1,5 +1,7 @@
 (function(){
   'use strict';
+  // The Android shell places the WebView below system bars. Do not add the inset twice.
+  if(/WeatherHannunAndroid\//.test(navigator.userAgent||''))document.documentElement.dataset.nativeInsets='true';
   var button=document.getElementById('headerMenuButton');
   var drawer=document.getElementById('headerMenuDrawer');
   var backdrop=document.getElementById('headerMenuBackdrop');

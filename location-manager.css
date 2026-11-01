@@ -125,3 +125,6 @@ html[data-stitch-live="true"] .topbar .top-inner{width:100%;height:56px;min-heig
 html .topbar #locationQuickBar.header-current-location{align-items:center;align-self:center}
 html .topbar .header-current-button,html .topbar .header-find-location,html .topbar .header-save-location,html .topbar #headerMenuButton{height:44px;min-height:44px;align-self:center;line-height:1}
 html .topbar .header-save-location{display:grid;place-items:center}
+
+/* Android reserves system-bar space outside the web header. Browser/PWA keeps its own safe area. */
+html[data-native-insets="true"][data-stitch-live="true"] .topbar{height:57px;padding-top:0}
