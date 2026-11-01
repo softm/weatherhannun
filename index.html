@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="./stitch-theme.css?v=18">
   <link rel="stylesheet" href="./stitch-today.utilities.css">
   <link rel="stylesheet" href="./stitch-today.css?v=19">
-  <link rel="stylesheet" href="./location-manager.css?v=20">
+  <link rel="stylesheet" href="./location-manager.css?v=21">
   <link rel="stylesheet" href="./region-search.css?v=17">
   <link rel="stylesheet" href="./startup-briefing.css?v=45">
   <link rel="stylesheet" href="./stitch-mobile.css?v=16">
@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="./action-progress.css?v=40">
   <link rel="stylesheet" href="./header-menu.css?v=1">
   <link rel="stylesheet" href="./day-flow.css?v=4">
-  <link rel="stylesheet" href="./clean-weather.css?v=1">
+  <link rel="stylesheet" href="./clean-weather.css?v=2">
   <link rel="stylesheet" href="./national-map.css?v=41">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -72,7 +72,7 @@
   <script defer src="./official-data-ui.js?v=40"></script>
   <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
-  <script defer src="./location-manager.js?v=20"></script>
+  <script defer src="./location-manager.js?v=21"></script>
   <script defer src="./daily-delta-ui.js?v=28"></script>
   <script defer src="./location-compare-ui.js?v=32"></script>
   <script defer src="./region-search-core.js?v=16"></script>
@@ -93,6 +93,7 @@
       <div class="top-inner">
         <button type="button" id="headerMenuButton" class="header-menu-button" aria-label="전체 메뉴 열기" aria-controls="headerMenuDrawer" aria-expanded="false"><span class="material-symbols-outlined" aria-hidden="true">menu</span></button>
         <a class="brand" href="./" aria-label="날씨한눈 홈"><span class="brand-symbol" aria-hidden="true">✺</span><span>날씨<span class="brand-accent">한눈</span><small>WEATHER, FOR LIFE</small></span></a>
+        <div id="locationQuickBar" class="header-current-location" aria-label="현재 날씨 지역"></div>
         <div id="siteAccountSlot" class="top-actions topbar-actions" aria-label="계정 및 보관소"></div>
       </div>
     </header>
@@ -121,7 +122,7 @@
         <div class="intro-side"><span id="todayDate">날짜 확인 중</span><span id="updatedBadge" class="freshness">예보 연결 중</span></div>
       </section>
 
-      <section id="locationQuickBar" class="location-shortcuts content-bound" aria-label="현재 날씨 지역" hidden></section>
+
 
       <section id="view-today" class="screen active content-bound" aria-label="오늘 날씨">
         <div class="today-layout">

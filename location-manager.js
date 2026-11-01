@@ -59,8 +59,11 @@
     const quick=$("locationQuickBar");
     if(quick){
       quick.hidden=false;
-      const mode=active?.source==="gps"?"GPS 기준 · 추정 위치":active?.regionCenter?"지역 대표 위치 기준":"선택한 지역 기준";
-      quick.innerHTML='<div class="location-active-summary"><span class="material-symbols-outlined" aria-hidden="true">location_on</span><div class="location-active-copy"><small>현재 날씨 지역</small><strong>'+esc(currentName())+'</strong><span>'+esc(mode)+'</span></div></div><button type="button" class="location-change-button" data-location-manage aria-haspopup="dialog" aria-controls="locationDialog" aria-label="현재 날씨 지역 '+esc(currentName())+' 변경">변경<span class="material-symbols-outlined" aria-hidden="true">edit_location_alt</span></button>';
+      const fullName=currentName();
+      const parts=fullName.trim().split(/\s+/);
+      const shortName=fullName.length>14&&parts.length>1?parts.slice(-2).join(" "):fullName;
+      const gps=active?.source==="gps";
+      quick.innerHTML='<button type="button" class="header-current-button" data-location-manage aria-haspopup="dialog" aria-controls="locationDialog" aria-label="현재 날씨 지역 '+esc(fullName)+(gps?' · GPS 기준 추정 위치':'')+' 변경" title="'+esc(active?.address||fullName)+'"><span class="material-symbols-outlined" aria-hidden="true">'+(gps?'my_location':'location_on')+'</span><strong>'+esc(shortName)+'</strong><span class="material-symbols-outlined" aria-hidden="true">expand_more</span></button>';
     }
   }
   function choose(raw,source="manual",keepDialogOpen=false){
@@ -281,7 +284,7 @@
     });
     $("welcomeLater")?.addEventListener("click",()=>{
       finishIntro();
-      status("상단 지역 옆 ‘변경’을 눌러 위치를 바꿀 수 있습니다.");
+      status("상단 지역명을 눌러 위치를 바꿀 수 있습니다.");
     });
     render();
     initialPermissionFlow();
