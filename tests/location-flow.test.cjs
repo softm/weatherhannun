@@ -157,17 +157,17 @@ test("saved region order controls persist order without switching the active reg
  assert.match(t.node("favoriteLocations").innerHTML,/서울 위로 이동[^>]* disabled/);
  assert.match(t.node("locationMessage").textContent,/서울 순서를 위로/);
 });
-test("an unsaved region can be saved from edit mode",async()=>{
+test("header star saves the current region and then shows a disabled saved star",async()=>{
  const t=boot({initial:{weatherhannun_location:{...SEOSAN,source:"manual"}}});
  await t.settle();
- assert.doesNotMatch(t.node("locationQuickBar").innerHTML,/data-location-save-current/);
+ assert.match(t.node("locationQuickBar").innerHTML,/data-location-save-current/);
  assert.equal(t.node("saveCurrentLocation").disabled,false);
  const button={hasAttribute:name=>name==="data-location-save-current",getAttribute:()=>null};
- t.node("favoriteLocations").handlers.get("click")({target:{closest:()=>button}});
+ t.node("locationQuickBar").handlers.get("click")({target:{closest:()=>button}});
  const saved=JSON.parse(t.localStorage.getItem("weatherhannun_places_v2"));
  assert.equal(saved.length,1);
  assert.equal(saved[0].name,"서산");
- assert.doesNotMatch(t.node("locationQuickBar").innerHTML,/data-location-save-current/);
+ assert.match(t.node("locationQuickBar").innerHTML,/disabled><span aria-hidden="true">★/);
 });
 test("새로 등록한 지역은 기존 등록 지역보다 앞에 저장되고 표시된다",async()=>{
  const SEOUL={name:"서울",lat:37.56,lon:126.98,source:"manual"};
