@@ -26,3 +26,11 @@ html[data-weather-theme="dark"] .day-flow-timeline-meta{color:#c2d4e4}
 html[data-weather-theme="dark"] .day-flow-scrub-hint{color:#ffe071}
 html[data-weather-theme="dark"] .day-flow-now-marker{background:#ffe071}
 html[data-weather-theme="dark"] .day-flow-now-marker b{background:#ffe071;color:#102f4b}
+
+/* 홈 브리핑 안에서는 독립 카드 테두리 대신 하나의 읽기 흐름을 사용한다. */
+#stitch-live-dashboard .day-flow-board.day-flow-integrated{margin:14px 0 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible}
+#stitch-live-dashboard .day-flow-integrated:before{display:none}
+#stitch-live-dashboard .day-flow-integrated .day-flow-heading h2{font-size:11px;font-weight:700;color:var(--st-muted)}
+#stitch-live-dashboard .day-flow-integrated .day-flow-heading{flex-wrap:wrap;gap:6px;margin-bottom:9px}
+#stitch-live-dashboard .day-flow-integrated .day-flow-summary{margin-bottom:12px}
+#stitch-live-dashboard .day-flow-integrated .day-flow-badges{gap:5px}

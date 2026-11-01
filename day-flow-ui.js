@@ -12,7 +12,9 @@
     host.setAttribute('aria-label','오늘 날씨 한눈 요약');
     host.innerHTML='<div class="day-flow-heading"><h2>오늘 한눈</h2><div class="day-flow-badges"><span class="day-flow-source" data-day-source title="관측소 실측이 아닌 모델 예보입니다.">모델 예보</span><span class="day-flow-confidence" data-day-confidence>판단 준비 중</span></div></div><ol class="day-flow-summary"><li><small>지금</small><strong data-day-now>불러오는 중</strong></li><li><small>다음</small><strong data-day-change>분석 중</strong></li><li class="day-flow-action"><small>준비</small><strong data-day-action>계산 중</strong></li></ol><div class="day-flow-timeline-wrap"><div class="day-flow-timeline-stage"><div class="day-flow-scrub-popover" data-day-popover role="status" aria-live="polite" hidden><strong data-day-popover-time></strong><span data-day-popover-detail></span></div><div class="day-flow-timeline" data-day-timeline role="group" aria-label="앞으로 24시간 생활 날씨선. 누른 채 좌우로 움직여 시간별 날씨를 확인하세요."></div><div class="day-flow-now-marker" data-day-now-marker hidden><b data-day-now-label>현재</b></div></div><div class="day-flow-time-axis" data-day-axis aria-label="24시간 시각 눈금"></div><div class="day-flow-timeline-meta"><span data-day-range-label>현재 시각부터 24시간</span><span class="day-flow-scrub-hint">누른 채 좌우로 확인</span><div class="day-flow-legend"><span><i class="good"></i>무난</span><span><i class="rain"></i>비</span><span><i class="cold"></i>추위</span><span><i class="heat"></i>더위</span><span><i class="wind"></i>강풍</span></div></div></div>';
     var stitch=document.getElementById('stitch-live-dashboard'),fallback=document.querySelector('#view-today .today-layout');
-    if(stitch)stitch.prepend(host);else if(fallback)fallback.prepend(host);
+    var slot=document.querySelector('[data-brief-day-flow]');
+    if(slot){slot.append(host);host.classList.add('day-flow-integrated');host.querySelector('.day-flow-heading h2').textContent='핵심 요약 · 24시간';}
+    else if(stitch)stitch.prepend(host);else if(fallback)fallback.prepend(host);
     return host;
   }
 

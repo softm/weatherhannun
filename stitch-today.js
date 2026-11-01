@@ -81,10 +81,10 @@
   function apply(){
    var extras=[...root.querySelectorAll('.rain-decision-card,.outfit-decision-card')];
    if(media.matches){
-    main.replaceChildren(hero,...extras,noteSource,actions,hour);
-    rail.replaceChildren(air,brief,weekly,metrics,notice);
+    main.replaceChildren(hero,brief,...extras,noteSource,actions,hour);
+    rail.replaceChildren(air,weekly,metrics,notice);
     root.replaceChildren(main,rail);
-   }else root.replaceChildren(hero,...extras,noteSource,air,brief,actions,hour,metrics,weekly,notice);
+   }else root.replaceChildren(hero,brief,...extras,noteSource,air,actions,hour,metrics,weekly,notice);
   }
   root.classList.add('stitch-dashboard-grid');
   apply();media.addEventListener?.('change',apply);
@@ -114,7 +114,14 @@
   var openAir=function(){go('air');};
   air.addEventListener('click',openAir);air.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openAir();}});
   put(nodes.briefMessage,'현재 지역의 기상 예보를 분석 중입니다.');
-  nodes.briefPlay?.addEventListener('click',playStitchSpeech);
+  // One home card owns the quick facts, timeline, narration and player.
+  var flowSlot=document.createElement('div');flowSlot.dataset.briefDayFlow='';
+  var explanation=document.createElement('details');explanation.className='stitch-brief-explanation';
+  var explanationTitle=document.createElement('summary');explanationTitle.textContent='날씨 해설 펼쳐보기';
+  explanation.append(explanationTitle,nodes.briefMessage);
+  var player=brief.querySelector('.stitch-briefing-player');
+  brief.append(flowSlot,explanation,player);brief.classList.add('stitch-unified-briefing');
+  nodes.briefPlay?.addEventListener('click',function(){if(!stitchSpeech)explanation.open=true;playStitchSpeech();});
   nodes.briefRoom?.addEventListener('click',function(){go('briefing');});
   if(nodes.matrix)[...nodes.matrix.children].forEach(card=>{
    put(card.querySelector('.font-tabular-metric'),'--');
