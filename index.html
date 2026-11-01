@@ -52,8 +52,8 @@
   <script defer src="./briefing-hub-core.js?v=1"></script>
   <script defer src="./briefing-hub.js?v=2"></script>
   <script defer src="./weather-icons.js?v=17"></script>
-  <script defer src="./alert-rules-core.js?v=32"></script>
-  <script defer src="./forecast-insights.js?v=36"></script>
+  <script defer src="./alert-rules-core.js?v=33"></script>
+  <script defer src="./forecast-insights.js?v=37"></script>
   <script defer src="./stitch-layout.js?v=18"></script>
   <script defer src="./daily-delta-core.js?v=27"></script>
   <script defer src="./official-data-core.js?v=40"></script>
@@ -75,7 +75,7 @@
   <script defer src="./national-weather-core.js?v=1"></script>
   <script defer src="./hourly-explorer-core.js?v=2"></script>
   <script defer src="./hourly-explorer.js?v=2"></script>
-  <script defer src="./app.js?v=48"></script>
+  <script defer src="./app.js?v=49"></script>
   <script defer src="./official-data-ui.js?v=42"></script>
   <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
@@ -93,7 +93,7 @@
   <script defer src="./agriculture-planner.js?v=35"></script>
   <script defer src="./startup-briefing.js?v=45"></script>
   <script defer src="./account-header.js?v=8"></script>
-  <link rel="stylesheet" href="./mobile-experience.css?v=3">
+  <link rel="stylesheet" href="./mobile-experience.css?v=4">
 </head>
 <body>
   <div class="app-shell">
@@ -112,7 +112,7 @@
       <button type="button" id="locationButton" class="header-location-button" aria-label="현재 지역 변경"><span class="material-symbols-outlined" aria-hidden="true">location_on</span><span><small>현재 지역</small><strong id="locationTitle">서산</strong></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
       <nav class="desktop-nav header-menu-nav" aria-label="화면 이동">
         <button class="nav-button active" data-view="today"><span class="material-symbols-outlined" aria-hidden="true">home</span>오늘</button>
-        <button class="nav-button" data-view="briefing"><span class="material-symbols-outlined" aria-hidden="true">campaign</span>브리핑</button>
+        <button class="nav-button" data-view="briefing"><span class="material-symbols-outlined" aria-hidden="true">campaign</span>브리핑 · 알림</button>
         <button class="nav-button" data-view="hourly"><span class="material-symbols-outlined" aria-hidden="true">schedule</span>시간별</button>
         <button class="nav-button" data-view="weekly"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>주간예보</button>
         <button class="nav-button" data-view="activity"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>활동 추천</button>
@@ -121,7 +121,6 @@
       </nav>
       <div class="header-menu-tools" aria-label="날씨 및 앱 도구">
         <button type="button" id="refreshButton"><span class="material-symbols-outlined" aria-hidden="true">refresh</span><span><b>날씨 새로고침</b><small>현재 지역의 최신 정보 다시 받기</small></span></button>
-        <button type="button" data-view="notifications"><span class="material-symbols-outlined" aria-hidden="true">notifications</span><span><b>알림 설정</b><small>날씨 조건·예약·미리보기 알림</small></span></button>
         <button type="button" id="settingsButton" data-view="settings"><span class="material-symbols-outlined" aria-hidden="true">settings</span><span><b>앱 설정</b><small>알림·화면 날씨·테마 관리</small></span></button>
       </div>
     </aside>
@@ -191,7 +190,7 @@
       </section>
 
       <section id="view-briefing" class="screen content-bound" aria-label="맞춤 날씨 브리핑">
-        <header class="brief-hub-lead"><div><span class="section-overline">PERSONAL WEATHER AUDIO</span><h2>내 생활에 맞는 브리핑</h2><p>필요한 날씨만 골라 듣고, 원하는 시각에 받아보세요.</p></div><span class="brief-schedule-status" id="briefScheduleStatus">예약 브리핑 꺼짐</span></header>
+        <header class="brief-hub-lead"><div><span class="section-overline">PERSONAL WEATHER AUDIO</span><h2>브리핑 · 알림</h2><p>필요한 날씨만 골라 듣고, 원하는 시각에 받아보세요.</p></div><span class="brief-schedule-status" id="briefScheduleStatus">예약 브리핑 꺼짐</span></header>
         <div class="brief-hub-grid">
           <article class="brief-hub-player stitch-card" aria-live="polite"><div class="brief-player-head"><div><span class="section-overline">NOW READY</span><h3 id="briefHubTitle">한눈 요약</h3><p id="briefHubCaption">지금 가장 중요한 변화</p></div><button type="button" id="briefHubPlay" class="brief-hub-play" aria-label="선택한 날씨 브리핑 지금 듣기"><span class="brief-play-icon material-symbols-outlined" aria-hidden="true">play_arrow</span><span class="brief-play-label"><b>지금 듣기</b><small>HD 날씨 브리핑</small></span><span class="brief-sound-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button></div><div id="briefHubText" class="brief-hub-copy">최신 예보를 연결하고 있습니다.</div><div class="brief-hub-meta"><span id="briefHubPlayStatus" class="brief-hub-status"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span> HD 음성 준비 · 실패 시 기기 음성</span><span>읽는 문장을 자동으로 강조합니다</span></div><div id="briefHubEvidence" class="brief-hub-evidence"></div></article>
           <aside class="brief-type-panel"><div class="brief-type-heading"><span>무엇을 들을까요?</span><small>종류 선택 → 듣기</small></div><nav id="briefHubTypes" class="brief-hub-types" aria-label="브리핑 종류"><p class="muted-text">예보를 불러오고 있습니다.</p></nav></aside>
@@ -203,6 +202,42 @@
           <div class="brief-setting-step"><div class="brief-step-title"><span>3</span><div><b>어떻게 받을까요?</b><small>소리가 부담되면 알림만 선택하세요.</small></div></div><div class="brief-delivery" role="radiogroup" aria-label="예약 브리핑 전달 방식"><label><input type="radio" name="briefDelivery" value="notice"><span class="material-symbols-outlined">notifications</span><span><b>알림만</b><small>소리 없이 알려드려요</small></span></label><label><input type="radio" name="briefDelivery" value="tap"><span class="material-symbols-outlined">touch_app</span><span><b>눌러서 듣기</b><small>알림을 누르면 재생</small></span></label><label><input type="radio" name="briefDelivery" value="auto"><span class="material-symbols-outlined">volume_up</span><span><b>바로 재생</b><small>설정 시각에 즉시 듣기</small></span></label></div></div>
           <div class="brief-schedule-summary"><span class="material-symbols-outlined" aria-hidden="true">event_available</span><div><small>내 예약</small><b id="briefScheduleSummary">예약을 켜면 선택 내용이 여기에 표시됩니다.</b></div><span class="brief-auto-save">자동 저장됨</span></div>
           <p class="brief-setting-note">앱이 열려 있을 때 예약을 실행합니다. 기기 정책이 자동 재생을 막으면 알림으로 전환합니다. 모델 예보를 읽으며 공식 관측·특보를 대신하지 않습니다.</p>
+        </section>
+        <section id="watchSettings" class="watch-settings glass-card" aria-label="날씨 알림 조건">
+          <span class="section-overline">MY WEATHER ALERTS</span><h3>맞춤 날씨 알림</h3>
+          <p class="watch-intro">Android 약 15분 주기 · 웹은 실행 중 확인</p>
+          <fieldset class="notification-modes"><legend>알림 표시 방식</legend>
+            <label><input type="radio" name="notificationMode" value="standard" checked><span><b>일반 알림</b><small>조건·예약에 맞춰 알림창에 표시</small></span></label>
+            <label><input type="radio" name="notificationMode" value="hub"><span><b>HUB · 상시 날씨</b><small>알림창에 날씨와 브리핑 바로가기 유지</small></span></label>
+            <label><input type="radio" name="notificationMode" value="headsup"><span><b>헤드업 알림</b><small>새 알림을 화면 위에 잠깐 표시</small></span></label>
+          </fieldset>
+          <p class="watch-note" id="notificationModeNote">Android 앱 업데이트 후 적용됩니다. 웹에서는 일반 브라우저 알림으로 표시합니다.</p>
+          <article class="notification-preview" aria-labelledby="notificationPreviewHeading">
+            <div class="notification-preview-heading"><div><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span><span><b id="notificationPreviewHeading">Android 알림 미리보기</b><small>실제 모양은 기기와 시스템 테마에 따라 달라집니다.</small></span></div><span class="notification-preview-live">예보 요약</span></div>
+            <div class="notification-preview-surface" aria-live="polite">
+              <span class="notification-preview-brand" aria-hidden="true"><img src="./assets/brand/weatherhannun-192.png?v=18" alt=""></span>
+              <span id="notificationPreviewWeatherIcon" class="notification-preview-weather weather-icon-host" aria-hidden="true"></span>
+              <span class="notification-preview-copy"><strong id="notificationPreviewTitle" class="notification-preview-location">선택 지역</strong><span class="notification-preview-main"><b id="notificationPreviewTemperature">--°</b><em id="notificationPreviewCondition">날씨 확인 중</em></span><span id="notificationPreviewBody">체감·최고/최저·강수 시각과 우산 판단을 요약합니다.</span><small id="notificationPreviewSchedule">오늘 준비 07:00 · 내일 계획 19:00</small></span>
+            </div>
+            <div class="notification-preview-actions" aria-label="알림에서 실행할 수 있는 기능"><span><span class="material-symbols-outlined" aria-hidden="true">volume_up</span>브리핑 듣기</span><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span>시간별</span><span><span class="material-symbols-outlined" aria-hidden="true">tune</span>알림 설정</span></div>
+            <div class="watch-action notification-preview-send"><button type="button" id="previewNotification"><span class="notification-preview-send-icon material-symbols-outlined" aria-hidden="true">notifications_active</span><span class="notification-preview-send-copy"><b>미리보기 알림 보내기</b><small>내 휴대폰 알림창에서 확인</small></span><span class="material-symbols-outlined notification-preview-send-arrow" aria-hidden="true">arrow_forward</span></button></div><p id="previewNotificationStatus" class="watch-note" role="status">저장한 방식으로 예시 알림 1회 · 60초 뒤 닫힘</p>
+          </article>
+          <div class="watch-choices watch-rule-grid">
+            <label><span><input id="watchRain" type="checkbox" checked>☂ 12시간 내 비</span><span class="watch-value">강수확률 <select id="rainThreshold" aria-label="비 알림 강수확률"><option value="30">30%</option><option value="50">50%</option><option value="65">65%</option><option value="70">70%</option><option value="80">80%</option></select> 이상</span></label>
+            <label><span><input id="watchDry" type="checkbox" checked>🌂 비 가능성 낮음</span><span class="watch-value">안 올 가능성 <select id="dryThreshold" aria-label="비 안 올 가능성 기준"><option value="70">70%</option><option value="80">80%</option><option value="90">90%</option></select> 이상</span></label>
+            <label><span><input id="watchClear" type="checkbox" checked>☀ 맑은 시간</span><span class="watch-value"><select id="clearHours" aria-label="맑은 시간 지속 기준"><option value="2">2시간</option><option value="3">3시간</option><option value="4">4시간</option><option value="6">6시간</option></select> 이상 지속</span></label>
+            <label><span><input id="watchFrost" type="checkbox" checked>❄ 저온·서리</span><span class="watch-value">48시간 내 2°C 이하</span></label>
+            <label><span><input id="watchWind" type="checkbox" checked>🌬 돌풍</span><span class="watch-value">24시간 내 35km/h 이상</span></label>
+          </div>
+          <div class="watch-subheading"><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span><b>정기 요약 받을 시각</b></span><small>선택 시각부터 시스템이 실행 가능한 첫 시점에 하루 한 번 보냅니다.</small></div>
+          <div class="watch-schedule-grid" aria-label="정기 날씨 요약">
+            <label><span><input id="morningSummary" type="checkbox">🔊 오늘 날씨 브리핑</span><span class="watch-time-field"><small>알림 시작</small><input id="morningTime" type="time" value="07:00" aria-label="오늘 날씨 브리핑 알림 시작 시각"></span></label>
+            <label><span><input id="eveningSummary" type="checkbox">🌙 내일 계획 요약</span><span class="watch-time-field"><small>발송 시작</small><input id="eveningTime" type="time" value="19:00" aria-label="내일 계획 요약 알림 시작 시각"></span></label>
+            <label class="quiet-hours"><span><input id="quietHours" type="checkbox">🔕 방해금지</span><span><input id="quietStart" type="time" value="22:00" aria-label="방해금지 시작">–<input id="quietEnd" type="time" value="06:00" aria-label="방해금지 종료"></span></label>
+          </div>
+          <p class="watch-note">‘비 가능성 낮음’은 별도 확률을 만들지 않고, 향후 6시간의 각 시간별 강수확률이 선택 기준 이하인지 확인합니다. 맑음은 낮 시간의 하늘 상태·강수확률·예상 강수량을 함께 봅니다.</p>
+          <div class="watch-action"><button type="button" id="saveWatch">알림 조건 저장</button><button type="button" class="alt" id="allowNotify">알림 권한 요청</button></div>
+          <div id="alertList" aria-live="polite"></div><p id="savedAlertStatus" class="watch-note">조건 저장 후 백그라운드 알림 시작</p><p id="foregroundNotice" class="watch-note">절전 중 알림 지연 가능</p>
         </section>
       </section>
 
@@ -421,39 +456,6 @@
         </section>
       </section>
 
-      <section id="view-notifications" class="screen content-bound" aria-label="알림 설정">
-        <div class="page-header settings-page-header"><div><span class="section-overline">NOTIFICATIONS</span><h2>알림 설정</h2><p>날씨 조건 · 예약 시각 · 미리보기</p></div></div>
-        <section id="watchSettings" class="watch-settings glass-card" aria-label="날씨 알림 조건">
-          <span class="section-overline">MY WEATHER ALERTS</span><h3>맞춤 날씨 알림</h3>
-          <p class="watch-intro">Android 약 15분 주기 · 웹은 실행 중 확인</p>
-          <article class="notification-preview" aria-labelledby="notificationPreviewHeading">
-            <div class="notification-preview-heading"><div><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span><span><b id="notificationPreviewHeading">Android 알림 미리보기</b><small>실제 모양은 기기와 시스템 테마에 따라 달라집니다.</small></span></div><span class="notification-preview-live">예보 요약</span></div>
-            <div class="notification-preview-surface" aria-live="polite">
-              <span class="notification-preview-brand" aria-hidden="true"><img src="./assets/brand/weatherhannun-192.png?v=18" alt=""></span>
-              <span id="notificationPreviewWeatherIcon" class="notification-preview-weather weather-icon-host" aria-hidden="true"></span>
-              <span class="notification-preview-copy"><strong id="notificationPreviewTitle" class="notification-preview-location">선택 지역</strong><span class="notification-preview-main"><b id="notificationPreviewTemperature">--°</b><em id="notificationPreviewCondition">날씨 확인 중</em></span><span id="notificationPreviewBody">체감·최고/최저·강수 시각과 우산 판단을 요약합니다.</span><small id="notificationPreviewSchedule">오늘 준비 07:00 · 내일 계획 19:00</small></span>
-            </div>
-            <div class="notification-preview-actions" aria-label="알림에서 실행할 수 있는 기능"><span><span class="material-symbols-outlined" aria-hidden="true">volume_up</span>브리핑 듣기</span><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span>시간별</span><span><span class="material-symbols-outlined" aria-hidden="true">tune</span>알림 설정</span></div>
-            <div class="watch-action notification-preview-send"><button type="button" id="previewNotification"><span class="notification-preview-send-icon material-symbols-outlined" aria-hidden="true">notifications_active</span><span class="notification-preview-send-copy"><b>미리보기 알림 보내기</b><small>내 휴대폰 알림창에서 확인</small></span><span class="material-symbols-outlined notification-preview-send-arrow" aria-hidden="true">arrow_forward</span></button></div><p id="previewNotificationStatus" class="watch-note" role="status">예시 알림 1회 · 저장 조건 유지</p>
-          </article>
-          <div class="watch-choices watch-rule-grid">
-            <label><span><input id="watchRain" type="checkbox" checked>☂ 12시간 내 비</span><span class="watch-value">강수확률 <select id="rainThreshold" aria-label="비 알림 강수확률"><option value="30">30%</option><option value="50">50%</option><option value="65">65%</option><option value="70">70%</option><option value="80">80%</option></select> 이상</span></label>
-            <label><span><input id="watchDry" type="checkbox" checked>🌂 비 가능성 낮음</span><span class="watch-value">안 올 가능성 <select id="dryThreshold" aria-label="비 안 올 가능성 기준"><option value="70">70%</option><option value="80">80%</option><option value="90">90%</option></select> 이상</span></label>
-            <label><span><input id="watchClear" type="checkbox" checked>☀ 맑은 시간</span><span class="watch-value"><select id="clearHours" aria-label="맑은 시간 지속 기준"><option value="2">2시간</option><option value="3">3시간</option><option value="4">4시간</option><option value="6">6시간</option></select> 이상 지속</span></label>
-            <label><span><input id="watchFrost" type="checkbox" checked>❄ 저온·서리</span><span class="watch-value">48시간 내 2°C 이하</span></label>
-            <label><span><input id="watchWind" type="checkbox" checked>🌬 돌풍</span><span class="watch-value">24시간 내 35km/h 이상</span></label>
-          </div>
-          <div class="watch-subheading"><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span><b>정기 요약 받을 시각</b></span><small>선택 시각부터 시스템이 실행 가능한 첫 시점에 하루 한 번 보냅니다.</small></div>
-          <div class="watch-schedule-grid" aria-label="정기 날씨 요약">
-            <label><span><input id="morningSummary" type="checkbox">🔊 오늘 날씨 브리핑</span><span class="watch-time-field"><small>알림 시작</small><input id="morningTime" type="time" value="07:00" aria-label="오늘 날씨 브리핑 알림 시작 시각"></span></label>
-            <label><span><input id="eveningSummary" type="checkbox">🌙 내일 계획 요약</span><span class="watch-time-field"><small>발송 시작</small><input id="eveningTime" type="time" value="19:00" aria-label="내일 계획 요약 알림 시작 시각"></span></label>
-            <label class="quiet-hours"><span><input id="quietHours" type="checkbox">🔕 방해금지</span><span><input id="quietStart" type="time" value="22:00" aria-label="방해금지 시작">–<input id="quietEnd" type="time" value="06:00" aria-label="방해금지 종료"></span></label>
-          </div>
-          <p class="watch-note">‘비 가능성 낮음’은 별도 확률을 만들지 않고, 향후 6시간의 각 시간별 강수확률이 선택 기준 이하인지 확인합니다. 맑음은 낮 시간의 하늘 상태·강수확률·예상 강수량을 함께 봅니다.</p>
-          <div class="watch-action"><button type="button" id="saveWatch">알림 조건 저장</button><button type="button" class="alt" id="allowNotify">알림 권한 요청</button></div>
-          <div id="alertList" aria-live="polite"></div><p id="savedAlertStatus" class="watch-note">조건 저장 후 백그라운드 알림 시작</p><p id="foregroundNotice" class="watch-note">절전 중 알림 지연 가능</p>
-        </section>
-      </section>
 
       <section class="status-footer content-bound" aria-label="데이터 제공 정보">
         <div><span class="status-light"></span><b id="dataFooterStatus">예보 갱신 상태 확인 중</b><span id="modelTime">—</span></div><a href="./data-status.html">수집 상태 상세 →</a>

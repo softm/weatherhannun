@@ -352,6 +352,8 @@
     $("airMetrics").innerHTML=values.map(function(v,i){var st=statuses[i];var percent=finite(v.value)?clamp(v.value/(v.thresholds[2]*1.5)*100,1,100):0;return '<div><div class="air-row-head"><b>'+v.name+'</b><span>'+st.grade+' <strong>'+num(v.value,1)+'</strong></span></div><div class="air-bar"><div style="width:'+percent+'%"></div></div></div>';}).join("");
   }
   function setView(view){
+    var openAlerts=view==="notifications";
+    if(openAlerts)view="briefing";
     if(!["today","briefing","hourly","weekly","activity","air","map","compare","settings","notifications"].includes(view))return;
     if(view!=="map")setMapFocus(false);
     STATE.view=view;
@@ -359,6 +361,7 @@
     document.querySelectorAll(".screen").forEach(function(el){el.classList.toggle("active",el.id==="view-"+view);});
     document.querySelectorAll("[data-view]").forEach(function(el){var a=el.dataset.view===view;el.classList.toggle("active",a);if(el.classList.contains("nav-button")||el.closest(".mobile-nav"))el.setAttribute("aria-current",a?"page":"false");});
     window.scrollTo({top:0,behavior:"instant"});
+    if(openAlerts)$("watchSettings")?.scrollIntoView({block:"start"});
     if(view==="map")showMap();
     window.dispatchEvent(new CustomEvent("weatherhannun:view",{detail:{
       view:view,

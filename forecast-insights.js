@@ -185,7 +185,7 @@
     if(data?.loc?.temporary)return false;
     const bridge=nativeBridge();
     if(!bridge||!latestLocation||!finite(Number(latestLocation.lat))||!finite(Number(latestLocation.lon)))return false;
-    const payload={version:2,configured:!!prefs.configured,location:{name:String(latestLocation.name||"선택 지역").slice(0,75),lat:Number(latestLocation.lat),lon:Number(latestLocation.lon)},rules:{rain:!!prefs.rain,rainThreshold:prefs.rainThreshold,dry:!!prefs.dry,dryThreshold:prefs.dryThreshold,clear:!!prefs.clear,clearHours:prefs.clearHours,frost:!!prefs.frost,wind:!!prefs.wind},schedules:{morning:!!prefs.morning,morningTime:prefs.morningTime,evening:!!prefs.evening,eveningTime:prefs.eveningTime},quietHours:{enabled:!!prefs.quiet,start:prefs.quietStart,end:prefs.quietEnd}};
+    const payload={version:2,configured:!!prefs.configured,notificationMode:prefs.notificationMode,location:{name:String(latestLocation.name||"선택 지역").slice(0,75),lat:Number(latestLocation.lat),lon:Number(latestLocation.lon)},rules:{rain:!!prefs.rain,rainThreshold:prefs.rainThreshold,dry:!!prefs.dry,dryThreshold:prefs.dryThreshold,clear:!!prefs.clear,clearHours:prefs.clearHours,frost:!!prefs.frost,wind:!!prefs.wind},schedules:{morning:!!prefs.morning,morningTime:prefs.morningTime,evening:!!prefs.evening,eveningTime:prefs.eveningTime},quietHours:{enabled:!!prefs.quiet,start:prefs.quietStart,end:prefs.quietEnd}};
     try{bridge.saveAlertConfiguration(JSON.stringify(payload));return true;}catch(_){return false;}
   }
   function renderAlerts(){
@@ -237,7 +237,7 @@
     if(icon)icon.innerHTML=sky(code,isDay);
   }
   function saveAlertPreferences(){
-    prefs=rules.normalizePreferences({version:2,configured:true,rain:el("watchRain").checked,rainThreshold:Number(el("rainThreshold").value),dry:el("watchDry").checked,dryThreshold:Number(el("dryThreshold").value),clear:el("watchClear").checked,clearHours:Number(el("clearHours").value),frost:el("watchFrost").checked,wind:el("watchWind").checked,morning:el("morningSummary").checked,morningTime:el("morningTime").value,evening:el("eveningSummary").checked,eveningTime:el("eveningTime").value,quiet:el("quietHours").checked,quietStart:el("quietStart").value,quietEnd:el("quietEnd").value});
+    prefs=rules.normalizePreferences({version:2,configured:true,notificationMode:document.querySelector("[name=notificationMode]:checked")?.value,rain:el("watchRain").checked,rainThreshold:Number(el("rainThreshold").value),dry:el("watchDry").checked,dryThreshold:Number(el("dryThreshold").value),clear:el("watchClear").checked,clearHours:Number(el("clearHours").value),frost:el("watchFrost").checked,wind:el("watchWind").checked,morning:el("morningSummary").checked,morningTime:el("morningTime").value,evening:el("eveningSummary").checked,eveningTime:el("eveningTime").value,quiet:el("quietHours").checked,quietStart:el("quietStart").value,quietEnd:el("quietEnd").value});
     try{localStorage.setItem(TRACK_KEY,JSON.stringify(prefs));}catch(_){}
     renderAlerts();
     const synced=syncWithAndroid();
@@ -269,6 +269,17 @@
     if(apply)apply.addEventListener("click",()=>{
       if(!start.value||!end.value||start.value>end.value){el("windowCaption").textContent="시작일은 종료일 이전이어야 합니다.";return;}
       rangeStart=start.value;rangeEnd=end.value;period="custom";updateButtons();rainSummary();
+    });
+    const modeBridge=nativeBridge();
+    let supportsModes=false;
+    try{supportsModes=Number(modeBridge?.notificationModesVersion?.())>=1;}catch(_){}
+    if(modeBridge&&!supportsModes)el("notificationModeNote").textContent="새 표시 방식을 사용하려면 Android 앱을 업데이트하세요. 선택값은 저장됩니다.";
+    else if(supportsModes)el("notificationModeNote").textContent="알림 조건 저장을 누르면 적용됩니다. 팝업·소리는 Android 시스템 설정을 따릅니다.";
+    document.querySelectorAll("[name=notificationMode]").forEach(control=>{
+      control.checked=control.value===prefs.notificationMode;
+      control.addEventListener("change",()=>{
+        el("notificationModeNote").textContent=control.value==="headsup"?"저장 후 적용 · 헤드업 표시와 소리는 Android 알림 설정·방해금지 상태에 따라 달라집니다.":control.value==="hub"?"저장 후 적용 · 약 15분 주기로 갱신하며 Android 버전에 따라 직접 지울 수 있습니다.":"저장 후 적용 · 조건과 예약에 맞춰 일반 알림을 보냅니다.";
+      });
     });
     const save=el("saveWatch");if(save)save.addEventListener("click",saveAlertPreferences);
     const preview=el("previewNotification");if(preview)preview.addEventListener("click",()=>{

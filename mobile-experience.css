@@ -153,3 +153,13 @@ html #stitch-live-dashboard .stitch-current-briefing .stitch-briefing-actions bu
 
 /* A complete low-risk rain forecast needs no extra home card. */
 html .rain-decision-card[hidden]{display:none!important}
+
+/* Briefing and notifications share one destination. */
+#view-briefing #watchSettings{margin-top:12px;scroll-margin-top:76px;min-width:0}
+.notification-modes{border:0;margin:12px 0;padding:0;display:grid;gap:8px}
+.notification-modes legend{font-size:16px;font-weight:700;margin-bottom:8px}
+.notification-modes label{display:flex;align-items:center;gap:10px;min-height:56px;padding:10px 12px;border:1px solid var(--st-line);border-radius:12px;cursor:pointer;background:var(--st-surface)}
+.notification-modes label:has(input:checked){border-color:var(--st-accent);box-shadow:inset 3px 0 var(--st-accent)}
+.notification-modes input{width:20px;height:20px;flex-shrink:0;accent-color:var(--st-accent)}
+.notification-modes b,.notification-modes small{display:block}
+.notification-modes b{font-size:15px}.notification-modes small{font-size:13px;color:var(--ux-muted);line-height:1.5}

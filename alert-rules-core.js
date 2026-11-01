@@ -7,6 +7,7 @@
   const DEFAULTS = Object.freeze({
     version: 2,
     configured: false,
+    notificationMode: "standard",
     rain: true,
     rainThreshold: 65,
     dry: true,
@@ -34,6 +35,7 @@
     const out = defaults();
     if (!saved || typeof saved !== "object") return out;
     const legacy = !Object.prototype.hasOwnProperty.call(saved, "version");
+    out.notificationMode = ["standard", "hub", "headsup"].includes(saved.notificationMode) ? saved.notificationMode : "standard";
     out.configured = boolean(saved.configured, true);
     out.rain = boolean(saved.rain, out.rain);
     out.rainThreshold = number(saved.rainThreshold, 65, 20, 100);
