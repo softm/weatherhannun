@@ -13,3 +13,8 @@ test('periods and dates do not extend beyond supplied forecast',()=>{
  assert.deepEqual(C.rows({current:{time:'2030-01-01T00:00'},hourly:{time:all.map(x=>x.time)}}),[]);
  assert.deepEqual(C.rows({}),[]);
 });
+
+test('wall clock can advance beyond an older current observation',()=>{
+ const weather={current:{time:'2026-11-02T00:00'},hourly:{time:['2026-11-02T00:00','2026-11-02T01:00','2026-11-02T02:00'],temperature_2m:[10,11,12]}};
+ assert.equal(C.rows(weather,'2026-11-02T01:45')[0].time,'2026-11-02T01:00');
+});
