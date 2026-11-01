@@ -1,19 +1,116 @@
 import {onRequest} from "firebase-functions/v2/https";
-import {defineSecret} from "firebase-functions/params";
-import {initializeApp,getApps} from "firebase-admin/app";
-import {getFirestore} from "firebase-admin/firestore";
-if(!getApps().length)initializeApp();
-const db=getFirestore();
-const kmaKey=defineSecret("KMA_API_KEY");
-const airKey=defineSecret("AIRKOREA_API_KEY");
-const json=(res,status,body)=>res.status(status).json(body);
-const finite=x=>x!==undefined&&x!==null&&x!==""&&Number.isFinite(Number(x));
-export function coords(q){const lat=Number(q.lat),lon=Number(q.lon);if(!finite(q.lat)||!finite(q.lon)||lat < -90||lat>90||lon < -180||lon>180)throw Error("invalid_coordinates");return {lat,lon};}
-export function inKorea({lat,lon}){return lat>=33&&lat<=39&&lon>=124&&lon<=132;}
-export function grid(lat,lon){const RE=6371.00877,GRID=5,SLAT1=30,SLAT2=60,OLON=126,OLAT=38,XO=43,YO=136,DEGRAD=Math.PI/180;const re=RE/GRID,slat1=SLAT1*DEGRAD,slat2=SLAT2*DEGRAD,olon=OLON*DEGRAD,olat=OLAT*DEGRAD;let sn=Math.tan(Math.PI*.25+slat2*.5)/Math.tan(Math.PI*.25+slat1*.5);sn=Math.log(Math.cos(slat1)/Math.cos(slat2))/Math.log(sn);let sf=Math.tan(Math.PI*.25+slat1*.5);sf=Math.pow(sf,sn)*Math.cos(slat1)/sn;let ro=Math.tan(Math.PI*.25+olat*.5);ro=re*sf/Math.pow(ro,sn);let ra=Math.tan(Math.PI*.25+lat*DEGRAD*.5);ra=re*sf/Math.pow(ra,sn);let theta=lon*DEGRAD-olon;if(theta>Math.PI)theta-=2*Math.PI;if(theta< -Math.PI)theta+=2*Math.PI;theta*=sn;return {nx:Math.floor(ra*Math.sin(theta)+XO+.5),ny:Math.floor(ro-ra*Math.cos(theta)+YO+.5)};}
-async function fetchJson(url,headers={}){let last;for(let i=0;i<3;i++){const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),9000);try{const r=await fetch(url,{headers,signal:ctrl.signal});if(!r.ok)throw Error("upstream_"+r.status);return await r.json();}catch(e){last=e;if(i<2)await new Promise(resolve=>setTimeout(resolve,250*2**i));}finally{clearTimeout(t);}}throw last;}
-function kstBase(now=new Date()){const kst=new Date(now.getTime()+9*3600000);const h=kst.getUTCHours();kst.setUTCHours(h<1?0:h,0,0,0);if(h<1)kst.setUTCDate(kst.getUTCDate()-1);return {base_date:kst.toISOString().slice(0,10).replaceAll("-",""),base_time:"2300"};}
-export function normalizeMet(data,loc){const series=data?.properties?.timeseries;if(!Array.isArray(series)||!series.length)throw Error("invalid_met_payload");const hourly=series.slice(0,168).map(x=>({time:x.time,temperature:x.data?.instant?.details?.air_temperature??null,humidity:x.data?.instant?.details?.relative_humidity??null,windSpeed:x.data?.instant?.details?.wind_speed??null,precipitation:x.data?.next_1_hours?.details?.precipitation_amount??null,condition:x.data?.next_1_hours?.summary?.symbol_code??null}));return {location:{...loc,timezone:"UTC"},current:hourly[0],hourly,daily:[],airQuality:null,alerts:[],officialForecast:null,comparison:null,source:{provider:"MET Norway",issuedAt:data.properties?.meta?.updated_at??null,fetchedAt:new Date().toISOString(),attribution:"MET Norway (met.no)"},stale:false};}
-async function met(loc){const url=new URL("https://api.met.no/weatherapi/locationforecast/2.0/compact");url.searchParams.set("lat",String(loc.lat));url.searchParams.set("lon",String(loc.lon));return normalizeMet(await fetchJson(url,{"User-Agent":"WeatherHannun/0.2 contact: https://softm.github.io/weatherhannun/"}),loc);}
-async function kma(loc){const key=kmaKey.value();if(!key)throw Error("kma_key_missing");const {nx,ny}=grid(loc.lat,loc.lon),base=kstBase();const url=new URL("https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst");url.searchParams.set("serviceKey",key);url.searchParams.set("pageNo","1");url.searchParams.set("numOfRows","1000");url.searchParams.set("dataType","JSON");url.searchParams.set("base_date",base.base_date);url.searchParams.set("base_time",base.base_time);url.searchParams.set("nx",String(nx));url.searchParams.set("ny",String(ny));const data=await fetchJson(url);const items=data?.response?.body?.items?.item;if(!Array.isArray(items)||!items.length)throw Error("kma_empty_forecast");const byTime=new Map();for(const item of items){const stamp=item.fcstDate+"T"+item.fcstTime.slice(0,2)+":"+item.fcstTime.slice(2);const row=byTime.get(stamp)||{time:stamp};row[item.category]=item.fcstValue;byTime.set(stamp,row);}const hourly=[...byTime.values()].sort((a,b)=>a.time.localeCompare(b.time)).map(x=>({time:x.time,temperature:finite(x.TMP)?Number(x.TMP):null,humidity:finite(x.REH)?Number(x.REH):null,windSpeed:finite(x.WSD)?Number(x.WSD):null,precipitation:x.PCP??null,precipitationProbability:finite(x.POP)?Number(x.POP):null,sky:x.SKY??null,precipitationType:x.PTY??null}));return {location:{...loc,timezone:"Asia/Seoul",grid:{nx,ny}},current:null,hourly,daily:[],airQuality:null,alerts:[],officialForecast:null,comparison:null,source:{provider:"KMA village forecast",issuedAt:base.base_date+"T"+base.base_time.slice(0,2)+":"+base.base_time.slice(2)+"+09:00",fetchedAt:new Date().toISOString(),attribution:"기상청 단기예보 (실황 아님)"},stale:false};}
-export const weatherApi=onRequest({region:"asia-northeast3",cors:["https://softm.github.io"],secrets:[kmaKey,airKey],maxInstances:10,timeoutSeconds:40},async(req,res)=>{if(req.method!=="GET")return json(res,405,{error:"method_not_allowed"});let loc;try{loc=coords(req.query);}catch{return json(res,400,{error:"invalid_coordinates"});}const country=inKorea(loc)?"kr":"global";const key=country+"_"+Math.round(loc.lat*100)/100+"_"+Math.round(loc.lon*100)/100;const doc=db.collection("weather_api_cache").doc(key);try{const old=(await doc.get()).data();if(old&&Date.now()-old.cachedAt<30*60000)return json(res,200,{...old.payload,cache:{hit:true}});const payload=country==="kr"?await kma(loc):await met(loc);await doc.set({payload,cachedAt:Date.now()});return json(res,200,{...payload,cache:{hit:false}});}catch(e){try{const old=(await doc.get()).data();if(old?.payload)return json(res,200,{...old.payload,stale:true,cache:{hit:true,fallback:true}});}catch{}return json(res,503,{error:country==="kr"?"kma_unavailable":"weather_provider_unavailable"});}});
+import {onSchedule} from "firebase-functions/v2/scheduler";
+import {defineSecret, defineString} from "firebase-functions/params";
+import {logger} from "firebase-functions";
+import {initializeApp, getApps} from "firebase-admin/app";
+import {getFirestore, FieldValue} from "firebase-admin/firestore";
+import {DATABASE_ID, REGION, coordinates, isSouthKorea, validateContract} from "./core.mjs";
+import {collectAirKorea, collectKma, collectMetNorway, collectWwis} from "./providers.mjs";
+import {locationDocumentId, readFreshOrLastGood, saveForecastHistory, writeIfChanged} from "./storage.mjs";
+
+if (!getApps().length) initializeApp();
+const db = getFirestore(DATABASE_ID);
+const kmaApiKey = defineSecret("KMA_API_KEY");
+const airKoreaApiKey = defineSecret("AIRKOREA_API_KEY");
+const wwisApproved = defineString("WWIS_COMMERCIAL_APPROVED", {default: "false"});
+
+const json = (response, status, body) => response.status(status).set("Cache-Control", "no-store").json(body);
+const locationFromQuery = query => ({...coordinates(query), name: String(query.name || "선택 지역").slice(0, 80), stationName: String(query.stationName || "").slice(0, 80)});
+const configured = value => Boolean(value && value !== "UNCONFIGURED");
+
+async function collect(location, {kmaKey = "", airKey = ""} = {}) {
+  const korean = isSouthKorea(location);
+  const payload = korean ? await collectKma(location, kmaKey) : await collectMetNorway(location);
+  if (korean && location.stationName && configured(airKey)) {
+    try { payload.airQuality = await collectAirKorea(location.stationName, airKey); }
+    catch (error) { logger.warn("AirKorea partial failure", {code: error.message, location: locationDocumentId(location)}); }
+  }
+  const result = validateContract(payload); if (!result.valid) throw new Error(`invalid_contract:${result.missing.join(",")}`); return payload;
+}
+
+async function serveWeather(request, response) {
+  if (request.method !== "GET") return json(response, 405, {error: "method_not_allowed"});
+  let location; try { location = locationFromQuery(request.query); } catch { return json(response, 400, {error: "invalid_coordinates"}); }
+  const korean = isSouthKorea(location); const cache = await readFreshOrLastGood(db, location, korean ? 10 * 60_000 : 30 * 60_000);
+  if (cache.fresh) return json(response, 200, {...cache.fresh, cache: {hit: true, fallback: false}});
+  try {
+    const payload = await collect(location, {kmaKey: kmaApiKey.value(), airKey: airKoreaApiKey.value()}); const write = await writeIfChanged(cache.ref, payload, {country: korean ? "KR" : "GLOBAL"});
+    if (write.changed) await saveForecastHistory(db, location, payload); return json(response, 200, {...payload, cache: {hit: false, changed: write.changed}});
+  } catch (error) {
+    logger.error("Weather collection failed", {code: error.message, location: locationDocumentId(location), korean});
+    if (cache.lastGood) return json(response, 200, {...cache.lastGood, stale: true, cache: {hit: true, fallback: true}, error: {code: "provider_unavailable"}});
+    return json(response, error.message === "kma_key_missing" ? 503 : 502, {error: error.message === "kma_key_missing" ? "domestic_provider_not_configured" : "weather_provider_unavailable"});
+  }
+}
+
+export const weatherApi = onRequest({region: REGION, cors: ["https://softm.github.io", /^http:\/\/127\.0\.0\.1:\d+$/, /^http:\/\/localhost:\d+$/], secrets: [kmaApiKey, airKoreaApiKey], maxInstances: 20, concurrency: 40, timeoutSeconds: 45}, serveWeather);
+
+async function selectedLocations({country, activeWithinMs, savedOnly = false, limit = 100} = {}) {
+  let query = db.collection("weather_locations").limit(limit); if (country) query = query.where("country", "==", country); if (savedOnly) query = query.where("saved", "==", true);
+  const snapshot = await query.get(), threshold = Date.now() - (activeWithinMs || Number.MAX_SAFE_INTEGER);
+  return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()})).filter(location => !activeWithinMs || Number(location.lastActiveAt || 0) >= threshold);
+}
+
+async function syncLocations(locations, keys = {}) {
+  const outcomes = [];
+  for (const location of locations) {
+    try {
+      const cache = await readFreshOrLastGood(db, location, 0), payload = await collect(location, keys), write = await writeIfChanged(cache.ref, payload, {country: isSouthKorea(location) ? "KR" : "GLOBAL"});
+      if (write.changed) await saveForecastHistory(db, location, payload); outcomes.push({id: location.id, ok: true, changed: write.changed});
+    } catch (error) { outcomes.push({id: location.id, ok: false, error: error.message}); }
+  }
+  logger.info("Location sync completed", {count: outcomes.length, failures: outcomes.filter(item => !item.ok).length}); return outcomes;
+}
+
+const scheduled = (schedule, extra = {}) => ({region: REGION, schedule, timeZone: "Asia/Seoul", timeoutSeconds: 300, retryCount: 2, ...extra});
+
+export const kmaNowcastSync = onSchedule({...scheduled("every 10 minutes"), secrets: [kmaApiKey, airKoreaApiKey]}, async () => syncLocations(await selectedLocations({country: "KR", activeWithinMs: 2 * 60 * 60_000, limit: 100}), {kmaKey: kmaApiKey.value(), airKey: airKoreaApiKey.value()}));
+export const kmaVillageSync = onSchedule({...scheduled("7,17,27,37,47,57 * * * *"), secrets: [kmaApiKey, airKoreaApiKey]}, async () => syncLocations(await selectedLocations({country: "KR", savedOnly: true, limit: 200}), {kmaKey: kmaApiKey.value(), airKey: airKoreaApiKey.value()}));
+
+export const kmaMidtermSync = onSchedule({...scheduled("20 6,18 * * *"), secrets: [kmaApiKey]}, async () => db.collection("weather_workflow_status").doc("kma-midterm-sync").set({lastRunAt: FieldValue.serverTimestamp(), state: configured(kmaApiKey.value()) ? "awaiting_location_region_mapping" : "blocked_missing_secret"}, {merge: true}));
+export const kmaWarningSync = onSchedule({...scheduled("every 5 minutes"), secrets: [kmaApiKey]}, async () => db.collection("weather_workflow_status").doc("kma-warning-sync").set({lastRunAt: FieldValue.serverTimestamp(), state: configured(kmaApiKey.value()) ? "collector_pending_official_endpoint_validation" : "blocked_missing_secret"}, {merge: true}));
+
+export const airKoreaSync = onSchedule({...scheduled("every 30 minutes"), secrets: [airKoreaApiKey]}, async () => {
+  const locations = (await selectedLocations({country: "KR", savedOnly: true, limit: 200})).filter(location => location.stationName);
+  for (const location of locations) {
+    try { const value = await collectAirKorea(location.stationName, airKoreaApiKey.value()); await db.collection("air_quality_cache").doc(location.id).set({value, updatedAt: FieldValue.serverTimestamp()}, {merge: true}); }
+    catch (error) { logger.warn("AirKorea sync failed", {id: location.id, code: error.message}); }
+  }
+});
+
+export const metnoActiveSync = onSchedule(scheduled("every 30 minutes"), async () => syncLocations(await selectedLocations({country: "GLOBAL", activeWithinMs: 2 * 60 * 60_000, limit: 100})));
+export const metnoSavedSync = onSchedule(scheduled("every 60 minutes"), async () => syncLocations(await selectedLocations({country: "GLOBAL", savedOnly: true, limit: 200})));
+
+export const wwisCitySync = onSchedule(scheduled("15 * * * *"), async () => {
+  if (wwisApproved.value() !== "true") { await db.collection("weather_workflow_status").doc("wwis-city-sync").set({lastRunAt: FieldValue.serverTimestamp(), state: "blocked_pending_commercial_approval"}, {merge: true}); return; }
+  const snapshot = await db.collection("wwis_cities").where("enabled", "==", true).limit(100).get();
+  for (const doc of snapshot.docs) { const city = doc.data(), payload = await collectWwis(doc.id, city.language || "en"); await writeIfChanged(db.collection("wwis_cache").doc(doc.id), payload, {issueDate: payload.city?.forecast?.issueDate || null}); }
+});
+export const wwisIndexSync = onSchedule(scheduled("35 3 * * *"), async () => db.collection("weather_workflow_status").doc("wwis-index-sync").set({lastRunAt: FieldValue.serverTimestamp(), state: wwisApproved.value() === "true" ? "ready_for_curated_index" : "blocked_pending_commercial_approval"}, {merge: true}));
+
+export const forecastVerify = onSchedule(scheduled("10 4 * * *", {timeoutSeconds: 540}), async () => {
+  const now = Date.now(), histories = await db.collection("weather_forecast_history").limit(200).get(); let evaluated = 0;
+  for (const history of histories.docs) {
+    const data = history.data(), observations = await db.collection("weather_observations").doc(data.locationId).collection("hours").limit(168).get(); if (observations.empty) continue;
+    const observed = new Map(observations.docs.map(doc => [doc.id, doc.data()])), matches = (data.hourly || []).filter(row => Date.parse(row.time) < now && observed.has(row.time)); if (!matches.length) continue;
+    const errors = matches.map(row => { const actual = observed.get(row.time)?.temperature; return Number.isFinite(actual) && Number.isFinite(row.temperature) ? Math.abs(actual - row.temperature) : null; }).filter(Number.isFinite);
+    await db.collection("weather_verification").doc(history.id).set({provider: data.provider, locationId: data.locationId, sampleCount: matches.length, temperatureSampleCount: errors.length, temperatureMae: errors.length ? errors.reduce((sum, value) => sum + value, 0) / errors.length : null, temperatureMaxError: errors.length ? Math.max(...errors) : null, state: "partial_observation_backed", evaluatedAt: FieldValue.serverTimestamp()}, {merge: true}); evaluated += 1;
+  }
+  logger.info("Forecast verification finished", {evaluated, note: "No actual observations means no completed metric"});
+});
+
+export const notificationEvaluate = onSchedule(scheduled("every 10 minutes"), async () => {
+  const candidates = await db.collection("weather_notification_candidates").where("state", "==", "pending").limit(100).get();
+  for (const doc of candidates.docs) {
+    const data = doc.data(); if (!data.dedupeKey) continue; const sent = db.collection("weather_notification_dedupe").doc(data.dedupeKey);
+    if ((await sent.get()).exists) { await doc.ref.set({state: "duplicate", evaluatedAt: FieldValue.serverTimestamp()}, {merge: true}); continue; }
+    await db.runTransaction(async transaction => { transaction.create(sent, {createdAt: FieldValue.serverTimestamp()}); transaction.set(db.collection("weather_notification_outbox").doc(doc.id), {...data, state: "ready", createdAt: FieldValue.serverTimestamp()}); transaction.set(doc.ref, {state: "queued", evaluatedAt: FieldValue.serverTimestamp()}, {merge: true}); });
+  }
+});
+
+export const staleDataAudit = onSchedule(scheduled("every 30 minutes"), async () => {
+  const snapshot = await db.collection("weather_api_cache").limit(500).get(), now = Date.now(), stale = snapshot.docs.filter(doc => now - Number(doc.data().cachedAt || 0) > 3 * 60 * 60_000).map(doc => doc.id);
+  await db.collection("weather_workflow_status").doc("stale-data-audit").set({lastRunAt: FieldValue.serverTimestamp(), scanned: snapshot.size, staleCount: stale.length, stale: stale.slice(0, 100)}, {merge: true});
+});
+
+export const weatherHealth = onRequest({region: REGION, cors: true, secrets: [kmaApiKey, airKoreaApiKey]}, async (_request, response) => json(response, 200, {ok: true, database: DATABASE_ID, providers: {metNorway: "ready", kma: configured(kmaApiKey.value()) ? "configured" : "missing_secret", airKorea: configured(airKoreaApiKey.value()) ? "configured" : "missing_secret", wwis: wwisApproved.value() === "true" ? "approved" : "approval_required", kimEcmwf: "verification_pipeline_only", weatheri: "commercial_evaluation_only"}, checkedAt: new Date().toISOString()}));

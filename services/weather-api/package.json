@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "main": "index.mjs",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
   "engines": {
     "node": "22"
   },
