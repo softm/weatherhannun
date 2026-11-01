@@ -134,8 +134,8 @@ html #stitch-live-dashboard .rain-decision-title{word-break:keep-all;overflow-wr
 html #stitch-live-dashboard .air-quality-glance{flex-wrap:wrap;gap:10px}
 html #stitch-live-dashboard .air-quality-glance>div:last-child{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 html #stitch-live-dashboard .air-quality-glance>div:last-child>div{font-size:12px;padding:8px;line-height:1.5}
-html #stitch-live-dashboard .briefing-mode{display:flex;gap:6px;margin:8px 0}
-html #stitch-live-dashboard .briefing-mode button{flex:1;min-height:44px;background:var(--st-surface);border:1px solid var(--st-line);border-radius:8px;color:var(--ux-muted);font-size:14px}
+html #stitch-live-dashboard .briefing-mode{display:flex;gap:6px;margin:4px 0}
+html #stitch-live-dashboard .stitch-briefing-player .briefing-mode button{flex:1;height:36px;min-height:36px;padding:4px 10px;line-height:20px;background:var(--st-surface);border:1px solid var(--st-line);border-radius:8px;color:var(--ux-muted);font-size:14px}
 html #stitch-live-dashboard .briefing-mode button.active{background:color-mix(in srgb,var(--st-accent) 10%,var(--st-surface));border-color:var(--st-accent);color:var(--st-accent);font-weight:750}
 html #stitch-live-dashboard .stitch-current-briefing>.stitch-briefing-player{display:flex;flex-direction:column;align-items:stretch}
 html #stitch-live-dashboard .stitch-briefing-actions{width:100%;flex:none}
