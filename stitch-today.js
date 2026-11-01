@@ -81,10 +81,10 @@
   function apply(){
    var extras=[...root.querySelectorAll('.rain-decision-card,.outfit-decision-card')];
    if(media.matches){
-    main.replaceChildren(hero,brief,...extras,noteSource,actions,hour);
+    main.replaceChildren(brief,hero,...extras,noteSource,actions,hour);
     rail.replaceChildren(air,weekly,metrics,notice);
     root.replaceChildren(main,rail);
-   }else root.replaceChildren(hero,brief,...extras,noteSource,air,actions,hour,metrics,weekly,notice);
+   }else root.replaceChildren(brief,hero,...extras,noteSource,air,actions,hour,metrics,weekly,notice);
   }
   root.classList.add('stitch-dashboard-grid');
   apply();media.addEventListener?.('change',apply);
