@@ -57,7 +57,7 @@ test("all forecast surfaces load the shared inline SVG system", () => {
   const css = read("weather-icons.css");
 
   assert.ok(html.indexOf("weather-icons.js?v=17") < html.indexOf("app.js?v=48"));
-  assert.ok(html.indexOf("weather-icons.css?v=17") > html.indexOf("stitch-mobile.css?v=18"));
+  assert.ok(html.indexOf("weather-icons.css?v=17") > html.indexOf("stitch-mobile.css?v=19"));
   assert.match(app, /WeatherIcons\.markup/);
   assert.match(today, /WeatherIcons\.render/);
   assert.match(forecast, /weather-glyph--insight/);
