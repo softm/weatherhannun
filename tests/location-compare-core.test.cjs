@@ -161,7 +161,9 @@ test("a short shared horizon is explicit and an unshared period start is rejecte
 test("destination request uses the forecast endpoint without embedding a secret", () => {
   const url = new URL(compare.buildForecastUrl({ name: "서울", lat: 37.5665, lon: 126.978 }));
   assert.equal(url.origin + url.pathname, compare.FORECAST_ENDPOINT);
-  assert.equal(url.searchParams.get("timezone"), "Asia/Seoul");
+  assert.equal(url.searchParams.get("lat"), "37.5665");
+  assert.equal(url.searchParams.get("lon"), "126.978");
+  assert.equal(url.searchParams.get("name"), "서울");
   assert.equal(url.searchParams.get("apikey"), null);
   assert.equal(url.searchParams.get("key"), null);
 });

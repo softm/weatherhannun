@@ -23,12 +23,12 @@ test('planner ships crop, stage, multiple-site, evidence and export surfaces off
   for (const token of ['agricultureCrop', 'agricultureStage', 'agricultureSites', 'agriculturePlanRun', 'agriculturePlanExport']) {
     assert.ok(html.includes(token), token);
   }
-  for (const asset of ['agriculture-planner.css?v=34', 'agriculture-planner-core.js?v=34', 'agriculture-planner.js?v=34']) {
+  for (const asset of ['agriculture-planner.css?v=34', 'agriculture-planner-core.js?v=34', 'agriculture-planner.js?v=35']) {
     assert.ok(html.includes(asset), asset);
     assert.ok(worker.includes(asset), asset);
   }
   assert.ok(html.indexOf('activity-decision-core.js?v=28') < html.indexOf('agriculture-planner-core.js?v=34'));
-  assert.ok(html.indexOf('agriculture-planner-core.js?v=34') < html.indexOf('agriculture-planner.js?v=34'));
+  assert.ok(html.indexOf('agriculture-planner-core.js?v=34') < html.indexOf('agriculture-planner.js?v=35'));
 });
 
 test('official crop thresholds keep direct RDA or Nongsaro evidence links', () => {

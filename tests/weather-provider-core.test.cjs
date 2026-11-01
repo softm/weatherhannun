@@ -51,13 +51,13 @@ test("source metadata keeps forecast, valid, fetched and observed times distinct
  assert.deepEqual(record.missingFields,[]);
 });
 
-test("commercial ads and subscriptions remain hard-blocked in preview mode",()=>{
+test("commercial ads and subscriptions stay blocked until every product gate passes",()=>{
  const gate=provider.releaseReadiness();
- assert.equal(gate.operatingMode,"noncommercial_preview");
+ assert.equal(gate.operatingMode,"official_first_with_legacy_fallback");
  assert.equal(gate.advertising.allowed,false);
  assert.equal(gate.subscriptions.allowed,false);
  assert.ok(gate.advertising.blockers.length>=2);
- assert.equal(gate.officialObservations.available,false);
+ assert.equal(gate.officialObservations.available,true);
  assert.equal(gate.officialWarnings.available,false);
  assert.equal(gate.radar.available,false);
  assert.equal(Object.isFrozen(provider.DEPLOYMENT_GATES),true);
@@ -73,7 +73,7 @@ test("freshness distinguishes fresh, stale, expired and unknown",()=>{
 
 test("data transparency page exposes every unavailable official and commercial gate",()=>{
  const html=fs.readFileSync(path.join(__dirname,"../data-status.html"),"utf8");
- for(const token of ["weather-provider-core.js?v=29","official-warning-status","radar-status","advertising-gate","subscription-gate","광고·유료 출시 차단 중","동일 지역·관측소·시각"]){
+ for(const token of ["weather-provider-core.js?v=42","official-warning-status","radar-status","advertising-gate","subscription-gate","광고·유료 출시 차단 중","동일 지역·관측소·시각"]){
   assert.ok(html.includes(token),token);
  }
 });
