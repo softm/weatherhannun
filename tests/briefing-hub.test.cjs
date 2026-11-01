@@ -38,5 +38,14 @@ test("브리핑 전용 메뉴와 예약·알림·자동재생 UI가 오프라인
   assert.match(html,/알림만/);assert.match(html,/알림을 누르면 재생/);assert.match(html,/바로 재생/);
   assert.match(ui,/weatherhannun:briefing-settings/);assert.match(ui,/new Notification/);assert.match(ui,/setInterval\(runSchedule,30000\)/);
   assert.match(html,/지금 듣기/);assert.match(html,/MY AUDIO ROUTINE/);assert.match(html,/data-brief-time-value="07:00"/);assert.match(html,/id="briefScheduleSummary"/);
-  for(const asset of ["briefing-hub.css?v=2","briefing-hub-core.js?v=1","briefing-hub.js?v=2"])assert.match(worker,new RegExp(asset.replace(/[.?]/g,"\\$&")));
+  for(const asset of ["briefing-hub.css?v=3","briefing-hub-core.js?v=1","briefing-hub.js?v=2"])assert.match(worker,new RegExp(asset.replace(/[.?]/g,"\\$&")));
+});
+
+test("브리핑 룸은 380px 모바일에서 가로 넘침 없이 압축된다",()=>{
+  const css=read("briefing-hub.css");
+  assert.match(css,/@media\(max-width:380px\)/);
+  assert.match(css,/#view-briefing\{width:100%;max-width:100%;padding-inline:12px;overflow-x:hidden\}/);
+  assert.match(css,/\.brief-hub-play\{box-sizing:border-box;width:100%;max-width:100%;min-width:0/);
+  assert.match(css,/\.brief-hub-evidence\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.brief-setting-enable\{box-sizing:border-box;width:100%;min-width:0/);
 });
