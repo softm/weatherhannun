@@ -109,3 +109,7 @@ html .topbar #siteAccountSlot{flex:none;margin-left:auto}
 html .topbar #siteAccountSlot{width:auto;min-width:0;max-width:44px}
 html .topbar #siteAccountSlot:empty{display:none}
 html .topbar .top-inner{justify-content:flex-start}
+
+html .topbar .header-save-location{flex:0 0 40px;width:40px;min-height:44px;margin-left:4px;padding:0;border:0;background:transparent;color:var(--st-muted,#65758a);font-size:26px;cursor:pointer}
+html .topbar .header-save-location:disabled{color:#b77c16;opacity:1;cursor:default}
+html[data-weather-theme="dark"] .topbar .header-save-location:disabled{color:#f3c76b}
