@@ -10,17 +10,19 @@ html[data-weather-theme="dark"] .day-flow-board{border-color:rgba(130,177,220,.2
 .day-flow-time-axis{z-index:2;color:#eef7ff;font-weight:750}
 @media(max-width:720px){.day-flow-time-axis{height:23px;font-size:.6rem}}
 
-/* Compact timeline with a subtle blue-gray surface. */
-.day-flow-timeline-wrap{padding:32px 11px 9px;border:1px solid #cfdeeb;border-radius:10px;background:linear-gradient(180deg,#e5eef7,#edf3f8);box-shadow:inset 0 1px 0 rgba(255,255,255,.75);color:#26394b}
-.day-flow-time-axis{color:#52677a}
-.day-flow-timeline-meta{color:#64748b;flex-wrap:wrap;row-gap:6px}
-.day-flow-scrub-hint{color:#52677a;font-weight:600}
-.day-flow-now-marker{background:#2563eb;box-shadow:none}
-.day-flow-now-marker b{left:0;transform:none;background:#e3edff;color:#1d4e98}
-.day-flow-segment.is-current-hour,.day-flow-segment:hover,.day-flow-segment:focus-visible{outline-color:#2563eb}
-.day-flow-segment.day-boundary:before{background:#94a3b8}
-.day-flow-timeline.empty{color:#64748b}
-html[data-weather-theme="dark"] .day-flow-timeline-wrap{background:linear-gradient(180deg,#203248,#192a3e);border-color:#354b64;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);color:#e2e8f0}
-html[data-weather-theme="dark"] .day-flow-time-axis,html[data-weather-theme="dark"] .day-flow-timeline-meta,html[data-weather-theme="dark"] .day-flow-scrub-hint{color:#b6c6d8}
-html[data-weather-theme="dark"] .day-flow-now-marker{background:#8bb9ff}
-html[data-weather-theme="dark"] .day-flow-now-marker b{background:#294363;color:#e4efff}
+/* A deep stage gives the colored piano-key timeline a clear visual anchor. */
+.day-flow-timeline-wrap{padding:32px 11px 9px;border:1px solid #214f70;border-radius:10px;background:linear-gradient(155deg,#183c5a 0%,#102f4b 56%,#0b253b 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 24px rgba(16,47,75,.16);color:#f4f9fd}
+.day-flow-time-axis{color:#e6f1fb}
+.day-flow-timeline-meta{color:#c2d4e4;flex-wrap:wrap;row-gap:6px}
+.day-flow-scrub-hint{color:#ffe071;font-weight:750}
+.day-flow-now-marker{background:#ffe071;box-shadow:0 0 0 1px rgba(16,47,75,.62),0 0 8px rgba(255,224,113,.68)}
+.day-flow-now-marker b{left:0;transform:none;background:#ffe071;color:#102f4b}
+.day-flow-segment.is-current-hour,.day-flow-segment:hover,.day-flow-segment:focus-visible{outline-color:#fff}
+.day-flow-segment.day-boundary:before{background:rgba(255,255,255,.58)}
+.day-flow-timeline.empty{color:#c7d8e8}
+html[data-weather-theme="dark"] .day-flow-timeline-wrap{background:linear-gradient(155deg,#0d2a40 0%,#091f32 58%,#061725 100%);border-color:#183b56;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 26px rgba(0,0,0,.22);color:#f4f9fd}
+html[data-weather-theme="dark"] .day-flow-time-axis{color:#e6f1fb}
+html[data-weather-theme="dark"] .day-flow-timeline-meta{color:#c2d4e4}
+html[data-weather-theme="dark"] .day-flow-scrub-hint{color:#ffe071}
+html[data-weather-theme="dark"] .day-flow-now-marker{background:#ffe071}
+html[data-weather-theme="dark"] .day-flow-now-marker b{background:#ffe071;color:#102f4b}

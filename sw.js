@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v75-cloud-hd-briefing";
+const CACHE="weatherhannun-shell-v76-cloud-hd-live";
 const BASE=self.registration.scope;
 const SHELL=[
   "./activity-interests-core.js?v=1",
