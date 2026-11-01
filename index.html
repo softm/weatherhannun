@@ -53,7 +53,7 @@
   <script defer src="./briefing-hub.js?v=2"></script>
   <script defer src="./weather-icons.js?v=17"></script>
   <script defer src="./alert-rules-core.js?v=32"></script>
-  <script defer src="./forecast-insights.js?v=35"></script>
+  <script defer src="./forecast-insights.js?v=36"></script>
   <script defer src="./stitch-layout.js?v=18"></script>
   <script defer src="./daily-delta-core.js?v=27"></script>
   <script defer src="./official-data-core.js?v=40"></script>
@@ -73,8 +73,10 @@
   <script defer src="./day-flow-ui.js?v=6"></script>
   <script defer src="./activity-interests-core.js?v=1"></script>
   <script defer src="./national-weather-core.js?v=1"></script>
-  <script defer src="./app.js?v=47"></script>
-  <script defer src="./official-data-ui.js?v=41"></script>
+  <script defer src="./hourly-explorer-core.js?v=1"></script>
+  <script defer src="./hourly-explorer.js?v=1"></script>
+  <script defer src="./app.js?v=48"></script>
+  <script defer src="./official-data-ui.js?v=42"></script>
   <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
   <script defer src="./location-manager.js?v=23"></script>
@@ -84,13 +86,14 @@
   <script defer src="./region-search-ui.js?v=19"></script>
   <script defer src="./rain-decision-core.js?v=31"></script>
   <script defer src="./outfit-decision-core.js?v=31"></script>
-  <script defer src="./stitch-today.js?v=44"></script>
-  <script defer src="./rain-decision-ui.js?v=22"></script>
-  <script defer src="./outfit-decision-ui.js?v=25"></script>
+  <script defer src="./stitch-today.js?v=45"></script>
+  <script defer src="./rain-decision-ui.js?v=23"></script>
+  <script defer src="./outfit-decision-ui.js?v=26"></script>
   <script defer src="./screen-weather-settings.js?v=39"></script>
   <script defer src="./agriculture-planner.js?v=35"></script>
   <script defer src="./startup-briefing.js?v=45"></script>
   <script defer src="./account-header.js?v=8"></script>
+  <link rel="stylesheet" href="./mobile-experience.css?v=1">
 </head>
 <body>
   <div class="app-shell">
@@ -204,12 +207,22 @@
       </section>
 
       <section id="view-hourly" class="screen content-bound" aria-label="시간별 예보">
-        <div class="page-header"><div><span class="section-overline">HOURLY FORECAST</span><h2>시간별 날씨 흐름</h2><p>48시간~7일 · 비·기온·바람</p></div></div>
+        <div class="page-header"><div><span class="section-overline">HOURLY FORECAST</span><h2>시간별 날씨 흐름</h2><p>시간 선택으로 기온·강수 비교</p></div></div>
         <section class="hourly-period-dock stitch-card" aria-label="예보 기간 설정">
           <div class="insight-intro"><h3>내 일정에 맞춰 날씨 확인</h3><p>선택 기간의 비·맑은 시간</p></div>
-          <div class="rain-tabs" role="group" aria-label="예보 기간 선택"><button type="button" data-rain-period="48" class="active" aria-pressed="true">48시간</button><button type="button" data-rain-period="72" aria-pressed="false">3일</button><button type="button" data-rain-period="168" aria-pressed="false">7일</button><button type="button" data-rain-period="custom" aria-pressed="false">날짜 지정</button></div>
+          <div class="rain-tabs" role="group" aria-label="예보 기간 선택"><button type="button" data-rain-period="24" class="active" aria-pressed="true">24시간</button><button type="button" data-rain-period="48" aria-pressed="false">48시간</button><button type="button" data-rain-period="168" aria-pressed="false">7일</button><button type="button" data-rain-period="custom" aria-pressed="false">날짜 지정</button></div>
           <details class="hourly-date-picker"><summary>날짜 직접 선택</summary><div class="rain-dates"><label for="rainDateStart">시작일</label><input id="rainDateStart" type="date" aria-label="시작일"><label for="rainDateEnd">종료일</label><input id="rainDateEnd" type="date" aria-label="종료일"><button id="applyRainDates" type="button">적용</button></div></details>
         </section>
+        <section class="hourly-panel stitch-card" aria-label="시간별 날씨 비교">
+          <div class="card-heading"><h2>시간별 예보</h2><button type="button" id="hourlyNow" class="text-link">처음 시각</button></div>
+          <p id="hourlyRangeStatus" class="explorer-caption" aria-live="polite">예보를 불러오는 중</p>
+          <div class="hourly-scroll" id="hourlyScroll" tabindex="0" aria-label="시간별 기온과 강수, 좌우로 스크롤"><div id="hourlyChart" class="hourly-chart"></div><div id="hourlyItems" class="hourly-items"></div></div>
+          <p class="explorer-caption">기온 °C · 강수확률 % · 강수량 mm · 시간을 누르면 상세 표시</p>
+          <p id="hourlySourceStatus" class="explorer-caption"></p>
+        </section>
+        <section class="hourly-detail-card stitch-card" aria-label="선택한 시간 상세"><div id="hourlyDetailRows" aria-live="polite"></div></section>
+        <details id="hourlyAll" class="stitch-card hourly-all"><summary>선택 기간 전체 수치 펼치기</summary><div class="hourly-table-scroll" tabindex="0" aria-label="시간별 전체 수치 표"><table><thead><tr><th>시각</th><th>기온 °C</th><th>강수 %</th><th>강수 mm</th><th>풍속 km/h</th><th>돌풍 km/h</th></tr></thead><tbody id="hourlyAllRows"></tbody></table></div></details>
+        <details class="stitch-card hourly-analysis"><summary>비 오는 시간·야외활동 분석</summary>
         <section class="insight-section hourly-insight" aria-label="비와 맑은 시간 찾기">
           <article class="hourly-countdown-card stitch-card">
             <span class="hourly-countdown-icon material-symbols-outlined" aria-hidden="true">rainy</span>
@@ -222,12 +235,7 @@
           </div>
           <div class="official-warning"><span>대설·강풍·한파 등 공식 기상특보는 예보 점수와 별개로 확인하세요.</span><a target="_blank" rel="noopener noreferrer" href="https://www.weather.go.kr/w/special-report/overall.do">기상청 특보 ↗</a></div>
         </section>
-        <section class="glass-card hourly-panel" aria-label="시간별 예보 그래프">
-          <div class="chart-head"><span>기온 흐름</span><div class="legend"><span><i class="legend-dot temp-dot"></i>기온</span><span><i class="legend-dot rain-dot"></i>비 확률</span></div></div>
-          <div class="hourly-scroll" id="hourlyScroll"><div id="hourlyChart" class="hourly-chart" aria-label="시간별 기온 그래프"><div class="empty-state">시간별 예보를 불러오는 중…</div></div><div id="hourlyItems" class="hourly-items"></div></div>
-          <div class="chart-caption">기온 °C · 강수확률 % · 풍속 km/h · 좌우로 스크롤</div>
-        </section>
-        <section class="hourly-detail-card stitch-card" aria-label="시간대별 상세 예보"><div class="card-heading"><div><span class="section-overline">TIME WINDOWS</span><h2>시간대별 상세</h2></div><span class="section-note">3시간 단위</span></div><div id="hourlyDetailRows" class="hourly-detail-rows"><div class="empty-state">상세 시간대를 계산하고 있습니다…</div></div></section>
+        </details>
         <button type="button" class="alert-cta stitch-card hourly-alert" data-view="notifications"><span class="alert-cta-icon"><span class="material-symbols-outlined" aria-hidden="true">umbrella</span></span><span><strong>우산·기온 알림 설정</strong><small>원하는 조건을 이 기기에 저장합니다.</small></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
       </section>
 
@@ -236,7 +244,7 @@
         <article class="weekly-insight-banner stitch-card"><div class="banner-label"><span class="material-symbols-outlined" aria-hidden="true">lightbulb</span> 주간 핵심 기상 인사이트</div><div id="weeklyInsight" class="weekly-insight">예보 분석 중…</div></article>
         <section class="week-list-card stitch-card"><div class="card-heading"><h2>7일간 기온 추이 및 강수 예보</h2><span id="weekRangeLabel" class="section-note">기온 범위 계산 중</span></div><div id="weeklyCards" class="week-grid"></div></section>
         <div class="week-summary-grid"><article class="stitch-card mini-stat"><span class="material-symbols-outlined" aria-hidden="true">rainy</span><small>7일 예상 강수량</small><strong id="weeklyRainTotal">-- mm</strong></article><article class="stitch-card mini-stat weekend-stat"><span id="weekendScoreRing" class="mini-score-ring" aria-hidden="true"></span><span><small>주말 야외 지수</small><strong id="weekendScore">-- / 100</strong></span></article></div>
-        <article class="stitch-card weekly-checklist"><h3>이번 주 생활·농작업 체크</h3><ul><li><span class="material-symbols-outlined">check_circle</span> 강수 전 배수로·시설물 상태 확인</li><li><span class="material-symbols-outlined">check_circle</span> 큰 기온 변화 전 작물 보온 준비</li><li><span class="material-symbols-outlined">check_circle</span> 야외 일정은 전날 최신 예보 재확인</li></ul></article>
+        <details class="stitch-card weekly-checklist"><summary>이번 주 생활·농작업 체크</summary><ul><li><span class="material-symbols-outlined">check_circle</span> 강수 전 배수로·시설물 상태 확인</li><li><span class="material-symbols-outlined">check_circle</span> 큰 기온 변화 전 작물 보온 준비</li><li><span class="material-symbols-outlined">check_circle</span> 야외 일정은 전날 최신 예보 재확인</li></ul></details>
         <button type="button" class="alert-cta stitch-card weekly-alert" data-view="notifications"><span class="alert-cta-icon"><span class="material-symbols-outlined" aria-hidden="true">device_thermostat</span></span><span><strong id="weeklyAlertTitle">이번 주 기온·강수 알림</strong><small id="weeklyAlertText">큰 변화가 있는 날을 미리 확인하세요.</small></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
       </section>
 

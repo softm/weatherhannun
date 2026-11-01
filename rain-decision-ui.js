@@ -15,6 +15,8 @@
   function goHourly() {
     var button = document.querySelector('.desktop-nav [data-view="hourly"]') || document.querySelector('.mobile-nav [data-view="hourly"]');
     if (button) button.click();
+    var answer=latest&&window.WeatherHannunRainDecision?.summarise(latest.weather);
+    if(answer?.startTime)window.dispatchEvent(new CustomEvent('weatherhannun:select-hour',{detail:{time:answer.startTime}}));
   }
   function ensureCard() {
     if (card) return card;
@@ -30,7 +32,7 @@
     copy.append(label,bits.title,bits.detail,bits.caution);
     var link = node('button','rain-decision-link','시간별 확인');
     link.type='button';
-    link.setAttribute('aria-label','48시간 강수 예보 상세 확인');
+    link.setAttribute('aria-label','시간별 강수 예보 상세 확인');
     link.addEventListener('click',goHourly);
     card.append(symbol,copy,link);
     return card;
@@ -39,8 +41,9 @@
     var hero = document.querySelector('#stitch-live-dashboard .stitch-dashboard-hero') || document.querySelector('#stitch-live-dashboard > div > section:first-of-type') || document.querySelector('#view-today .today-layout > .hero-weather');
     if (!hero || !hero.parentNode) return;
     var element = ensureCard();
-    if (hero.nextElementSibling !== element) {
-      hero.insertAdjacentElement('afterend',element);
+    var combined=hero.querySelector('.stitch-current-briefing');
+    if (combined ? element.parentNode!==hero : hero.nextElementSibling !== element) {
+      if(combined)hero.insertBefore(element,combined);else hero.insertAdjacentElement('afterend',element);
       if (latest) render(latest);
     }
   }

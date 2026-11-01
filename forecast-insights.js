@@ -15,7 +15,7 @@
   const TRACK_KEY="weatherhannun_alert_v1";
   const rules=window.WeatherAlertRules;
   let data=null;
-  let period="48";
+  let period="24";
   let rangeStart="";
   let rangeEnd="";
   let prefs=rules?rules.defaults():{rain:false,frost:false,wind:false};

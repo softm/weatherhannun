@@ -54,7 +54,9 @@
     } else put("[data-official-air-source]", "에어코리아 실측 미확보 · 모델 예측과 구분");
     var warning = warningSummary();
     put("[data-official-warning]", warning.text);
-    document.querySelectorAll(".official-glance-line").forEach(function (node) { node.dataset.warningState = warning.state; });
+    document.querySelectorAll(".official-glance-line").forEach(function (node) { node.dataset.warningState = warning.state;
+      var hero=node.closest('.stitch-dashboard-hero'),context=hero&&hero.querySelector('.stitch-current-context'),combined=hero&&hero.querySelector('.stitch-current-briefing');
+      if(hero&&context&&combined){if(warning.state==='local')hero.insertBefore(node,combined);else context.append(node);} });
   }
   function renderPanel() {
     var status = document.getElementById("officialMapLayerStatus");

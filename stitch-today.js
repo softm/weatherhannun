@@ -77,14 +77,18 @@
   items.forEach(([node,name])=>node.classList.add('stitch-dashboard-'+name));
   var main=document.createElement('div'),rail=document.createElement('aside');
   main.className='stitch-dashboard-main';rail.className='stitch-dashboard-rail';rail.setAttribute('aria-label','오늘의 상세 날씨 정보');
+  var auxiliary=document.createElement('details');auxiliary.className='home-auxiliary';
+  var auxiliaryTitle=document.createElement('summary');auxiliaryTitle.textContent='생활·농업 지표와 데이터 안내';
+  var transparency=document.createElement('a');transparency.href='./data-status.html';transparency.textContent='데이터 출처·발표 시각·갱신 상태 확인';
+  auxiliary.append(auxiliaryTitle,metrics,notice,noteSource,transparency);
   var media=window.matchMedia('(min-width: 1024px)');
   function apply(){
-   var extras=[...root.querySelectorAll('.rain-decision-card,.outfit-decision-card')];
+   var extras=[...root.querySelectorAll('.outfit-decision-card')];
    if(media.matches){
-    main.replaceChildren(hero,...extras,noteSource,actions,hour);
-    rail.replaceChildren(air,weekly,metrics,notice);
+    main.replaceChildren(hero,hour,actions,...extras);
+    rail.replaceChildren(air,weekly,auxiliary);
     root.replaceChildren(main,rail);
-   }else root.replaceChildren(hero,...extras,noteSource,air,actions,hour,metrics,weekly,notice);
+   }else root.replaceChildren(hero,hour,actions,...extras,air,weekly,auxiliary);
   }
   root.classList.add('stitch-dashboard-grid');
   apply();media.addEventListener?.('change',apply);
@@ -120,9 +124,12 @@
   var combined=document.createElement('div');combined.className='stitch-unified-briefing stitch-current-briefing';
   var narrator=brief.children[1];narrator.classList.add('stitch-restored-narrator');
   nodes.briefMessage.hidden=false;
+  var modes=document.querySelector('.briefing-mode');
+  if(modes){player.prepend(modes);modes.addEventListener('click',function(e){if(e.target.closest('[data-brief-mode]')){stopStitchSpeech('길이를 바꿨습니다. 재생 버튼을 눌러 주세요.');if(latest)render(latest);}});}
   combined.append(flowSlot,narrator,player);
   hero.append(combined);hero.classList.add('stitch-current-combined');
-  var context=document.createElement('div');context.className='stitch-current-context';
+  var context=document.createElement('details');context.className='stitch-current-context';
+  var contextTitle=document.createElement('summary');contextTitle.textContent='어제 비교·공식 특보 확인';context.append(contextTitle);
   hero.querySelectorAll('.daily-delta-block,.official-glance-line').forEach(function(item){context.append(item);});
   hero.append(context);
   nodes.briefPlay?.addEventListener('click',playStitchSpeech);
@@ -168,8 +175,7 @@
   put(nodes.airText,pm==='정보 없음'?'대기질 예측 정보 없음':pm.includes('나쁨')||fine.includes('나쁨')?'대기질 주의 · 활동 전 확인':'대기질 모델 예측 · 실외 활동 참고');
   put(nodes.airAdvice,pm==='정보 없음'?'대기질 정보를 다시 확인해 주세요.':pm.includes('나쁨')||fine.includes('나쁨')?'외출 전 마스크를 준비하고 환기는 짧게 하세요.':'환기와 야외활동에 무난해요.');
   // Retain original colored 2-chip presentation while replacing fictional values.
-  var chips=[...nodes.air.querySelectorAll('div')].filter(x=>x.childElementCount<=1&&/^(미세|초미세)\s/.test(x.textContent.trim()));
-  chips.slice(-2).forEach((el,i)=>{el.textContent=(i?'초미세 ':'미세 ')+(i?fine:pm)+' '+fmt(i?air.pm2_5:air.pm10)+'㎍/㎥';el.title='Open-Meteo 대기질 모델 예측값';});
+  ['[data-official-pm10]','[data-official-pm25]'].forEach((selector,i)=>{var el=nodes.air.querySelector(selector);if(el){el.textContent=(i?'초미세 ':'미세 ')+(i?fine:pm)+' '+fmt(i?air.pm2_5:air.pm10)+'㎍/㎥';el.title='Open-Meteo 대기질 모델 예측값';}});
   put(nodes.briefName,loc+' 기상브리핑');
   // The Stitch prototype has amber/emerald emphasis, but a textContent
   // update used to erase all inline colors. Render weather-backed semantic
@@ -200,11 +206,7 @@
     var rain=document.createElement('span');rain.className='font-label-sm text-label-sm mt-0.5';rain.textContent='비 '+fmt(item.rain)+'%';
     num.append(temp,rain);b.append(hour,ic,num);
     b.addEventListener('click',()=>{
-     nodes.track.querySelectorAll('.stitch-hour-selected').forEach(x=>x.classList.remove('stitch-hour-selected'));
-     b.classList.add('stitch-hour-selected');
-     var txt=nodes.hour.querySelector('.stitch-hour-context')||document.createElement('p');
-     txt.className='stitch-hour-context';txt.textContent=short(item.time)+' · '+cond.name+' '+fmt(item.temp)+'°C · 비 '+fmt(item.rain)+'% · 바람 '+fmt(item.wind)+'km/h';
-     nodes.hour.appendChild(txt);
+     go('hourly');window.dispatchEvent(new CustomEvent('weatherhannun:select-hour',{detail:{time:item.time}}));
     });
     nodes.track.appendChild(b);
    });
@@ -228,7 +230,7 @@
    put(nodes.daylight,Math.floor(diff/60)+'시간 '+(diff%60)+'분');
   }else put(nodes.daylight,'정보 없음');
   if(nodes.weekList){
-   var dates=d.time||[],days=Math.min(7,dates.length);
+   var dates=d.time||[],days=Math.min(3,dates.length);
    nodes.weekList.replaceChildren();
    if(!days){var empty=document.createElement('p');empty.textContent='주간 예보 정보 없음';nodes.weekList.append(empty);}
    for(var i=0;i<days;i++){
@@ -239,7 +241,7 @@
     var icon=document.createElement('span');icon.className='stitch-week-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML=window.WeatherIcons?window.WeatherIcons.markup(cell(d.weather_code,i),1,'weather-glyph--tile'):'?';
     var rain=document.createElement('span');rain.className='stitch-week-rain';rain.textContent='비 '+fmt(cell(d.precipitation_probability_max,i))+'%';
     var range=document.createElement('span');range.className='stitch-week-range';range.innerHTML='<small></small><b></b>';range.querySelector('small').textContent=fmt(cell(d.temperature_2m_min,i))+'°';range.querySelector('b').textContent=fmt(cell(d.temperature_2m_max,i))+'°';
-    button.append(date,icon,rain,range);button.addEventListener('click',()=>go('weekly'));nodes.weekList.append(button);
+    button.append(date,icon,rain,range);button.dataset.weekPreview=String(i);button.addEventListener('click',event=>{go('weekly');var target=document.querySelector('[data-week-index="'+event.currentTarget.dataset.weekPreview+'"]');if(target&&target.getAttribute('aria-expanded')!=='true')target.click();});nodes.weekList.append(button);
    }
   }
   put(nodes.community,'강수·저온·돌풍 알림 조건 설정 · 앱이 열려 있는 동안 알림');

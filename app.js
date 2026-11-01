@@ -203,37 +203,7 @@
     window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:{weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt,status:STATE.dataStatus,source:PROVIDER?PROVIDER.sourceRecord({payload:w,fetchedAt:STATE.fetchedAt,cached:STATE.dataStatus!=="live",fallbackReason:STATE.dataStatus==="cached-error"?"network_error":""}):null}}));
   }
   function renderHourly(){
-    var h=STATE.hourly.slice(0,36),width=Math.max(36*76,h.length*76);
-    var values=h.map(function(x){return x.temp;}).filter(finite);
-    if(!values.length){$("hourlyChart").textContent="시간별 기온 정보 없음";return;}
-    var low=Math.floor(Math.min.apply(null,values)-2),high=Math.ceil(Math.max.apply(null,values)+2);
-    if(high===low)high+=1;
-    var coordinates=h.map(function(x,i){return finite(x.temp)?{x:38+i*76,y:103-(x.temp-low)/(high-low)*83}:null;});
-    var segments=[],segment=[];
-    coordinates.forEach(function(point){if(point)segment.push(point);else if(segment.length){segments.push(segment);segment=[];}});
-    if(segment.length)segments.push(segment);
-    var pointText=function(point){return point.x+","+point.y.toFixed(1);};
-    var lines=segments.filter(function(items){return items.length>1;}).map(function(items){return '<polyline points="'+items.map(pointText).join(" ")+'" stroke="#ffcf78" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>';}).join("");
-    var fill=coordinates.every(Boolean)&&coordinates.length?'<polygon points="'+coordinates.map(pointText).join(" ")+' '+coordinates[coordinates.length-1].x+',121 38,121" fill="url(#lineFill)"/>':"";
-    var labels=h.map(function(x,i){var point=coordinates[i];return point&&i%3===0?'<text x="'+point.x+'" y="'+(point.y-11).toFixed(1)+'" fill="#ffdd97" font-size="12" text-anchor="middle">'+safe(num(x.temp))+'°</text>':"";}).join("");
-    var dots=h.map(function(_,i){var point=coordinates[i];return point&&i%3===0?'<circle cx="'+point.x+'" cy="'+point.y.toFixed(1)+'" r="3.4" fill="#ffda86"/>':"";}).join("");
-    $("hourlyChart").innerHTML='<svg width="'+width+'" height="124" viewBox="0 0 '+width+' 124" role="img" aria-label="기온 변동 그래프"><defs><linearGradient id="lineFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#f7bd66" stop-opacity=".22"/><stop offset="100%" stop-color="#f7bd66" stop-opacity="0"/></linearGradient></defs>'+fill+lines+dots+labels+'</svg>';
-    $("hourlyItems").innerHTML=h.map(function(x,i){var symbol=weatherSymbol(x.code,x.isDay),label=i===0?"현재":hourLabel(x.time);return '<div class="hour-item '+(i===0?"now":"")+'" data-hour-index="'+i+'" aria-label="'+safe(label+", "+symbol.name+", "+num(x.temp)+"도, 비 "+num(x.rain)+"퍼센트, 풍속 "+num(x.wind)+"킬로미터, 돌풍 "+num(x.gust)+"킬로미터")+'"><span class="hour-time">'+label+'</span><span class="hour-icon" aria-hidden="true">'+symbol.icon+'</span><span class="hour-temp">'+num(x.temp)+'°</span><span class="hour-rain">☂ '+num(x.rain)+'%</span><span class="hour-wind">풍 '+num(x.wind)+'</span><span class="hour-gust">돌 '+num(x.gust)+' km/h</span></div>';}).join("");
-    var detail=$("hourlyDetailRows");
-    if(detail){
-      var windows=[];
-      for(var start=0;start<Math.min(24,h.length);start+=3){
-        var rows=h.slice(start,start+3),temps=rows.map(function(x){return x.temp;}).filter(finite),winds=rows.map(function(x){return x.wind;}).filter(finite),gusts=rows.map(function(x){return x.gust;}).filter(finite),rains=rows.map(function(x){return x.rain;}).filter(finite);
-        if(!rows.length)continue;
-        var avgTemp=temps.length===rows.length?temps.reduce(function(a,b){return a+b;},0)/temps.length:null;
-        var maxWind=winds.length===rows.length?Math.max.apply(null,winds):null,maxGust=gusts.length===rows.length?Math.max.apply(null,gusts):null,maxRain=rains.length===rows.length?Math.max.apply(null,rains):null;
-        windows.push({index:start,first:rows[0],last:rows[rows.length-1],temp:avgTemp,wind:maxWind,gust:maxGust,rain:maxRain});
-      }
-      detail.innerHTML=windows.map(function(x,i){
-        var symbol=weatherSymbol(x.first.code,x.first.isDay),label=i===0?"지금부터":hourLabel(x.first.time)+"–"+hourLabel(x.last.time);
-        return '<button type="button" class="hourly-detail-row" data-hour-window="'+x.index+'" aria-label="'+safe(label+", "+symbol.name+", 평균 "+num(x.temp)+"도, 비 "+num(x.rain)+"퍼센트, 풍속 "+num(x.wind)+"킬로미터, 돌풍 "+num(x.gust)+"킬로미터")+'"><span class="hourly-detail-icon" aria-hidden="true">'+symbol.icon+'</span><span class="hourly-detail-main"><b>'+safe(label)+'</b><small>'+safe(dateLabel(x.first.time.slice(0,10)))+' · '+safe(symbol.name)+'</small></span><span class="hourly-detail-metrics"><span><small>기온</small><b>'+num(x.temp)+'°</b></span><span><small>비</small><b>'+num(x.rain)+'%</b></span><span><small>풍속</small><b>'+num(x.wind)+'km/h</b></span><span><small>돌풍</small><b>'+num(x.gust)+'km/h</b></span></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>';
-      }).join("");
-    }
+    var h=STATE.hourly.slice(0,9);
     var preview=$("todayHourlyPreview");
     if(preview)preview.innerHTML=h.slice(0,9).map(function(x,i){
       var symbol=weatherSymbol(x.code,x.isDay),label=i===0?"현재":hourLabel(x.time);
@@ -387,7 +357,7 @@
     STATE.view=view;
     if($("temporaryLocationNotice"))$("temporaryLocationNotice").hidden=!STATE.loc.temporary||view!=="today";
     document.querySelectorAll(".screen").forEach(function(el){el.classList.toggle("active",el.id==="view-"+view);});
-    document.querySelectorAll("[data-view]").forEach(function(el){var a=el.dataset.view===view;el.classList.toggle("active",a);if(el.classList.contains("nav-button"))el.setAttribute("aria-current",a?"page":"false");});
+    document.querySelectorAll("[data-view]").forEach(function(el){var a=el.dataset.view===view;el.classList.toggle("active",a);if(el.classList.contains("nav-button")||el.closest(".mobile-nav"))el.setAttribute("aria-current",a?"page":"false");});
     window.scrollTo({top:0,behavior:"instant"});
     if(view==="map")showMap();
     window.dispatchEvent(new CustomEvent("weatherhannun:view",{detail:{
@@ -600,14 +570,6 @@
       document.querySelectorAll("[data-activity]").forEach(function(b){b.classList.toggle("active",b.dataset.activity===STATE.activity);});
       renderActivity();
       $("activityDetailPanel").scrollIntoView({behavior:"smooth",block:"start"});
-    });
-    $("hourlyDetailRows").addEventListener("click",function(event){
-      var button=event.target.closest("[data-hour-window]");if(!button)return;
-      var index=Number(button.dataset.hourWindow),scroll=$("hourlyScroll");
-      document.querySelectorAll(".hourly-detail-row").forEach(function(row){row.classList.toggle("selected",row===button);});
-      document.querySelectorAll(".hour-item[data-hour-index]").forEach(function(item){item.classList.toggle("selected",Number(item.dataset.hourIndex)>=index&&Number(item.dataset.hourIndex)<index+3);});
-      if(scroll)scroll.scrollTo({left:Math.max(0,index*76-20),behavior:"smooth"});
-      $("hourlyChart").scrollIntoView({behavior:"smooth",block:"center"});
     });
     document.querySelectorAll("[data-activity-filter]").forEach(function(btn){btn.addEventListener("click",function(){
       STATE.activityFilter=btn.dataset.activityFilter;

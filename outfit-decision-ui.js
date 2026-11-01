@@ -51,7 +51,7 @@
   }
 
   function mount() {
-    var anchor = document.querySelector('.rain-decision-card');
+    var anchor = document.querySelector('.stitch-dashboard-actions') || document.querySelector('.rain-decision-card');
     if (!anchor || !anchor.parentNode) return;
     var element = ensureCard();
     if (anchor.nextElementSibling !== element) {
