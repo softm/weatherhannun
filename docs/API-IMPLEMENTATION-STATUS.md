@@ -34,7 +34,7 @@
 ## 검증 결과
 
 - 백엔드 단위·계약 테스트: 6개 통과
-- 기존 웹 회귀 테스트: 236개 통과
+- 최신 원격 `main` 기준 웹 회귀 테스트: 235개 통과
 - Playwright 주요 화면 테스트: 해외 MET Norway·국내 키 미설정 폴백 2개 통과
 - Android: `testDebugUnitTest assembleDebug` 통과
 - 해외 운영 API: MET Norway 기반 공통 계약 v2 응답 확인
