@@ -57,7 +57,7 @@
   <script defer src="./monetization-core.js?v=32"></script>
   <script defer src="./monetization-settings.js?v=34"></script>
   <script defer src="./plus-personalization-core.js?v=34"></script>
-  <script defer src="./plus-personalization.js?v=34"></script>
+  <script defer src="./plus-personalization.js?v=35"></script>
   <script defer src="./product-metrics-core.js?v=33"></script>
   <script defer src="./product-metrics.js?v=33"></script>
   <script defer src="./location-compare-core.js?v=32"></script>
@@ -67,7 +67,8 @@
   <script defer src="./header-menu.js?v=1"></script>
   <script defer src="./day-flow-core.js?v=3"></script>
   <script defer src="./day-flow-ui.js?v=3"></script>
-  <script defer src="./app.js?v=41"></script>
+  <script defer src="./activity-interests-core.js?v=1"></script>
+  <script defer src="./app.js?v=42"></script>
   <script defer src="./official-data-ui.js?v=40"></script>
   <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
@@ -78,7 +79,7 @@
   <script defer src="./region-search-ui.js?v=19"></script>
   <script defer src="./rain-decision-core.js?v=31"></script>
   <script defer src="./outfit-decision-core.js?v=31"></script>
-  <script defer src="./stitch-today.js?v=34"></script>
+  <script defer src="./stitch-today.js?v=35"></script>
   <script defer src="./rain-decision-ui.js?v=22"></script>
   <script defer src="./outfit-decision-ui.js?v=25"></script>
   <script defer src="./screen-weather-settings.js?v=38"></script>
@@ -216,6 +217,13 @@
 
       <section id="view-activity" class="screen content-bound" aria-label="활동 추천">
         <div class="page-header"><div><span class="section-overline">ACTIVITY RECOMMENDATIONS</span><h2>날씨에 맞는 오늘의 활동</h2><p>앞으로 48시간의 기온·비·바람·습도로 활동별 적합 시간을 계산합니다.</p></div></div>
+        <details class="activity-interests stitch-card">
+          <summary>관심 활동 설정 · 무료</summary>
+          <p>관심 있는 활동을 선택하세요. 홈 TOP 3와 내 관심 활동에 함께 적용됩니다.</p>
+          <div class="interest-options"><label><input type="checkbox" data-interest value="walk" checked>산책·외출</label><label><input type="checkbox" data-interest value="laundry" checked>빨래</label><label><input type="checkbox" data-interest value="carwash" checked>세차</label><label><input type="checkbox" data-interest value="harvest">수확·농작업</label><label><input type="checkbox" data-interest value="spray">방제 참고</label><label><input type="checkbox" data-interest value="irrigation">관수 참고</label></div>
+          <p id="activityInterestsStatus" role="status">선택은 이 기기에 자동 저장됩니다. 언제든 변경할 수 있어요.</p>
+        </details>
+        <div class="activity-filters" role="group" aria-label="활동 범위"><button type="button" class="active" data-activity-scope="mine" aria-pressed="true">내 관심 활동</button><button type="button" data-activity-scope="all" aria-pressed="false">전체 활동</button></div>
         <div class="activity-filters" role="group" aria-label="활동 카테고리"><button type="button" class="active" data-activity-filter="all">전체</button><button type="button" data-activity-filter="daily">생활·일상</button><button type="button" data-activity-filter="agri">농업·원예</button><button type="button" data-activity-filter="outdoor">야외 레저</button></div>
         <aside class="activity-disclaimer"><span class="material-symbols-outlined" aria-hidden="true">info</span><p>활동 점수는 모델 예보 기반 참고 지표이며 현장 특성과 안전 판단, 공식 특보를 대체하지 않습니다.</p></aside>
         <article class="activity-summary stitch-card"><div><span><i></i> 오늘의 야외 지수</span><strong id="activitySummaryText">활동 조건 분석 중</strong><small id="activitySummarySub">시간별 예보를 비교하고 있습니다.</small></div><div><b id="activitySummaryScore">--</b><small>/ 100</small></div></article>
@@ -334,17 +342,16 @@
           <p>핵심 날씨와 위험정보는 무료입니다. 가격은 임의로 정하지 않고 Google Play에 실제 등록된 지역화 가격만 표시합니다.</p>
           <div class="membership-plan-grid">
             <article class="membership-plan active" data-membership-plan="free"><div><b>Free</b><span data-plan-status>기본 제공</span></div><strong>핵심 날씨·위험정보</strong><ul><li>오늘·시간별·주간</li><li>기본 활동·필수 알림</li><li>공식 위험정보는 무료 유지</li></ul><small data-plan-price>무료</small></article>
-            <article class="membership-plan" data-membership-plan="plus"><div><b>Plus</b><span data-plan-status>판매 전</span></div><strong>편의·개인화 확장</strong><ul><li>운영 광고 제거</li><li>추가 위젯 테마</li><li>고급 활동·알림 개인화</li></ul><small data-plan-price>가격 미확정 · 임의 가격을 표시하지 않음</small><button type="button" data-purchase-plan="plus" disabled>판매 준비 중</button></article>
+            <article class="membership-plan" data-membership-plan="plus"><div><b>Plus</b><span data-plan-status>판매 전</span></div><strong>편의·개인화 확장</strong><ul><li>운영 광고 제거</li><li>추가 위젯 테마</li><li>고급 알림 개인화</li></ul><small data-plan-price>가격 미확정 · 임의 가격을 표시하지 않음</small><button type="button" data-purchase-plan="plus" disabled>판매 준비 중</button></article>
             <article class="membership-plan premium" data-membership-plan="agriculture"><div><b>농업 Premium</b><span data-plan-status>판매 전</span></div><strong>여러 현장의 작업 계획</strong><ul><li>작물·생육단계별 위험</li><li>여러 지역 작업 일정</li><li>근거가 포함된 위험 리포트</li></ul><small data-plan-price>가격 미확정 · 임의 가격을 표시하지 않음</small><button type="button" data-purchase-plan="agriculture" disabled>판매 준비 중</button></article>
           </div>
           <p id="membershipStatus" class="membership-status" aria-live="polite">유료 판매 준비 상태를 확인하고 있습니다.</p>
           <ul id="membershipBlockers" class="membership-blockers"><li>유료 서비스용 데이터 이용권과 Play Billing 검증 전 판매하지 않습니다.</li></ul>
           <div class="settings-actions"><button type="button" id="membershipRestore" disabled><span class="material-symbols-outlined" aria-hidden="true">restore</span>구매 복원</button><button type="button" id="membershipManage" class="secondary" disabled><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>Play 구독 관리</button></div>
           <div id="plusPersonalization" class="plus-personalization">
-            <div><span><b>Plus 활동·알림 프로필</b><small>기존 무료 알림을 잠그지 않고, 선택한 프리셋과 TOP 3 활동 우선순위만 빠르게 적용합니다.</small></span><span id="plusPersonalizationBadge">Plus</span></div>
+            <div><span><b>Plus 알림 프로필</b><small>기존 무료 알림을 잠그지 않고, 선택한 알림 프리셋을 빠르게 적용합니다. 관심 활동은 활동 추천 화면에서 무료로 설정합니다.</small></span><span id="plusPersonalizationBadge">Plus</span></div>
             <fieldset id="plusPersonalizationControls" disabled>
               <label>알림 프리셋<select id="plusAlertProfile"><option value="commute">출퇴근·등하교</option><option value="outdoor">야외활동 민감형</option><option value="farm">농작업 점검형</option></select></label>
-              <div><span class="plus-personalization-label">TOP 3 우선 활동 · 적합 점수 60점 이상 · 최대 3개</span><div class="plus-activity-priorities"><label><input type="checkbox" value="walk" checked>산책·외출</label><label><input type="checkbox" value="laundry" checked>빨래</label><label><input type="checkbox" value="carwash">세차</label><label><input type="checkbox" value="harvest" checked>수확·농작업</label><label><input type="checkbox" value="spray">방제 참고</label><label><input type="checkbox" value="irrigation">관수 참고</label></div></div>
               <button type="button" id="plusPersonalizationApply">프로필을 알림 설정에 적용</button>
             </fieldset>
             <p id="plusPersonalizationStatus">검증된 Plus 권한과 상업 데이터 이용권이 준비되면 사용할 수 있습니다.</p>

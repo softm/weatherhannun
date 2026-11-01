@@ -15,12 +15,12 @@
     { name: "제주", lat: 33.4996, lon: 126.5312 }
   ];
   var ACTIVITY_CORE=window.WeatherActivityCore;
-  var PLUS_PERSONALIZATION=window.WeatherHannunPlusPersonalization;
+  var INTERESTS=window.WeatherActivityInterests;
   var ACTIVITIES=ACTIVITY_CORE?ACTIVITY_CORE.DEFINITIONS:{};
   var STATE = {
     loc: CITY_LIST[0], weather: null, air: null, activity: "walk", dataStatus: "loading",
     view: "today", hourly: [], fetchedAt: null, cityData: null,
-    map: null, tileLayer: null, mapObserver: null, markers: [], loading: false, ticket: 0, mapBusy: false, mapMetric:"temperature", activityFilter: "all", activityPriority: []
+    map: null, tileLayer: null, mapObserver: null, markers: [], loading: false, ticket: 0, mapBusy: false, mapMetric:"temperature", activityFilter: "all", activityScope: "mine", activityPriority: ["walk","laundry","carwash"]
   };
   var toastTimer;
   function storeGet(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (_) { return null; } }
@@ -310,14 +310,14 @@
   }
   function renderDecisions(){
     var candidates=Object.keys(ACTIVITIES).map(activitySummary);
-    var rank=PLUS_PERSONALIZATION?PLUS_PERSONALIZATION.order(candidates,STATE.activityPriority):candidates.sort(function(a,b){return (finite(b.data.score)?b.data.score:-1)-(finite(a.data.score)?a.data.score:-1);});
+    var rank=INTERESTS.rank(candidates,STATE.activityPriority);
     var top=rank.slice(0,3);
-    text("decisionLead",top[0]&&finite(top[0].data.score)&&top[0].data.score>=60?"오늘은 "+top[0].info.title+"에 유리한 시간대가 있어요.":top.some(function(x){return finite(x.data.score);})?"활동별 추천 시간과 위험 근거를 확인하세요.":"필수 예보값이 부족해 활동 점수를 만들지 않습니다.");
+    text("decisionLead",top[0]&&finite(top[0].data.score)&&top[0].data.score>=60?"선택한 "+top[0].info.title+"에 유리한 시간대가 있어요.":top.some(function(x){return finite(x.data.score);})?"오늘은 관심 활동에 적합한 시간이 적어요.":!top.length?"관심 활동을 선택하면 추천 시간을 알려드려요.":"필수 예보값이 부족해 활동 점수를 만들지 않습니다.");
     $("quickActivity").innerHTML=top.map(function(x){return '<button type="button" class="quick-item" data-quick-activity="'+x.key+'"><div class="quick-icon">'+x.info.icon+'</div><div class="quick-main"><b>'+x.info.title+'</b><small>'+(x.best?"추천 "+whenLabel(x.best.start):"필수 예보값 확인 필요")+'</small></div><span class="quick-badge '+scoreClass(x.data.score)+'">'+grade(x.data.score)+(finite(x.data.score)?" "+x.data.score:"")+'</span></button>';}).join("");
   }
   function renderActivityFeed(){
     var target=$("activityFeed");if(!target)return;
-    var rank=Object.keys(ACTIVITIES).map(activitySummary).sort(function(a,b){return (finite(b.data.score)?b.data.score:-1)-(finite(a.data.score)?a.data.score:-1);});
+    var rank=INTERESTS.rank(Object.keys(ACTIVITIES).map(activitySummary),STATE.activityPriority,STATE.activityScope==="all");
     var shown=rank.filter(function(x){return STATE.activityFilter==="all"||x.info.category===STATE.activityFilter;});
     target.innerHTML=shown.map(function(x){
       var reason=x.data.reasons[0]||{detail:x.info.hint};
@@ -327,9 +327,10 @@
       var forecast=weatherSymbol(weather.code,weather.isDay);
       var scoreText=finite(x.data.score)?String(x.data.score):"--",scoreWidth=finite(x.data.score)?x.data.score:0;
       return '<button type="button" class="activity-feed-card stitch-card '+(x.key===STATE.activity?"selected":"")+'" data-activity-open="'+x.key+'" aria-label="'+safe(x.info.title+", "+grade(x.data.score)+(finite(x.data.score)?" "+x.data.score+"점":"")+", 추천 시간 날씨 "+forecast.name)+'"><span class="feed-icon" aria-hidden="true">'+x.info.icon+'</span><span class="feed-copy"><span><strong>'+safe(x.info.title)+'</strong><em class="feed-grade '+scoreClass(x.data.score)+'">'+grade(x.data.score)+'</em></span><small class="feed-best-time"><span aria-hidden="true">'+forecast.icon+'</span>추천 시간: '+safe(best)+' · '+safe(forecast.name)+'</small><span class="feed-metrics"><span>☂ '+num(weather.rain)+'%</span><span>≋ '+num(weather.wind)+'km/h</span><span>습도 '+num(weather.humidity)+'%</span></span><span class="feed-progress" aria-hidden="true"><i style="width:'+scoreWidth+'%"></i></span><p>'+safe(reason.detail)+'</p></span><span class="score-ring" style="--score:'+scoreWidth+'"><b>'+scoreText+'</b><small>'+(finite(x.data.score)?"점":"")+'</small></span><span class="material-symbols-outlined feed-arrow" aria-hidden="true">chevron_right</span></button>';
-    }).join("")||'<div class="empty-state">이 분류에 표시할 활동이 없습니다.</div>';
-    var lead=shown[0]||rank[0];
-    if(lead){text("activitySummaryText",finite(lead.data.score)?lead.info.title+"에 가장 좋은 조건":"활동 판단 자료 부족");text("activitySummarySub",lead.best?"추천 "+whenLabel(lead.best.start):lead.info.hint);text("activitySummaryScore",finite(lead.data.score)?lead.data.score:"--");}
+    }).join("")||'<div class="empty-state">표시할 관심 활동이 없습니다. 관심 활동 설정에서 선택하거나 전체 활동을 확인하세요.</div>';
+    var lead=shown[0];
+    if(!lead){text("activitySummaryText","표시할 활동이 없습니다");text("activitySummarySub","관심 활동이나 분류를 변경해 주세요.");text("activitySummaryScore","--");}
+    if(lead){text("activitySummaryText",finite(lead.data.score)?(STATE.activityScope==="mine"?"선택한 ":"")+lead.info.title+(lead.data.score>=60?"에 유리한 시간대":" · 적합한 시간이 적어요"):"활동 판단 자료 부족");text("activitySummarySub",lead.best?"추천 "+whenLabel(lead.best.start):lead.info.hint);text("activitySummaryScore",finite(lead.data.score)?lead.data.score:"--");}
   }
   function renderActivity(){
     var key=STATE.activity,info=ACTIVITIES[key],now=activityEvalAt(key,0),best=bestActivity(key);
@@ -515,14 +516,24 @@
     if(!validLocation(l))l=CITY_LIST[0];
     var remembered=storeGet("weatherhannun_activity_v1");
     if(typeof remembered==="string"&&ACTIVITIES[remembered])STATE.activity=remembered;
-    if(window.WeatherHannunPlusPreferences?.currentPriority)STATE.activityPriority=window.WeatherHannunPlusPreferences.currentPriority();
+    STATE.activityPriority=INTERESTS.normalize(storeGet("weatherhannun_activity_interests_v1"));
+    document.querySelectorAll("[data-interest]").forEach(function(input){
+      input.checked=STATE.activityPriority.includes(input.value);
+      input.addEventListener("change",function(){
+        STATE.activityPriority=INTERESTS.normalize(Array.from(document.querySelectorAll("[data-interest]:checked")).map(function(x){return x.value;}));
+        storeSet("weatherhannun_activity_interests_v1",STATE.activityPriority);
+        text("activityInterestsStatus","관심 활동 "+STATE.activityPriority.length+"개 선택 · 이 기기에 자동 저장됩니다.");
+        if(STATE.weather){renderDecisions();renderActivityFeed();}
+      });
+    });
+    document.querySelectorAll("[data-activity-scope]").forEach(function(btn){btn.addEventListener("click",function(){
+      STATE.activityScope=btn.dataset.activityScope;
+      document.querySelectorAll("[data-activity-scope]").forEach(function(b){b.classList.toggle("active",b===btn);b.setAttribute("aria-pressed",String(b===btn));});
+      if(STATE.weather)renderActivityFeed();
+    });});
     document.querySelectorAll("[data-activity]").forEach(function(b){b.classList.toggle("active",b.dataset.activity===STATE.activity);});
     window.addEventListener("weatherhannun:change-location",function(ev){
       if(validLocation(ev.detail))applyLocation(ev.detail,true);
-    });
-    window.addEventListener("weatherhannun:activity-priority",function(ev){
-      STATE.activityPriority=PLUS_PERSONALIZATION?PLUS_PERSONALIZATION.normalizePriority(ev.detail?.activities):[];
-      if(STATE.weather)renderDecisions();
     });
     document.querySelectorAll("[data-view]").forEach(function(btn){btn.addEventListener("click",function(){setView(btn.dataset.view);});});
     document.querySelectorAll("[data-scroll-target]").forEach(function(btn){btn.addEventListener("click",function(){var id=btn.dataset.scrollTarget;requestAnimationFrame(function(){var target=$(id);if(target)target.scrollIntoView({behavior:"smooth",block:"start"});});});});

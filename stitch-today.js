@@ -110,15 +110,9 @@
    put(card.querySelector('.font-tabular-metric'),'--');
    put(card.querySelector('p'),'예보 연결 중…');
   });
-  cards.forEach((card,i)=>{
-   var key=['walk','laundry','harvest'][i];
-   card.setAttribute('role','button');card.tabIndex=0;card.classList.add('stitch-action-card');
-   card.setAttribute('aria-label',['산책 추천 상세 보기','빨래 추천 상세 보기','농작업 추천 상세 보기'][i]);
-   card.addEventListener('click',()=>activity(key));
-   card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activity(key);}});
-   card.querySelector('button')?.addEventListener('click',e=>{e.stopPropagation();activity(key);});
-   put(card.querySelector('p'),'추천 시간 분석 중…');
-  });
+  // Reuse the live recommendation nodes so home and activity settings share one ranking.
+  var quick=document.getElementById('quickActivity'),lead=document.getElementById('decisionLead');
+  if(cards[0]&&quick&&lead)cards[0].parentElement.replaceChildren(lead,quick);
   var noteSource=document.createElement('p');
   noteSource.className='stitch-source-note';noteSource.textContent='Open-Meteo 모델 예보 · 관측소 실측 아님';
   hero.insertAdjacentElement('afterend',noteSource);
@@ -171,15 +165,6 @@
   var rainWindow=h.slice(0,12),rainComplete=rainWindow.length===12&&rainWindow.every(x=>Number.isFinite(x.rain)&&Number.isFinite(x.mm));
   var next=rainWindow.find(x=>Number.isFinite(x.rain)&&x.rain>=50||Number.isFinite(x.mm)&&x.mm>=.3);
   put(nodes.hourlyBanner,next?short(next.time)+' 비 신호 '+(Number.isFinite(next.rain)&&next.rain>=50?fmt(next.rain)+'%':fmt(next.mm,1)+'mm/h'):rainComplete?'12시간 뚜렷한 강수 신호 낮음':'강수 자료 일부 누락');
-  var kinds=['walk','laundry','harvest'],windows=kinds.map(k=>best(k,h));
-  nodes.cards.forEach((card,i)=>{
-   var bestTime=windows[i];
-   var message=i===2?'풍속 '+fmt(c.wind_speed_10m)+' km/h · 비 '+fmt(now.rain)+'% · 현장 확인':
-    bestTime?short(bestTime.from)+' ~ '+short(bestTime.to)+' ('+bestTime.score+'점)':'적합한 시간 확인 필요';
-   put(card.querySelector('p'),message);
-   var chip=[...card.querySelectorAll('span')].find(s=>s.childElementCount===0&&/^(--점|92점)$/.test(s.textContent.trim()));
-   if(chip&&bestTime)put(chip,fmt(bestTime.score)+'점');
-  });
   if(nodes.track){
    nodes.track.replaceChildren();
    h.slice(0,12).forEach((item,i)=>{
