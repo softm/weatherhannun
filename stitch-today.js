@@ -81,10 +81,10 @@
   function apply(){
    var extras=[...root.querySelectorAll('.rain-decision-card,.outfit-decision-card')];
    if(media.matches){
-    main.replaceChildren(brief,hero,...extras,noteSource,actions,hour);
+    main.replaceChildren(hero,...extras,noteSource,actions,hour);
     rail.replaceChildren(air,weekly,metrics,notice);
     root.replaceChildren(main,rail);
-   }else root.replaceChildren(brief,hero,...extras,noteSource,air,actions,hour,metrics,weekly,notice);
+   }else root.replaceChildren(hero,...extras,noteSource,air,actions,hour,metrics,weekly,notice);
   }
   root.classList.add('stitch-dashboard-grid');
   apply();media.addEventListener?.('change',apply);
@@ -114,14 +114,17 @@
   var openAir=function(){go('air');};
   air.addEventListener('click',openAir);air.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openAir();}});
   put(nodes.briefMessage,'현재 지역의 기상 예보를 분석 중입니다.');
-  // One home card owns the quick facts, timeline, narration and player.
+  // Current conditions and the day summary share one compact home surface.
   var flowSlot=document.createElement('div');flowSlot.dataset.briefDayFlow='';
-  var explanation=document.createElement('details');explanation.className='stitch-brief-explanation';
-  var explanationTitle=document.createElement('summary');explanationTitle.textContent='날씨 해설 펼쳐보기';
-  explanation.append(explanationTitle,nodes.briefMessage);
   var player=brief.querySelector('.stitch-briefing-player');
-  brief.append(flowSlot,explanation,player);brief.classList.add('stitch-unified-briefing');
-  nodes.briefPlay?.addEventListener('click',function(){if(!stitchSpeech)explanation.open=true;playStitchSpeech();});
+  var combined=document.createElement('div');combined.className='stitch-unified-briefing stitch-current-briefing';
+  nodes.briefMessage.hidden=true;
+  combined.append(flowSlot,player,nodes.briefMessage);
+  hero.append(combined);hero.classList.add('stitch-current-combined');
+  var context=document.createElement('div');context.className='stitch-current-context';
+  hero.querySelectorAll('.daily-delta-block,.official-glance-line').forEach(function(item){context.append(item);});
+  hero.append(context);
+  nodes.briefPlay?.addEventListener('click',playStitchSpeech);
   nodes.briefRoom?.addEventListener('click',function(){go('briefing');});
   if(nodes.matrix)[...nodes.matrix.children].forEach(card=>{
    put(card.querySelector('.font-tabular-metric'),'--');

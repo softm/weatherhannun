@@ -173,11 +173,22 @@ html[data-weather-theme="light"] #stitch-live-dashboard .stitch-hour-current .ma
 
 /* 오늘 브리핑: 요약·시간 흐름·음성을 한 카드에서 확인. */
 #stitch-live-dashboard .stitch-unified-briefing{overflow:visible}
-#stitch-live-dashboard .stitch-brief-explanation{margin-top:14px;padding-top:12px;border-top:1px solid var(--st-line);color:var(--st-fg)}
-#stitch-live-dashboard .stitch-brief-explanation summary{cursor:pointer;font-size:12px;font-weight:750;color:var(--st-muted);min-height:32px;align-content:center}
-#stitch-live-dashboard .stitch-brief-explanation[open] summary{color:var(--st-accent)}
-#stitch-live-dashboard .stitch-brief-explanation p{margin:8px 0 12px;font-size:13px;line-height:1.65}
 #stitch-live-dashboard .stitch-unified-briefing>.stitch-briefing-player{margin-top:8px;padding-top:4px;justify-content:space-between}
 #stitch-live-dashboard .stitch-unified-briefing .stitch-briefing-actions{flex:1;display:grid;grid-template-columns:1fr 1fr}
 #stitch-live-dashboard .stitch-unified-briefing .stitch-briefing-actions button{justify-content:center;min-height:42px}
 @media(max-width:720px){#stitch-live-dashboard .stitch-unified-briefing>.stitch-briefing-player small{width:100%;font-size:10px}#stitch-live-dashboard .stitch-unified-briefing .day-flow-summary strong{font-size:12px}}
+
+/* 현재 날씨부터 판단 요약·시간선·음성까지 한 영역으로 이어진다. */
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero.stitch-current-combined{padding:14px 16px 12px;min-height:0;overflow:visible}
+#stitch-live-dashboard .stitch-current-briefing{width:100%;margin-top:10px;text-align:left}
+#stitch-live-dashboard .stitch-current-briefing .day-flow-integrated{margin-top:0}
+#stitch-live-dashboard .stitch-current-briefing .day-flow-heading{margin-bottom:6px}
+#stitch-live-dashboard .stitch-current-briefing .day-flow-summary{margin:0 0 10px}
+#stitch-live-dashboard .stitch-current-briefing .day-flow-summary li{padding:7px 9px}
+#stitch-live-dashboard .stitch-current-briefing>.stitch-briefing-player{margin-top:10px;padding-top:0;gap:6px}
+#stitch-live-dashboard .stitch-current-briefing .stitch-briefing-actions button{min-height:38px}
+#stitch-live-dashboard .stitch-current-briefing .day-flow-timeline-wrap{box-shadow:inset 0 1px 0 #ffffff18;padding-bottom:7px}
+@media(max-width:720px){html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero.stitch-current-combined{padding:12px 12px 10px}#stitch-live-dashboard .stitch-current-briefing{margin-top:8px}}
+#stitch-live-dashboard .stitch-current-context{margin-top:10px;text-align:left}
+#stitch-live-dashboard .stitch-current-context .daily-delta-block{margin-top:0;padding-top:8px;padding-bottom:8px}
+#stitch-live-dashboard .stitch-current-context .official-glance-line{margin-top:6px;padding-top:7px}
