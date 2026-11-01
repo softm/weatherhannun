@@ -34,7 +34,7 @@ test("hourly, weekly, and activity screens expose the aligned content hierarchy"
 
   assert.ok(app.includes("week-row-badge"));
   assert.ok(app.includes("feed-metrics"));
-  assert.ok(app.includes("data-hour-window"));
+  assert.ok(read("hourly-explorer.js").includes("data-explorer-hour"));
   assert.match(css, /\.hourly-insight \.insight-window\s*\{[\s\S]*?grid-template-columns:\s*1fr/);
 });
 
@@ -60,8 +60,8 @@ test("service worker version tracks the aligned shell", () => {
   const html = read("index.html");
   const worker = read("sw.js");
 
-  assert.ok(worker.includes("weatherhannun-shell-v94-weather-api"));
-  for (const asset of ["briefing-core.js?v=32", "briefing-highlights.css?v=20", "briefing-highlights.js?v=20", "stitch-theme.css?v=18", "stitch-today.css?v=25", "stitch-today.js?v=44", "stitch-mobile.css?v=18", "settings.css?v=37", "screen-weather-settings.css?v=34", "screen-weather-settings.js?v=39", "agriculture-planner.css?v=34", "agriculture-planner-core.js?v=34", "agriculture-planner.js?v=35", "location-manager.css?v=24", "location-manager.js?v=23", "region-search.css?v=17", "region-search-core.js?v=16", "region-search-ui.js?v=19", "weather-icons.css?v=17", "weather-icons.js?v=17", "weather-provider-core.js?v=42", "monetization-core.js?v=32", "monetization-settings.js?v=34", "product-metrics-core.js?v=33", "product-metrics.js?v=33", "activity-decision-core.js?v=28", "official-data-core.js?v=40", "official-data.css?v=40", "official-data-ui.js?v=41", "app.js?v=47", "alert-rules-core.js?v=32", "forecast-insights.js?v=35", "rain-decision-core.js?v=31", "rain-decision-ui.js?v=22", "outfit-decision.css?v=24", "outfit-decision-core.js?v=31", "outfit-decision-ui.js?v=25", "daily-delta-core.js?v=27", "daily-delta-ui.js?v=29", "location-compare-core.js?v=33", "location-compare-ui.js?v=34", "location-compare.css?v=30"]) {
+  assert.ok(worker.includes("weatherhannun-shell-v95-mobile-ux"));
+  for (const asset of ["hourly-explorer-core.js?v=1", "hourly-explorer.js?v=1", "mobile-experience.css?v=1", "briefing-core.js?v=32", "briefing-highlights.css?v=20", "briefing-highlights.js?v=20", "stitch-theme.css?v=18", "stitch-today.css?v=25", "stitch-today.js?v=45", "stitch-mobile.css?v=18", "settings.css?v=37", "screen-weather-settings.css?v=34", "screen-weather-settings.js?v=39", "agriculture-planner.css?v=34", "agriculture-planner-core.js?v=34", "agriculture-planner.js?v=35", "location-manager.css?v=24", "location-manager.js?v=23", "region-search.css?v=17", "region-search-core.js?v=16", "region-search-ui.js?v=19", "weather-icons.css?v=17", "weather-icons.js?v=17", "weather-provider-core.js?v=42", "monetization-core.js?v=32", "monetization-settings.js?v=34", "product-metrics-core.js?v=33", "product-metrics.js?v=33", "activity-decision-core.js?v=28", "official-data-core.js?v=40", "official-data.css?v=40", "official-data-ui.js?v=42", "app.js?v=48", "alert-rules-core.js?v=32", "forecast-insights.js?v=36", "rain-decision-core.js?v=31", "rain-decision-ui.js?v=23", "outfit-decision.css?v=24", "outfit-decision-core.js?v=31", "outfit-decision-ui.js?v=26", "daily-delta-core.js?v=27", "daily-delta-ui.js?v=29", "location-compare-core.js?v=33", "location-compare-ui.js?v=34", "location-compare.css?v=30"]) {
     assert.ok(html.includes(asset), `page must request ${asset}`);
     assert.ok(worker.includes(asset), `service worker must warm ${asset}`);
   }
@@ -81,10 +81,10 @@ test("desktop today dashboard uses a dense main-and-rail layout backed by live d
   assert.match(today, /createWeeklyRail\(\)/);
   assert.match(today, /matchMedia\('\(min-width: 1024px\)'\)/);
   assert.match(today, /\[hero,'hero'\],\[noteSource,'source'\],\[air,'air'\],\[brief,'brief'\],\[actions,'actions'\],\[hour,'hourly'\],\[metrics,'metrics'\],\[weekly,'weekly'\],\[notice,'notice'\]/);
-  assert.match(today, /else root\.replaceChildren\(hero,\.\.\.extras,noteSource,air,actions,hour,metrics,weekly,notice\)/);
+  assert.match(today, /else root\.replaceChildren\(hero,hour,actions,\.\.\.extras,air,weekly,auxiliary\)/);
   assert.match(today, /d\.temperature_2m_min/);
   assert.match(today, /d\.precipitation_probability_max/);
-  assert.match(today, /button\.addEventListener\('click',\(\)=>go\('weekly'\)\)/);
+  assert.match(today, /go\('weekly'\)/);
   assert.match(css, /@media\(min-width:1024px\)[\s\S]*grid-template-columns:minmax\(0,2\.05fr\) minmax\(340px,\.95fr\)/);
   assert.doesNotMatch(css, /\.stitch-dashboard-rail\{position:sticky/);
   assert.match(css, /\.stitch-rail-heading button\{[^}]*min-height:44px/);

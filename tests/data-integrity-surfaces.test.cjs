@@ -31,7 +31,7 @@ test("daily precipitation bars represent maximum probability, not wet-hour share
 
 test("hourly and weekly views keep missing aggregates unknown", () => {
   const source = read("app.js");
-  assert.match(source, /coordinates=h\.map\(function\(x,i\)\{return finite\(x\.temp\)/);
+  assert.match(read("hourly-explorer.js"), /if\(C\.finite\(x\.temp\)\)/);
   assert.match(source, /precipitationRows\.length===len&&precipitationRows\.every\(finite\)/);
   assert.match(source, /일부 기온·강수 자료가 없어 위험 없음으로 판단하지 않습니다/);
   assert.equal((source.match(/weatherhannun:data/g) || []).length, 1, "weather data is dispatched once per render");
@@ -40,7 +40,7 @@ test("hourly and weekly views keep missing aggregates unknown", () => {
 test("cache-busted shell ships the data-integrity implementations", () => {
   const page = read("index.html");
   const worker = read("sw.js");
-  for (const asset of ["app.js?v=47", "stitch-today.js?v=44", "forecast-insights.js?v=35", "alert-rules-core.js?v=32"]) {
+  for (const asset of ["app.js?v=48", "stitch-today.js?v=45", "forecast-insights.js?v=36", "alert-rules-core.js?v=32"]) {
     assert.match(page, new RegExp(asset.replace(/[.?]/g, "\\$&")));
     assert.ok(worker.includes(asset));
   }
