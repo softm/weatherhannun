@@ -9,6 +9,7 @@
 .briefing-main h2{font-size:24px;margin:9px 0 7px;letter-spacing:-.7px}
 .briefing-headline{color:#fce0a2;font-size:15px;font-weight:750;margin-bottom:8px}
 .briefing-main p#briefingText{font-size:clamp(15px,1.8vw,19px);font-weight:520;line-height:1.73;color:#f3f9ff;margin:5px 0 18px}
+.briefing-sentence{padding:3px 2px;border-radius:7px;box-decoration-break:clone;-webkit-box-decoration-break:clone;transition:color .18s,background .18s,box-shadow .18s}.briefing-sentence.is-speaking{color:#142f45;background:#ffe39f;box-shadow:0 0 0 3px #ffe39f}.briefing-player{display:flex;align-items:center;gap:12px;margin:0 0 13px}.briefing-play{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 15px;color:#17364d;border:1px solid #ffe09b;border-radius:99px;background:#ffe09b;font-weight:800}.briefing-play.is-playing{color:#fff;border-color:#8fc8c3;background:#265c62}.briefing-play-status{color:#b7d1dd;font-size:11px;line-height:1.45}
 .briefing-mode{display:flex;gap:8px;flex-wrap:wrap}
 .briefing-mode button{background:#ffffff12;color:#d3e7f4;border:1px solid #83a6b67c;border-radius:11px;padding:9px 14px;font-size:12px;font-weight:780}
 .briefing-mode button.active{background:#ffdf9e;color:#19334e;border-color:#ffdf9e}
@@ -44,5 +45,5 @@
 .quick-activity .quick-item{width:100%;font:inherit;text-align:left;color:inherit;cursor:pointer}
 .quick-activity .quick-item:hover{background:#ffffff17;border-color:#95c7c350}
 @media(max-width:900px){.briefing-board{grid-template-columns:1fr}.briefing-aside{padding:21px}}
-@media(max-width:710px){.briefing-board{gap:11px;margin-bottom:15px}.briefing-main,.briefing-aside{padding:19px;border-radius:19px}.briefing-main h2{font-size:21px}.briefing-main p#briefingText{font-size:16px}.briefing-evidence{gap:13px}.briefing-mode button{flex:1}.briefing-aside{padding:18px}.briefing-aside h3{font-size:16px}}
+@media(max-width:710px){.briefing-board{gap:11px;margin-bottom:15px}.briefing-main,.briefing-aside{padding:19px;border-radius:19px}.briefing-main h2{font-size:21px}.briefing-main p#briefingText{font-size:16px}.briefing-player{align-items:flex-start;flex-direction:column;gap:7px}.briefing-evidence{gap:13px}.briefing-mode button{flex:1}.briefing-aside{padding:18px}.briefing-aside h3{font-size:16px}}
 @media(prefers-reduced-motion:reduce){.briefing-board *{animation:none!important;transition:none!important}}

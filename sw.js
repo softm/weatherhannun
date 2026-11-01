@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v67-time-focus";
+const CACHE="weatherhannun-shell-v68-spoken-briefing";
 const BASE=self.registration.scope;
 const SHELL=[
   "./","./index.html","./styles.css","./header-menu.css?v=1","./header-menu.js?v=1","./clean-weather.css?v=1","./action-progress.css?v=40","./action-progress.js?v=40","./day-flow.css?v=3","./day-flow-core.js?v=3","./day-flow-ui.js?v=3","./national-map.css?v=41","./startup-briefing.css?v=45","./startup-briefing-core.js?v=45","./startup-briefing.js?v=45","./stitch-theme.css?v=18","./stitch-mobile.css?v=16",
@@ -19,8 +19,8 @@ const SHELL=[
   "./assets/brand/weatherhannun-192.png?v=18","./assets/brand/weatherhannun-512.png?v=18",
   "./data/korea-regions-202602.json","./region-search-core.js?v=16","./region-search-ui.js?v=19",
   "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=19",
-  "./location-manager.css?v=19","./briefing-core.js?v=31","./briefing-highlights.js?v=20","./briefing-ui.js?v=20",
-  "./briefing-ui.css","./briefing-highlights.css?v=20","./app.js?v=41","./alert-rules-core.js?v=32",
+  "./location-manager.css?v=19","./briefing-core.js?v=31","./briefing-highlights.js?v=20","./briefing-ui.js?v=21",
+  "./briefing-ui.css?v=21","./briefing-highlights.css?v=20","./app.js?v=41","./alert-rules-core.js?v=32",
   "./forecast-insights.js?v=32","./forecast-insights.css?v=26","./manifest.webmanifest?v=18",
   "./icon.svg?v=18","./data-status.html","./official-rights.html"
 ].map(x=>new URL(x,BASE).href);

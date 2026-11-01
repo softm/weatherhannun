@@ -227,7 +227,7 @@
     else if(next.length)summary.push("12시간 강수 자료 일부 누락 · 시간별 예보 확인");
     body.textContent=summary.join(" · ")||"체감·최고/최저·강수 시각과 우산 판단을 요약합니다.";
     const schedules=[];
-    if(checkedControl("morningSummary",prefs.morning))schedules.push("오늘 준비 "+currentControl("morningTime",prefs.morningTime||"07:00"));
+    if(checkedControl("morningSummary",prefs.morning))schedules.push("날씨 브리핑 "+currentControl("morningTime",prefs.morningTime||"07:00"));
     if(checkedControl("eveningSummary",prefs.evening))schedules.push("내일 계획 "+currentControl("eveningTime",prefs.eveningTime||"19:00"));
     if(checkedControl("quietHours",prefs.quiet))schedules.push("방해금지 "+currentControl("quietStart",prefs.quietStart||"22:00")+"–"+currentControl("quietEnd",prefs.quietEnd||"06:00"));
     schedule.textContent=schedules.join(" · ")||"정기 요약 꺼짐 · 선택한 조건 변화만 알림";

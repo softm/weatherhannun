@@ -19,7 +19,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./forecast-insights.css?v=26">
-  <link rel="stylesheet" href="./briefing-ui.css">
+  <link rel="stylesheet" href="./briefing-ui.css?v=21">
   <link rel="stylesheet" href="./stitch-theme.css?v=18">
   <link rel="stylesheet" href="./stitch-today.utilities.css">
   <link rel="stylesheet" href="./stitch-today.css?v=18">
@@ -46,7 +46,7 @@
   <script defer src="./briefing-core.js?v=31"></script>
   <script defer src="./startup-briefing-core.js?v=45"></script>
   <script defer src="./briefing-highlights.js?v=20"></script>
-  <script defer src="./briefing-ui.js?v=20"></script>
+  <script defer src="./briefing-ui.js?v=21"></script>
   <script defer src="./weather-icons.js?v=17"></script>
   <script defer src="./alert-rules-core.js?v=32"></script>
   <script defer src="./forecast-insights.js?v=32"></script>
@@ -148,6 +148,7 @@
               <h2 id="briefingModeTitle">10초 날씨 브리핑</h2>
               <div class="briefing-headline" id="briefingHeadline">어떤 날씨가 기다리고 있을까요?</div>
               <p id="briefingText" aria-live="polite">기상 데이터를 불러오고 있습니다.</p>
+              <div class="briefing-player" aria-label="날씨 브리핑 음성 재생"><button type="button" id="briefingPlay" class="briefing-play" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span><span>브리핑 듣기</span></button><span id="briefingPlayStatus" class="briefing-play-status" aria-live="polite">10초 요약을 음성으로 들을 수 있어요.</span></div>
               <div class="briefing-mode" role="group" aria-label="브리핑 길이"><button type="button" data-brief-mode="short" class="active" aria-pressed="true">10초 요약</button><button type="button" data-brief-mode="detail" aria-pressed="false">30초 상세</button></div>
               <details class="briefing-details"><summary>해설 근거·예보 수치 확인</summary><dl id="briefingEvidence" class="briefing-evidence"></dl></details>
               <div class="briefing-foot"><span id="briefingSource">Open-Meteo 모델 예보 · 실제 관측 아님</span><span id="briefingValidAt">예보 유효시각 확인 중</span></div>
@@ -360,7 +361,7 @@
               <span id="notificationPreviewWeatherIcon" class="notification-preview-weather weather-icon-host" aria-hidden="true"></span>
               <span class="notification-preview-copy"><strong id="notificationPreviewTitle">선택 지역 · 날씨 요약 준비 중</strong><span id="notificationPreviewBody">체감·최고/최저·강수 시각과 우산 판단을 요약합니다.</span><small id="notificationPreviewSchedule">오늘 준비 07:00 · 내일 계획 19:00</small></span>
             </div>
-            <div class="notification-preview-actions" aria-label="알림에서 열 수 있는 화면"><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span>시간별</span><span><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>활동 추천</span><span><span class="material-symbols-outlined" aria-hidden="true">tune</span>알림 설정</span></div>
+            <div class="notification-preview-actions" aria-label="알림에서 실행할 수 있는 기능"><span><span class="material-symbols-outlined" aria-hidden="true">volume_up</span>브리핑 듣기</span><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span>시간별</span><span><span class="material-symbols-outlined" aria-hidden="true">tune</span>알림 설정</span></div>
           </article>
           <div class="watch-choices watch-rule-grid">
             <label><span><input id="watchRain" type="checkbox" checked>☂ 12시간 내 비</span><span class="watch-value">강수확률 <select id="rainThreshold" aria-label="비 알림 강수확률"><option value="30">30%</option><option value="50">50%</option><option value="65">65%</option><option value="70">70%</option><option value="80">80%</option></select> 이상</span></label>
@@ -371,7 +372,7 @@
           </div>
           <div class="watch-subheading"><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span><b>정기 요약 받을 시각</b></span><small>선택 시각부터 시스템이 실행 가능한 첫 시점에 하루 한 번 보냅니다.</small></div>
           <div class="watch-schedule-grid" aria-label="정기 날씨 요약">
-            <label><span><input id="morningSummary" type="checkbox">🌅 오늘 준비 요약</span><span class="watch-time-field"><small>발송 시작</small><input id="morningTime" type="time" value="07:00" aria-label="오늘 준비 요약 알림 시작 시각"></span></label>
+            <label><span><input id="morningSummary" type="checkbox">🔊 오늘 날씨 브리핑</span><span class="watch-time-field"><small>알림 시작</small><input id="morningTime" type="time" value="07:00" aria-label="오늘 날씨 브리핑 알림 시작 시각"></span></label>
             <label><span><input id="eveningSummary" type="checkbox">🌙 내일 계획 요약</span><span class="watch-time-field"><small>발송 시작</small><input id="eveningTime" type="time" value="19:00" aria-label="내일 계획 요약 알림 시작 시각"></span></label>
             <label class="quiet-hours"><span><input id="quietHours" type="checkbox">🔕 방해금지</span><span><input id="quietStart" type="time" value="22:00" aria-label="방해금지 시작">–<input id="quietEnd" type="time" value="06:00" aria-label="방해금지 종료"></span></label>
           </div>
