@@ -36,7 +36,7 @@ test('Plus personalization is entitlement and commercial-rights gated and cached
   const worker = fs.readFileSync('sw.js', 'utf8');
   assert.match(html, /id="plusPersonalizationControls" disabled/);
   assert.match(ui, /plans\?\.plus\?\.entitled===true&&releaseAllowed\(\)/);
-  for (const asset of ['plus-personalization-core.js?v=34', 'plus-personalization.js?v=34']) {
+  for (const asset of ['plus-personalization-core.js?v=34', 'plus-personalization.js?v=35']) {
     assert.ok(html.includes(asset));
     assert.ok(worker.includes(asset));
   }
