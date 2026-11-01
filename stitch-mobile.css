@@ -1016,11 +1016,11 @@ html[data-weather-theme="dark"] .map-shell .leaflet-container {
   }
 
   .topbar {
-    height: 64px;
+    height: calc(64px + env(safe-area-inset-top));
   }
 
   .top-inner {
-    padding: max(5px, env(safe-area-inset-top)) 16px 5px;
+    padding: calc(5px + env(safe-area-inset-top)) 16px 5px;
   }
 
   .location-button {
