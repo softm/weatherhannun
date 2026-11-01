@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import {pathToFileURL} from "node:url";
 import express from "express";
 import textToSpeech from "@google-cloud/text-to-speech";
 
@@ -41,4 +42,5 @@ export function createApp({client=new textToSpeech.TextToSpeechClient()}={}){
   return app;
 }
 
-if(process.env.NODE_ENV!=="test")createApp().listen(Number(process.env.PORT||8080),()=>console.log("weatherhannun Google TTS listening"));
+const isDirectRun=process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href;
+if(process.env.NODE_ENV!=="test"&&isDirectRun)createApp().listen(Number(process.env.PORT||8080),()=>console.log("weatherhannun Google TTS listening"));
