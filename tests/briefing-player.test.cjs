@@ -32,3 +32,17 @@ test("실제 오늘 화면의 기상브리핑 카드에 듣기 버튼과 재생 
   assert.match(script,/stitch-brief-sentence/);
   assert.match(css,/\.stitch-brief-sentence\.is-speaking/);
 });
+
+test("Google HD 음성은 서버 중계로 호출하고 실패하면 기기 음성으로 전환한다",()=>{
+  const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
+  const cloud=fs.readFileSync(path.join(root,"briefing-cloud-tts.js"),"utf8");
+  const today=fs.readFileSync(path.join(root,"stitch-today.js"),"utf8");
+  const worker=fs.readFileSync(path.join(root,"sw.js"),"utf8");
+  assert.match(html,/weatherhannun-tts-endpoint/);
+  assert.match(html,/briefing-cloud-tts\.js\?v=1/);
+  assert.match(cloud,/method:"POST"/);
+  assert.doesNotMatch(cloud,/API[_-]?KEY|AIza/i);
+  assert.match(today,/WeatherHannunCloudTTS/);
+  assert.match(today,/playDeviceSpeech/);
+  assert.match(worker,/briefing-cloud-tts\.js\?v=1/);
+});
