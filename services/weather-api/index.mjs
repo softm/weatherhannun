@@ -1,32 +1,19 @@
 import {onRequest} from "firebase-functions/v2/https";
+import {defineSecret} from "firebase-functions/params";
 import {initializeApp,getApps} from "firebase-admin/app";
 import {getFirestore} from "firebase-admin/firestore";
 if(!getApps().length)initializeApp();
 const db=getFirestore();
-const allowedOrigin="https://softm.github.io";
-const finite=x=>Number.isFinite(Number(x));
+const kmaKey=defineSecret("KMA_API_KEY");
+const airKey=defineSecret("AIRKOREA_API_KEY");
 const json=(res,status,body)=>res.status(status).json(body);
-function coords(q){const lat=Number(q.lat),lon=Number(q.lon);if(!finite(q.lat)||!finite(q.lon)||lat < -90||lat>90||lon < -180||lon>180)throw Error("invalid_coordinates");return {lat,lon};}
-function inKorea({lat,lon}){return lat>=33&&lat<=39&&lon>=124&&lon<=132;}
-async function fetchJson(url,headers={}){const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),9000);try{const r=await fetch(url,{headers,signal:ctrl.signal});if(!r.ok)throw Error("upstream_"+r.status);return await r.json();}finally{clearTimeout(t);}}
-function normalizeMet(data,loc){const series=data?.properties?.timeseries;if(!Array.isArray(series)||!series.length)throw Error("invalid_met_payload");const hourly=series.slice(0,168).map(x=>({time:x.time,temperature:x.data?.instant?.details?.air_temperature??null,humidity:x.data?.instant?.details?.relative_humidity??null,windSpeed:x.data?.instant?.details?.wind_speed??null,precipitation:x.data?.next_1_hours?.details?.precipitation_amount??null,condition:x.data?.next_1_hours?.summary?.symbol_code??null}));return {location:{...loc,timezone:"UTC"},current:hourly[0],hourly,daily:[],airQuality:null,alerts:[],officialForecast:null,comparison:null,source:{provider:"MET Norway",issuedAt:data.properties?.meta?.updated_at??null,fetchedAt:new Date().toISOString(),attribution:"MET Norway (met.no)"},stale:false};}
-export const weatherApi=onRequest({region:"asia-northeast3",cors:[allowedOrigin],maxInstances:10,timeoutSeconds:30},async(req,res)=>{
- if(req.method!=="GET")return json(res,405,{error:"method_not_allowed"});
- let loc;try{loc=coords(req.query);}catch{return json(res,400,{error:"invalid_coordinates"});}
- const key=`${Math.round(loc.lat*100)/100}_${Math.round(loc.lon*100)/100}`;
- const doc=db.collection("weather_api_cache").doc(key);
- try{
-  const cached=await doc.get(),value=cached.data();
-  if(value&&Date.now()-value.cachedAt<30*60*1000)return json(res,200,{...value.payload,cache:{hit:true}});
-  if(inKorea(loc))return json(res,503,{error:"kma_not_configured",message:"국내 기상청 공식 API 연결 전에는 다른 공급자 자료를 공식 실황으로 표시하지 않습니다."});
-  const url=new URL("https://api.met.no/weatherapi/locationforecast/2.0/compact");
-  url.searchParams.set("lat",String(loc.lat));url.searchParams.set("lon",String(loc.lon));
-  const data=await fetchJson(url,{"User-Agent":"WeatherHannun/0.1 (https://softm.github.io/weatherhannun/)"});
-  const payload=normalizeMet(data,loc);
-  await doc.set({payload,cachedAt:Date.now()});
-  return json(res,200,{...payload,cache:{hit:false}});
- }catch(e){
-  try{const old=(await doc.get()).data();if(old?.payload)return json(res,200,{...old.payload,stale:true,cache:{hit:true,fallback:true}});}catch{}
-  return json(res,502,{error:"weather_provider_unavailable"});
- }
-});
+const finite=x=>x!==undefined&&x!==null&&x!==""&&Number.isFinite(Number(x));
+export function coords(q){const lat=Number(q.lat),lon=Number(q.lon);if(!finite(q.lat)||!finite(q.lon)||lat < -90||lat>90||lon < -180||lon>180)throw Error("invalid_coordinates");return {lat,lon};}
+export function inKorea({lat,lon}){return lat>=33&&lat<=39&&lon>=124&&lon<=132;}
+export function grid(lat,lon){const RE=6371.00877,GRID=5,SLAT1=30,SLAT2=60,OLON=126,OLAT=38,XO=43,YO=136,DEGRAD=Math.PI/180;const re=RE/GRID,slat1=SLAT1*DEGRAD,slat2=SLAT2*DEGRAD,olon=OLON*DEGRAD,olat=OLAT*DEGRAD;let sn=Math.tan(Math.PI*.25+slat2*.5)/Math.tan(Math.PI*.25+slat1*.5);sn=Math.log(Math.cos(slat1)/Math.cos(slat2))/Math.log(sn);let sf=Math.tan(Math.PI*.25+slat1*.5);sf=Math.pow(sf,sn)*Math.cos(slat1)/sn;let ro=Math.tan(Math.PI*.25+olat*.5);ro=re*sf/Math.pow(ro,sn);let ra=Math.tan(Math.PI*.25+lat*DEGRAD*.5);ra=re*sf/Math.pow(ra,sn);let theta=lon*DEGRAD-olon;if(theta>Math.PI)theta-=2*Math.PI;if(theta< -Math.PI)theta+=2*Math.PI;theta*=sn;return {nx:Math.floor(ra*Math.sin(theta)+XO+.5),ny:Math.floor(ro-ra*Math.cos(theta)+YO+.5)};}
+async function fetchJson(url,headers={}){let last;for(let i=0;i<3;i++){const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),9000);try{const r=await fetch(url,{headers,signal:ctrl.signal});if(!r.ok)throw Error("upstream_"+r.status);return await r.json();}catch(e){last=e;if(i<2)await new Promise(resolve=>setTimeout(resolve,250*2**i));}finally{clearTimeout(t);}}throw last;}
+function kstBase(now=new Date()){const kst=new Date(now.getTime()+9*3600000);const h=kst.getUTCHours();kst.setUTCHours(h<1?0:h,0,0,0);if(h<1)kst.setUTCDate(kst.getUTCDate()-1);return {base_date:kst.toISOString().slice(0,10).replaceAll("-",""),base_time:"2300"};}
+export function normalizeMet(data,loc){const series=data?.properties?.timeseries;if(!Array.isArray(series)||!series.length)throw Error("invalid_met_payload");const hourly=series.slice(0,168).map(x=>({time:x.time,temperature:x.data?.instant?.details?.air_temperature??null,humidity:x.data?.instant?.details?.relative_humidity??null,windSpeed:x.data?.instant?.details?.wind_speed??null,precipitation:x.data?.next_1_hours?.details?.precipitation_amount??null,condition:x.data?.next_1_hours?.summary?.symbol_code??null}));return {location:{...loc,timezone:"UTC"},current:hourly[0],hourly,daily:[],airQuality:null,alerts:[],officialForecast:null,comparison:null,source:{provider:"MET Norway",issuedAt:data.properties?.meta?.updated_at??null,fetchedAt:new Date().toISOString(),attribution:"MET Norway (met.no)"},stale:false};}
+async function met(loc){const url=new URL("https://api.met.no/weatherapi/locationforecast/2.0/compact");url.searchParams.set("lat",String(loc.lat));url.searchParams.set("lon",String(loc.lon));return normalizeMet(await fetchJson(url,{"User-Agent":"WeatherHannun/0.2 contact: https://softm.github.io/weatherhannun/"}),loc);}
+async function kma(loc){const key=kmaKey.value();if(!key)throw Error("kma_key_missing");const {nx,ny}=grid(loc.lat,loc.lon),base=kstBase();const url=new URL("https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst");url.searchParams.set("serviceKey",key);url.searchParams.set("pageNo","1");url.searchParams.set("numOfRows","1000");url.searchParams.set("dataType","JSON");url.searchParams.set("base_date",base.base_date);url.searchParams.set("base_time",base.base_time);url.searchParams.set("nx",String(nx));url.searchParams.set("ny",String(ny));const data=await fetchJson(url);const items=data?.response?.body?.items?.item;if(!Array.isArray(items)||!items.length)throw Error("kma_empty_forecast");const byTime=new Map();for(const item of items){const stamp=item.fcstDate+"T"+item.fcstTime.slice(0,2)+":"+item.fcstTime.slice(2);const row=byTime.get(stamp)||{time:stamp};row[item.category]=item.fcstValue;byTime.set(stamp,row);}const hourly=[...byTime.values()].sort((a,b)=>a.time.localeCompare(b.time)).map(x=>({time:x.time,temperature:finite(x.TMP)?Number(x.TMP):null,humidity:finite(x.REH)?Number(x.REH):null,windSpeed:finite(x.WSD)?Number(x.WSD):null,precipitation:x.PCP??null,precipitationProbability:finite(x.POP)?Number(x.POP):null,sky:x.SKY??null,precipitationType:x.PTY??null}));return {location:{...loc,timezone:"Asia/Seoul",grid:{nx,ny}},current:null,hourly,daily:[],airQuality:null,alerts:[],officialForecast:null,comparison:null,source:{provider:"KMA village forecast",issuedAt:base.base_date+"T"+base.base_time.slice(0,2)+":"+base.base_time.slice(2)+"+09:00",fetchedAt:new Date().toISOString(),attribution:"기상청 단기예보 (실황 아님)"},stale:false};}
+export const weatherApi=onRequest({region:"asia-northeast3",cors:["https://softm.github.io"],secrets:[kmaKey,airKey],maxInstances:10,timeoutSeconds:40},async(req,res)=>{if(req.method!=="GET")return json(res,405,{error:"method_not_allowed"});let loc;try{loc=coords(req.query);}catch{return json(res,400,{error:"invalid_coordinates"});}const country=inKorea(loc)?"kr":"global";const key=country+"_"+Math.round(loc.lat*100)/100+"_"+Math.round(loc.lon*100)/100;const doc=db.collection("weather_api_cache").doc(key);try{const old=(await doc.get()).data();if(old&&Date.now()-old.cachedAt<30*60000)return json(res,200,{...old.payload,cache:{hit:true}});const payload=country==="kr"?await kma(loc):await met(loc);await doc.set({payload,cachedAt:Date.now()});return json(res,200,{...payload,cache:{hit:false}});}catch(e){try{const old=(await doc.get()).data();if(old?.payload)return json(res,200,{...old.payload,stale:true,cache:{hit:true,fallback:true}});}catch{}return json(res,503,{error:country==="kr"?"kma_unavailable":"weather_provider_unavailable"});}});
