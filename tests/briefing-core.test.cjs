@@ -28,6 +28,13 @@ test("sunny scenario: conservative no-event briefing and evidence",()=>{
  assert.equal(x.freshness.state,"recent");
  assert.equal(x.evidence.length,5);
 });
+test("air quality is spoken as an explicitly modeled daily action cue",()=>{
+ const bad=scenario();bad.air.current.pm2_5=42;
+ const x=core.analyse(bad,{now:Date.UTC(2026,9,25,0,0)});
+ assert.match(x.detail,/초미세먼지 모델 예측은 나쁨/);
+ assert.match(x.detail,/마스크/);
+ assert.match(x.evidence.at(-1).label,/모델 예측/);
+});
 test("rain scenario: interprets probability as possibility, not certainty",()=>{
  const s=scenario({rain:{3:65},mm:{3:.4}});
  const x=core.analyse(s,{now:Date.UTC(2026,9,25,0,5)});

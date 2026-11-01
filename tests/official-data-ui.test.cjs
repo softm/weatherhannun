@@ -25,7 +25,15 @@ test("official data is resolved from a key-free licensed snapshot and cached off
  assert.match(ui,/visibilitychange/);
  assert.match(ui,/resolved\.latestAvailable/);
  assert.match(ui,/weatherhannun:official-data/);
- for(const asset of ["official-data-core.js?v=40","official-data.css?v=40","official-data-ui.js?v=40","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
+ for(const asset of ["official-data-core.js?v=40","official-data.css?v=40","official-data-ui.js?v=41","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
+});
+
+test("today glance promotes measured PM10 and PM2.5 with source, time and action advice",()=>{
+ const html=fs.readFileSync("index.html","utf8");
+ const ui=fs.readFileSync("official-data-ui.js","utf8");
+ for(const token of ['id="airSummarySource"','id="airSummaryGrade"','id="airSummaryAdvice"','id="airPm10"','id="airPm25"'])assert.ok(html.includes(token),token);
+ for(const token of ["에어코리아 실측","air.stationName","air.measuredAt","환기는 짧게","보건용 마스크"])assert.ok(ui.includes(token),token);
+ assert.match(html,/미세먼지와 초미세먼지 상세 보기/);
 });
 
 test("deployment sync keeps credentials server-side and publishes evidence metadata",()=>{

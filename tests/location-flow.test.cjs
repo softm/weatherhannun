@@ -127,8 +127,10 @@ test("current location stays visible while saved choices remain in edit dialog",
  assert.doesNotMatch(html,/등록 지역|2 \/ 10/);
  assert.match(html,/현재 날씨 지역/);
  assert.match(html,/>서울</);
- assert.doesNotMatch(html,/data-location-select|data-geo-quick|data-location-compare|>서산</);
+ assert.doesNotMatch(html,/data-location-select|data-location-compare|>서산</);
  assert.match(html,/data-location-manage/);
+ assert.match(html,/data-geo-quick/);
+ assert.ok(html.indexOf("data-geo-quick")<html.indexOf("data-location-save-current"));
  const seosanId=core.key(SEOSAN);
  const button={
   hasAttribute:name=>name==="data-location-select",

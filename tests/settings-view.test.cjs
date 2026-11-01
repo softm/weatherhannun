@@ -46,14 +46,14 @@ test("appearance, location, alerts and app information live in the settings view
   assert.ok(!activity.includes('id="watchSettings"'), "alerts must not remain mixed into activity recommendations");
 });
 
-test("all weather alert shortcuts route to the unified settings view", () => {
+test("all weather alert shortcuts route to the dedicated notification settings view", () => {
   const html = read("index.html");
   const today = read("stitch-today.js");
-  const shortcuts = [...html.matchAll(/class="alert-cta[^>]*data-view="([^"]+)"[^>]*data-scroll-target="watchSettings"/g)];
+  const shortcuts = [...html.matchAll(/class="alert-cta[^>]*data-view="([^"]+)"/g)];
 
-  assert.equal(shortcuts.length, 3);
-  assert.ok(shortcuts.every(match => match[1] === "settings"));
-  assert.match(today, /go\('settings'\)[\s\S]*?watch-settings/);
+  assert.equal(shortcuts.length, 4);
+  assert.ok(shortcuts.every(match => match[1] === "notifications"));
+  assert.match(today, /go\('notifications'\)[\s\S]*?watch-settings/);
 });
 
 test("theme choices replace the standalone header theme toggle", () => {
