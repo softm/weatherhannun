@@ -206,7 +206,8 @@ test("GPS coordinates resolve to approximate Korean address in header, quick bar
  assert.equal(last?.address,"경기도 부천시 소사구 옥길동 · 옥길로 인근");
  assert.equal(last?.source,"gps");
  assert.match(t.node("managedCurrentAddress").textContent,/옥길로 인근/);
- assert.doesNotMatch(t.node("locationQuickBar").innerHTML,/GPS 기준 추정주소|옥길로 인근/);
+ assert.match(t.node("locationQuickBar").innerHTML,/my_location/);
+ assert.match(t.node("locationQuickBar").innerHTML,/title="경기도 부천시 소사구 옥길동 · 옥길로 인근"/);
  assert.equal(JSON.parse(t.localStorage.getItem("weatherhannun_location")).address,last.address);
 });
 test("a pending address lookup cannot override a newly selected manual place",async()=>{

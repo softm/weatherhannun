@@ -15,7 +15,7 @@ test('오늘 화면은 한 줄 흐름과 얇은 구분선 중심의 간결한 �
 
 test('간결한 화면 자산은 페이지와 오프라인 셸에 포함된다',()=>{
   const html=read('index.html'),sw=read('sw.js');
-  assert.match(html,/clean-weather\.css\?v=1/);
-  assert.match(sw,/clean-weather\.css\?v=1/);
-  assert.match(sw,/weatherhannun-shell-v71-visible-briefing/);
+  assert.match(html,/clean-weather\.css\?v=2/);
+  assert.match(sw,/clean-weather\.css\?v=2/);
+  assert.match(sw,/weatherhannun-shell-v74-header-location/);
 });
