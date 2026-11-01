@@ -134,6 +134,22 @@
       '<div><dt>공식 특보</dt><dd>앱 내 자료 미연동</dd></div></dl></article>';
   }
 
+  function timelineCell(row) {
+    if (!row) return '<span class="compare-cell-missing">—</span>';
+    var rain = core.rainSignal(row);
+    return '<span class="compare-cell-icon" aria-hidden="true">'+weatherMarkup(row)+'</span>'+
+      '<strong>'+number(row.temp,1)+'°</strong>'+
+      '<small class="'+(rain.triggered?'signal':'')+'">비 '+(finite(row.rainProbability)?number(row.rainProbability)+'%':'—')+'</small>';
+  }
+
+  function timelineMarkup(originWeather, destinationWeather, startTime) {
+    var times=core.commonTimes(originWeather,destinationWeather),start=Math.max(0,times.indexOf(startTime));
+    var shown=times.slice(start,start+5);
+    if(!shown.length)return '<div class="empty-state">함께 비교할 시간대가 없습니다.</div>';
+    function row(place,weather,role){return '<div class="compare-timeline-row '+role+'"><div class="compare-timeline-place"><span>'+(role==='origin'?'현재':'목적지')+'</span><b>'+escapeHtml(place.name)+'</b></div>'+shown.map(function(time){return '<div class="compare-timeline-cell">'+timelineCell(core.rowAt(weather,time))+'</div>';}).join('')+'</div>';}
+    return '<section class="compare-timeline" aria-label="시간별 두 지역 예보 비교"><div class="compare-timeline-row compare-timeline-head"><div>지역</div>'+shown.map(function(time,index){return '<div><b>'+(index===0?'선택':'')+'</b><span>'+escapeHtml(time.slice(11,13))+'시</span></div>';}).join('')+'</div>'+row(latest.loc,originWeather,'origin')+row(destinationPlace,destinationWeather,'destination')+'<p>기온과 강수확률을 같은 예보 시각끼리 비교합니다. 비 수치가 없으면 —로 표시합니다.</p></section>';
+  }
+
   function periodTemperature(summary) {
     return finite(summary.temperatureMin) && finite(summary.temperatureMax)
       ? number(summary.temperatureMin, 1) + "° ~ " + number(summary.temperatureMax, 1) + "°"
@@ -218,8 +234,8 @@
           : comparison.destination.rain.complete && comparison.origin.rain.complete
             ? "두 지역 모두 뚜렷한 비 신호가 낮습니다."
             : "강수 수치가 부족해 비 신호를 단정하지 않습니다.";
-    resultNode.innerHTML = '<div class="compare-summary" aria-live="polite"><span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span><div><b>'+escapeHtml(timeLabel(comparison.time))+' 동일 유효시각</b><p>목적지는 현재 지역보다 기온 '+escapeHtml(temperatureSummary)+', 바람 '+escapeHtml(windSummary)+'입니다. '+escapeHtml(rainSummary)+'</p></div></div>'+
-      '<div class="compare-place-grid">'+sideMarkup(comparison.origin,"origin")+sideMarkup(comparison.destination,"destination")+'</div>'+
+    resultNode.innerHTML = '<div class="compare-summary" aria-live="polite"><span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span><div><b>'+escapeHtml(destinationPlace.name)+'은 '+escapeHtml(latest.loc.name)+'보다 기온 '+escapeHtml(temperatureSummary)+'</b><p>바람 '+escapeHtml(windSummary)+' · '+escapeHtml(rainSummary)+'</p></div></div>'+
+      timelineMarkup(latest.weather,destinationWeather,comparison.time)+
       periodMarkup(period);
     $("compareSource").textContent = comparison.sourceLabel + " · 동일 유효시각과 동일 12시간 기간 · 예보끼리 비교 · 실측 관측 아님";
     $("compareAlertStatus").textContent = comparison.officialAlerts.reason;

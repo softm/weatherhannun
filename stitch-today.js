@@ -98,7 +98,7 @@
    temperature:hero.querySelector('[data-official-temp]')||leaf(hero,'22'),sky:leaf(hero,'대체로 맑음'),feels:leaf(hero,'체감 23.5°'),
    high:leaf(hero,'최고 25°'),low:leaf(hero,'최저 14°'),updated:leaf(hero,'조회 중'),
    source:hero.querySelector('[data-official-source]')||leaf(hero,'기상 모델 예보 연결'),airText:air.querySelector('[data-official-air-grade]'),airAdvice:air.querySelector('[data-official-air-advice]'),
-   briefName:leaf(brief,'삼청동 기상브리핑'),briefMessage:brief.querySelector('p'),briefPlay:brief.querySelector('[data-stitch-brief-play]'),briefStatus:brief.querySelector('[data-stitch-brief-status]'),
+   briefName:leaf(brief,'삼청동 기상브리핑'),briefMessage:brief.querySelector('p'),briefPlay:brief.querySelector('[data-stitch-brief-play]'),briefRoom:brief.querySelector('[data-stitch-brief-room]'),briefStatus:brief.querySelector('[data-stitch-brief-status]'),
    actionPlace:leaf(actions,'삼청동 기준'),
    hourlyBanner:leaf(hour,'강수 예보 확인 중'),
    sunset:leaf(metrics,'오후 7시 28분 (19:28)'),daylight:leaf(metrics,'9시간 47분'),
@@ -115,6 +115,7 @@
   air.addEventListener('click',openAir);air.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openAir();}});
   put(nodes.briefMessage,'현재 지역의 기상 예보를 분석 중입니다.');
   nodes.briefPlay?.addEventListener('click',playStitchSpeech);
+  nodes.briefRoom?.addEventListener('click',function(){go('briefing');});
   if(nodes.matrix)[...nodes.matrix.children].forEach(card=>{
    put(card.querySelector('.font-tabular-metric'),'--');
    put(card.querySelector('p'),'예보 연결 중…');
@@ -235,7 +236,7 @@
  function init(){
   var oldView=document.getElementById('view-today');if(!oldView)return;
   decorateNav();
-  fetch('./stitch-today.template.html?v=42').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
+  fetch('./stitch-today.template.html?v=43').then(r=>{if(!r.ok)throw Error('Stitch template '+r.status);return r.text();}).then(html=>{
    var host=document.createElement('div');host.id='stitch-live-dashboard';host.innerHTML=html;
    var group=[...host.firstElementChild.children].filter(x=>x.tagName==='SECTION');
    if(group.length!==7)throw Error('Stitch 원본 섹션 변경: '+group.length);
