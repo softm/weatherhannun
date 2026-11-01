@@ -60,11 +60,17 @@ test("service worker version tracks the aligned shell", () => {
   const html = read("index.html");
   const worker = read("sw.js");
 
-  assert.ok(worker.includes("weatherhannun-shell-v87-briefing-first"));
-  for (const asset of ["briefing-core.js?v=32", "briefing-highlights.css?v=20", "briefing-highlights.js?v=20", "stitch-theme.css?v=18", "stitch-today.css?v=22", "stitch-today.js?v=42", "stitch-mobile.css?v=17", "settings.css?v=35", "screen-weather-settings.css?v=34", "screen-weather-settings.js?v=39", "agriculture-planner.css?v=34", "agriculture-planner-core.js?v=34", "agriculture-planner.js?v=34", "location-manager.css?v=23", "location-manager.js?v=23", "region-search.css?v=17", "region-search-core.js?v=16", "region-search-ui.js?v=19", "weather-icons.css?v=17", "weather-icons.js?v=17", "weather-provider-core.js?v=41", "monetization-core.js?v=32", "monetization-settings.js?v=34", "product-metrics-core.js?v=33", "product-metrics.js?v=33", "activity-decision-core.js?v=28", "official-data-core.js?v=40", "official-data.css?v=40", "official-data-ui.js?v=41", "app.js?v=46", "alert-rules-core.js?v=32", "forecast-insights.js?v=34", "rain-decision-core.js?v=31", "rain-decision-ui.js?v=22", "outfit-decision.css?v=24", "outfit-decision-core.js?v=31", "outfit-decision-ui.js?v=25", "daily-delta-core.js?v=27", "daily-delta-ui.js?v=28", "location-compare-core.js?v=32", "location-compare-ui.js?v=33", "location-compare.css?v=30"]) {
+  assert.ok(worker.includes("weatherhannun-shell-v88-header-safe-area"));
+  for (const asset of ["briefing-core.js?v=32", "briefing-highlights.css?v=20", "briefing-highlights.js?v=20", "stitch-theme.css?v=18", "stitch-today.css?v=22", "stitch-today.js?v=42", "stitch-mobile.css?v=18", "settings.css?v=35", "screen-weather-settings.css?v=34", "screen-weather-settings.js?v=39", "agriculture-planner.css?v=34", "agriculture-planner-core.js?v=34", "agriculture-planner.js?v=34", "location-manager.css?v=23", "location-manager.js?v=23", "region-search.css?v=17", "region-search-core.js?v=16", "region-search-ui.js?v=19", "weather-icons.css?v=17", "weather-icons.js?v=17", "weather-provider-core.js?v=41", "monetization-core.js?v=32", "monetization-settings.js?v=34", "product-metrics-core.js?v=33", "product-metrics.js?v=33", "activity-decision-core.js?v=28", "official-data-core.js?v=40", "official-data.css?v=40", "official-data-ui.js?v=41", "app.js?v=46", "alert-rules-core.js?v=32", "forecast-insights.js?v=34", "rain-decision-core.js?v=31", "rain-decision-ui.js?v=22", "outfit-decision.css?v=24", "outfit-decision-core.js?v=31", "outfit-decision-ui.js?v=25", "daily-delta-core.js?v=27", "daily-delta-ui.js?v=28", "location-compare-core.js?v=32", "location-compare-ui.js?v=33", "location-compare.css?v=30"]) {
     assert.ok(html.includes(asset), `page must request ${asset}`);
     assert.ok(worker.includes(asset), `service worker must warm ${asset}`);
   }
+});
+
+test("모바일 헤더 배경은 상태 표시줄 안전영역까지 이어진다", () => {
+  const css = read("stitch-mobile.css");
+  assert.match(css, /height: calc\(64px \+ env\(safe-area-inset-top\)\)/);
+  assert.match(css, /padding: calc\(5px \+ env\(safe-area-inset-top\)\) 16px 5px/);
 });
 
 test("desktop today dashboard uses a dense main-and-rail layout backed by live daily forecast", () => {
