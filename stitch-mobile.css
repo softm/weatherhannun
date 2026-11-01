@@ -153,7 +153,7 @@ body {
 .hourly-insight { margin-top: 0; }
 .insight-window { border-radius: 12px; background: rgba(17,32,55,.88); }
 .rain-tabs { background: rgba(1,14,37,.7); border-radius: 12px; padding: 4px; display: grid; grid-template-columns: repeat(4,1fr); gap: 3px; }
-.rain-tabs button { border: 0; border-radius: 8px; background: transparent; padding: 9px 3px; }
+.rain-tabs button { border: 0; border-radius: 8px; background: transparent; padding: 9px 3px; white-space: nowrap; }
 .rain-tabs button.active { background: #27354d; color: #9dcaff; }
 .rain-headline { background: rgba(67,111,173,.17); border-color: rgba(157,202,255,.18); }
 .hourly-panel { margin: 16px 0; border-radius: 12px; background: rgba(17,32,55,.88); }
