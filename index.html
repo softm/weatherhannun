@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./forecast-insights.css?v=26">
   <link rel="stylesheet" href="./briefing-ui.css?v=22">
+  <link rel="stylesheet" href="./briefing-hub.css?v=1">
   <link rel="stylesheet" href="./stitch-theme.css?v=18">
   <link rel="stylesheet" href="./stitch-today.utilities.css">
   <link rel="stylesheet" href="./stitch-today.css?v=19">
@@ -49,6 +50,8 @@
   <script defer src="./briefing-highlights.js?v=20"></script>
   <script defer src="./briefing-cloud-tts.js?v=1"></script>
   <script defer src="./briefing-ui.js?v=22"></script>
+  <script defer src="./briefing-hub-core.js?v=1"></script>
+  <script defer src="./briefing-hub.js?v=1"></script>
   <script defer src="./weather-icons.js?v=17"></script>
   <script defer src="./alert-rules-core.js?v=32"></script>
   <script defer src="./forecast-insights.js?v=32"></script>
@@ -70,7 +73,7 @@
   <script defer src="./day-flow-core.js?v=3"></script>
   <script defer src="./day-flow-ui.js?v=4"></script>
   <script defer src="./activity-interests-core.js?v=1"></script>
-  <script defer src="./app.js?v=42"></script>
+  <script defer src="./app.js?v=43"></script>
   <script defer src="./official-data-ui.js?v=40"></script>
   <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
@@ -106,6 +109,7 @@
       <button type="button" id="locationButton" class="header-location-button" aria-label="현재 지역 변경"><span class="material-symbols-outlined" aria-hidden="true">location_on</span><span><small>현재 지역</small><strong id="locationTitle">서산</strong></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
       <nav class="desktop-nav header-menu-nav" aria-label="화면 이동">
         <button class="nav-button active" data-view="today"><span class="material-symbols-outlined" aria-hidden="true">home</span>오늘</button>
+        <button class="nav-button" data-view="briefing"><span class="material-symbols-outlined" aria-hidden="true">campaign</span>브리핑</button>
         <button class="nav-button" data-view="hourly"><span class="material-symbols-outlined" aria-hidden="true">schedule</span>시간별</button>
         <button class="nav-button" data-view="weekly"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>주간예보</button>
         <button class="nav-button" data-view="activity"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>활동 추천</button>
@@ -179,6 +183,21 @@
 
           <button type="button" class="alert-cta stitch-card" data-view="settings" data-scroll-target="watchSettings"><span class="alert-cta-icon"><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span></span><span><strong>내 지역 날씨 알림</strong><small>비·저온·돌풍 조건을 직접 설정하세요.</small></span><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
         </div>
+      </section>
+
+      <section id="view-briefing" class="screen content-bound" aria-label="맞춤 날씨 브리핑">
+        <header class="brief-hub-lead"><div><span class="section-overline">PERSONAL WEATHER AUDIO</span><h2>내 생활에 맞는 브리핑</h2><p>필요한 날씨만 골라 듣고, 원하는 시각에 받아보세요.</p></div><span class="brief-schedule-status" id="briefScheduleStatus">예약 브리핑 꺼짐</span></header>
+        <div class="brief-hub-grid">
+          <nav id="briefHubTypes" class="brief-hub-types" aria-label="브리핑 종류"><p class="muted-text">예보를 불러오고 있습니다.</p></nav>
+          <article class="brief-hub-player stitch-card" aria-live="polite"><span class="section-overline">SELECTED BRIEFING</span><h3 id="briefHubTitle">한눈 요약</h3><p id="briefHubCaption">지금 가장 중요한 변화</p><div id="briefHubText" class="brief-hub-copy">최신 예보를 연결하고 있습니다.</div><div class="brief-hub-controls"><button type="button" id="briefHubPlay" class="brief-hub-play"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span><span>이 브리핑 듣기</span></button><span id="briefHubPlayStatus" class="brief-hub-status">HD 음성 · 실패 시 기기 음성</span></div><div id="briefHubEvidence" class="brief-hub-evidence"></div></article>
+        </div>
+        <section id="briefingSettings" class="briefing-settings stitch-card" aria-labelledby="briefingSettingsTitle">
+          <div class="briefing-settings-head"><div><span class="section-overline">SCHEDULE & DELIVERY</span><h3 id="briefingSettingsTitle">브리핑 설정</h3><p>선택한 종류를 아침과 저녁에 알려드립니다.</p></div><label class="brief-setting-enable"><input id="briefScheduleEnabled" type="checkbox" role="switch"> 예약 사용</label></div>
+          <div class="brief-setting-types" aria-label="예약 브리핑 종류"><label><input type="checkbox" value="summary" data-brief-setting-type>한눈 요약</label><label><input type="checkbox" value="commute" data-brief-setting-type>출근·외출</label><label><input type="checkbox" value="life" data-brief-setting-type>생활 준비</label><label><input type="checkbox" value="safety" data-brief-setting-type>안전 기상</label><label><input type="checkbox" value="farming" data-brief-setting-type>농작업</label><label><input type="checkbox" value="sleep" data-brief-setting-type>취침 전</label></div>
+          <div class="brief-time-grid"><label>아침 브리핑<input id="briefMorningTime" type="time" value="07:00"></label><label>저녁 브리핑<input id="briefEveningTime" type="time" value="18:00"></label></div>
+          <div class="brief-delivery" role="radiogroup" aria-label="예약 브리핑 전달 방식"><label><input type="radio" name="briefDelivery" value="notice">알림만</label><label><input type="radio" name="briefDelivery" value="tap">알림을 누르면 재생</label><label><input type="radio" name="briefDelivery" value="auto">시간에 바로 재생</label></div>
+          <p class="brief-setting-note">웹의 예약 실행은 앱이 열려 있을 때 동작합니다. 자동 재생이 기기 정책으로 차단되면 알림을 표시합니다. 모델 예보를 읽으며 공식 관측·특보를 대신하지 않습니다.</p>
+        </section>
       </section>
 
       <section id="view-hourly" class="screen content-bound" aria-label="시간별 예보">
@@ -415,10 +434,10 @@
     <footer class="site-footer"><div class="content-bound"><span>날씨한눈 <b>WEATHERHANNUN</b> · 예보를 행동으로</span><span><a href="./official-rights.html">공식 자료·이용권 증빙</a> · 모델 예보와 공식 관측을 구분합니다</span></div></footer>
     <nav class="mobile-nav" aria-label="모바일 주요 메뉴">
       <button data-view="today" class="active"><span class="material-symbols-outlined">home</span>오늘</button>
+      <button data-view="briefing"><span class="material-symbols-outlined">campaign</span>브리핑</button>
       <button data-view="hourly"><span class="material-symbols-outlined">schedule</span>시간별</button>
       <button data-view="weekly"><span class="material-symbols-outlined">calendar_month</span>주간</button>
       <button data-view="activity"><span class="material-symbols-outlined">auto_awesome</span>활동추천</button>
-      <button data-view="map"><span class="material-symbols-outlined">map</span>전국지도</button>
     </nav>
   </div>
   <dialog id="locationDialog" class="location-hub-dialog" aria-labelledby="locationDialogTitle">
