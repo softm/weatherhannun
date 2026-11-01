@@ -39,6 +39,7 @@ test("Google HD 음성은 서버 중계로 호출하고 실패하면 기기 음�
   const today=fs.readFileSync(path.join(root,"stitch-today.js"),"utf8");
   const worker=fs.readFileSync(path.join(root,"sw.js"),"utf8");
   assert.match(html,/weatherhannun-tts-endpoint/);
+  assert.match(html,/cloudfunctions\.net\/weatherBriefingTts\/v1\/briefing\/speech/);
   assert.match(html,/briefing-cloud-tts\.js\?v=1/);
   assert.match(cloud,/method:"POST"/);
   assert.doesNotMatch(cloud,/API[_-]?KEY|AIza/i);
