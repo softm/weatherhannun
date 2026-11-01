@@ -507,20 +507,26 @@ html[data-weather-theme="light"] .map-shell {
   padding-top: 10px;
 }
 
-.hourly-date-picker summary {
-  width: max-content;
-  color: #2589f5;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .hourly-date-picker:not([open]) .rain-dates {
   display: none;
 }
 
 .hourly-date-picker .rain-dates {
-  margin-top: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0;
+}
+
+.hourly-date-picker .rain-dates input {
+  width: 100%;
+  min-width: 0;
+}
+
+.hourly-date-picker .rain-dates button {
+  min-width: 54px;
+  white-space: nowrap;
 }
 
 .hourly-countdown-card {

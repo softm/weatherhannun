@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="./location-manager.css?v=24">
   <link rel="stylesheet" href="./region-search.css?v=17">
   <link rel="stylesheet" href="./startup-briefing.css?v=45">
-  <link rel="stylesheet" href="./stitch-mobile.css?v=19">
+  <link rel="stylesheet" href="./stitch-mobile.css?v=20">
   <link rel="stylesheet" href="./settings.css?v=37">
   <link rel="stylesheet" href="./screen-weather-settings.css?v=34">
   <link rel="stylesheet" href="./agriculture-planner.css?v=34">
@@ -211,7 +211,7 @@
         <section class="hourly-period-dock stitch-card" aria-label="예보 기간 설정">
           <div class="insight-intro"><h3>내 일정에 맞춰 날씨 확인</h3><p>선택 기간의 비·맑은 시간</p></div>
           <div class="rain-tabs" role="group" aria-label="예보 기간 선택"><button type="button" data-rain-period="24" class="active" aria-pressed="true">24시간</button><button type="button" data-rain-period="48" aria-pressed="false">48시간</button><button type="button" data-rain-period="168" aria-pressed="false">7일</button><button type="button" data-rain-period="custom" aria-pressed="false">날짜 지정</button></div>
-          <details class="hourly-date-picker"><summary>날짜 직접 선택</summary><div class="rain-dates"><label for="rainDateStart">시작일</label><input id="rainDateStart" type="date" aria-label="시작일"><label for="rainDateEnd">종료일</label><input id="rainDateEnd" type="date" aria-label="종료일"><button id="applyRainDates" type="button">적용</button></div></details>
+          <details class="hourly-date-picker"><div class="rain-dates"><input id="rainDateStart" type="date" aria-label="시작일"><input id="rainDateEnd" type="date" aria-label="종료일"><button id="applyRainDates" type="button">적용</button></div></details>
         </section>
         <section class="hourly-panel stitch-card" aria-label="시간별 날씨 비교">
           <div class="card-heading"><h2>시간별 예보</h2><button type="button" id="hourlyNow" class="text-link">처음 시각</button></div>

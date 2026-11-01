@@ -1,11 +1,11 @@
 "use strict";
-const CACHE="weatherhannun-shell-v96-date-nowrap";
+const CACHE="weatherhannun-shell-v97-date-row";
 const BASE=self.registration.scope;
 const SHELL=[
   "./hourly-explorer-core.js?v=2","./hourly-explorer.js?v=2","./mobile-experience.css?v=3",
   "./national-weather-core.js?v=1",
   "./activity-interests-core.js?v=1",
-  "./","./index.html","./styles.css","./header-menu.css?v=1","./header-menu.js?v=2","./clean-weather.css?v=5","./action-progress.css?v=40","./action-progress.js?v=40","./day-flow.css?v=7","./day-flow-core.js?v=3","./day-flow-ui.js?v=7","./national-map.css?v=43","./startup-briefing.css?v=45","./startup-briefing-core.js?v=45","./startup-briefing.js?v=45","./stitch-theme.css?v=18","./stitch-mobile.css?v=19",
+  "./","./index.html","./styles.css","./header-menu.css?v=1","./header-menu.js?v=2","./clean-weather.css?v=5","./action-progress.css?v=40","./action-progress.js?v=40","./day-flow.css?v=7","./day-flow-core.js?v=3","./day-flow-ui.js?v=7","./national-map.css?v=43","./startup-briefing.css?v=45","./startup-briefing-core.js?v=45","./startup-briefing.js?v=45","./stitch-theme.css?v=18","./stitch-mobile.css?v=20",
   "./settings.css?v=37","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=39","./account-header.js?v=8",
   "./agriculture-planner.css?v=34","./agriculture-planner-core.js?v=34","./agriculture-planner.js?v=35",
   "./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",
