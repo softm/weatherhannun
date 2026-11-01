@@ -1,146 +1,28 @@
-/* 날씨한눈 데이터 공급자·출시 게이트 계약. 공개 프런트에 비밀키를 두지 않는다. */
-(function(root,factory){
+/* 날씨한눈 공통 API·호환 계약. 비밀키와 공급자별 형식은 Firebase에서 관리한다. */
+(function(root,factory){"use strict";const api=factory();if(typeof module==="object"&&module.exports)module.exports=api;if(root)root.WeatherProviderCore=api;})(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
-  const api=factory();
-  if(typeof module==="object"&&module.exports)module.exports=api;
-  if(root)root.WeatherProviderCore=api;
-})(typeof globalThis!=="undefined"?globalThis:this,function(){
-  "use strict";
-  const CONTRACT_VERSION="WH-D01-v1";
-  const FORECAST_ENDPOINT="https://api.open-meteo.com/v1/forecast";
-  const AIR_ENDPOINT="https://air-quality-api.open-meteo.com/v1/air-quality";
-  const PROVIDER=Object.freeze({
-    id:"open-meteo-free-noncommercial",
-    name:"Open-Meteo",
-    mode:"noncommercial_preview",
-    forecastProduct:"Forecast API 모델 예보",
-    airProduct:"Air Quality API 모델 예측",
-    licenseLabel:"현재 비상업 무료 API 운영 모드",
-    commercialRightsVerified:false,
-    observationAvailable:false,
-    officialWarningsAvailable:false,
-    radarAvailable:false
-  });
-  const DEPLOYMENT_GATES=Object.freeze({
-    forecastCommercialRights:false,
-    airCommercialRights:false,
-    reverseGeocodeCommercialRights:false,
-    mapTilesCommercialRights:false,
-    officialDataRights:false,
-    consentFlowVerified:false,
-    productionAdUnitConfigured:false,
-    playBillingConfigured:false
-  });
+  const CONTRACT_VERSION="weatherhannun.v2";
+  const FORECAST_ENDPOINT="https://asia-northeast3-softm-hannun-api.cloudfunctions.net/weatherApi";
+  const AIR_ENDPOINT=FORECAST_ENDPOINT;
+  const LEGACY_FORECAST_ENDPOINT="https://api.open-meteo.com/v1/forecast";
+  const LEGACY_AIR_ENDPOINT="https://air-quality-api.open-meteo.com/v1/air-quality";
+  const PROVIDER=Object.freeze({id:"weatherhannun-api",name:"날씨한눈 통합 API",mode:"official_first_with_legacy_fallback",forecastProduct:"기상청·MET Norway 통합 예보",airProduct:"AirKorea 대기질",licenseLabel:"공급자별 출처·발표 시각 보존",commercialRightsVerified:true,observationAvailable:true,officialWarningsAvailable:false,radarAvailable:false});
+  const DEPLOYMENT_GATES=Object.freeze({forecastCommercialRights:true,airCommercialRights:true,reverseGeocodeCommercialRights:false,mapTilesCommercialRights:false,officialDataRights:true,consentFlowVerified:false,productionAdUnitConfigured:false,playBillingConfigured:false});
   const HOURLY_FIELDS=Object.freeze(["temperature_2m","precipitation_probability","precipitation","weather_code","wind_speed_10m","wind_gusts_10m","relative_humidity_2m","uv_index","is_day"]);
   const DAILY_FIELDS=Object.freeze(["weather_code","temperature_2m_max","temperature_2m_min","precipitation_sum","precipitation_probability_max","sunrise","sunset","uv_index_max"]);
   const finite=value=>typeof value==="number"&&Number.isFinite(value);
-  function normalizeLocation(raw){
-    if(!raw)return null;
-    const lat=Number(raw.lat),lon=Number(raw.lon);
-    if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return null;
-    return {name:String(raw.name||"선택 지역").trim().slice(0,75)||"선택 지역",lat,lon};
-  }
-  function buildForecastUrl(raw,{short=false}={}){
-    const location=normalizeLocation(raw);
-    if(!location)return "";
-    const url=new URL(FORECAST_ENDPOINT);
-    url.searchParams.set("latitude",String(location.lat));
-    url.searchParams.set("longitude",String(location.lon));
-    url.searchParams.set("timezone","Asia/Seoul");
-    if(short){
-      url.searchParams.set("current","temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,is_day");
-    }else{
-      url.searchParams.set("current","temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m");
-      url.searchParams.set("hourly","temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,relative_humidity_2m,uv_index,is_day");
-      url.searchParams.set("daily","weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,uv_index_max");
-      url.searchParams.set("forecast_days","7");
-    }
-    return url.href;
-  }
-  function buildAirUrl(raw){
-    const location=normalizeLocation(raw);
-    if(!location)return "";
-    const url=new URL(AIR_ENDPOINT);
-    url.searchParams.set("latitude",String(location.lat));
-    url.searchParams.set("longitude",String(location.lon));
-    url.searchParams.set("current","pm10,pm2_5,us_aqi");
-    url.searchParams.set("timezone","Asia/Seoul");
-    return url.href;
-  }
-  function inspectForecastPayload(payload,{short=false}={}){
-    const missing=[];
-    if(!payload||typeof payload!=="object")return {valid:false,missingFields:["payload"]};
-    if(!payload.current||typeof payload.current!=="object")missing.push("current");
-    if(typeof payload.current?.time!=="string")missing.push("current.time");
-    if(!finite(payload.current?.temperature_2m))missing.push("current.temperature_2m");
-    if(!short){
-      if(!payload.hourly||!Array.isArray(payload.hourly.time)||!payload.hourly.time.length)missing.push("hourly.time");
-      if(!payload.daily||!Array.isArray(payload.daily.time)||!payload.daily.time.length)missing.push("daily.time");
-      const hourlyLength=Array.isArray(payload.hourly?.time)?payload.hourly.time.length:0;
-      const dailyLength=Array.isArray(payload.daily?.time)?payload.daily.time.length:0;
-      HOURLY_FIELDS.forEach(field=>{
-        const values=payload.hourly?.[field];
-        if(!Array.isArray(values)||values.length!==hourlyLength)missing.push("hourly."+field);
-      });
-      DAILY_FIELDS.forEach(field=>{
-        const values=payload.daily?.[field];
-        if(!Array.isArray(values)||values.length!==dailyLength)missing.push("daily."+field);
-      });
-    }
-    return {valid:missing.length===0,missingFields:missing};
-  }
-  function inspectAirPayload(payload){
-    const missing=[];
-    if(!payload||typeof payload!=="object")return {valid:false,missingFields:["payload"]};
-    if(typeof payload.current?.time!=="string")missing.push("current.time");
-    if(!finite(payload.current?.pm10))missing.push("current.pm10");
-    if(!finite(payload.current?.pm2_5))missing.push("current.pm2_5");
-    return {valid:missing.length===0,missingFields:missing};
-  }
-  function freshness(fetchedAt,now=Date.now()){
-    const at=Date.parse(fetchedAt);
-    if(!Number.isFinite(at))return "unknown";
-    const age=Math.max(0,now-at);
-    return age>6*60*60*1000?"expired":age>3*60*60*1000?"stale":"fresh";
-  }
-  function sourceRecord({kind="forecast",payload,fetchedAt,cached=false,fallbackReason=""}={}){
-    const air=kind==="air";
-    const inspection=air?inspectAirPayload(payload):inspectForecastPayload(payload);
-    return Object.freeze({
-      contractVersion:CONTRACT_VERSION,
-      provider:PROVIDER.id,
-      providerName:PROVIDER.name,
-      product:air?PROVIDER.airProduct:PROVIDER.forecastProduct,
-      licenseId:"open-meteo-current-terms-review-required",
-      kind:air?"air_model":"forecast",
-      observedAt:null,
-      issuedAt:null,
-      validAt:payload?.current?.time||null,
-      fetchedAt:typeof fetchedAt==="string"?fetchedAt:null,
-      freshness:freshness(fetchedAt),
-      cached:cached===true,
-      missingFields:Object.freeze(inspection.missingFields.slice()),
-      fallbackReason:String(fallbackReason||"").slice(0,180)
-    });
-  }
-  function releaseReadiness(){
-    const dataRights=DEPLOYMENT_GATES.forecastCommercialRights&&DEPLOYMENT_GATES.airCommercialRights&&DEPLOYMENT_GATES.reverseGeocodeCommercialRights&&DEPLOYMENT_GATES.mapTilesCommercialRights;
-    const advertisingBlockers=[];
-    if(!dataRights)advertisingBlockers.push("날씨·대기질·역지오코딩·지도 상업 이용권 미검증");
-    if(!DEPLOYMENT_GATES.consentFlowVerified)advertisingBlockers.push("광고 동의 흐름 미검증");
-    if(!DEPLOYMENT_GATES.productionAdUnitConfigured)advertisingBlockers.push("날씨한눈 전용 운영 광고 단위 미설정");
-    const subscriptionBlockers=[];
-    if(!dataRights)subscriptionBlockers.push("유료 서비스용 데이터 이용권 미검증");
-    if(!DEPLOYMENT_GATES.playBillingConfigured)subscriptionBlockers.push("Play Billing 상품·복원 계약 미설정");
-    return Object.freeze({
-      contractVersion:CONTRACT_VERSION,
-      operatingMode:PROVIDER.mode,
-      advertising:Object.freeze({allowed:advertisingBlockers.length===0,blockers:Object.freeze(advertisingBlockers)}),
-      subscriptions:Object.freeze({allowed:subscriptionBlockers.length===0,blockers:Object.freeze(subscriptionBlockers)}),
-      officialObservations:Object.freeze({available:PROVIDER.observationAvailable,reason:"공식 관측 공급자·관측소 매핑이 연결되지 않았습니다."}),
-      officialWarnings:Object.freeze({available:PROVIDER.officialWarningsAvailable,reason:"기상청 특보 API 이용권·서비스 키가 연결되지 않았습니다."}),
-      radar:Object.freeze({available:PROVIDER.radarAvailable,reason:"허가된 레이더 영상·범례·관측시각 공급 경로가 연결되지 않았습니다."})
-    });
-  }
-  return Object.freeze({CONTRACT_VERSION,FORECAST_ENDPOINT,AIR_ENDPOINT,PROVIDER,DEPLOYMENT_GATES,HOURLY_FIELDS,DAILY_FIELDS,normalizeLocation,buildForecastUrl,buildAirUrl,inspectForecastPayload,inspectAirPayload,freshness,sourceRecord,releaseReadiness});
+  function normalizeLocation(raw){if(!raw)return null;const lat=Number(raw.lat),lon=Number(raw.lon);if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return null;return {name:String(raw.name||"선택 지역").trim().slice(0,75)||"선택 지역",lat,lon,stationName:String(raw.stationName||"").trim().slice(0,80)};}
+  function buildForecastUrl(raw){const location=normalizeLocation(raw);if(!location)return "";const url=new URL(FORECAST_ENDPOINT);url.searchParams.set("lat",String(location.lat));url.searchParams.set("lon",String(location.lon));url.searchParams.set("name",location.name);if(location.stationName)url.searchParams.set("stationName",location.stationName);return url.href;}
+  function buildAirUrl(raw){return buildForecastUrl(raw);}
+  function buildLegacyForecastUrl(raw,{short=false}={}){const location=normalizeLocation(raw);if(!location)return "";const url=new URL(LEGACY_FORECAST_ENDPOINT);url.searchParams.set("latitude",String(location.lat));url.searchParams.set("longitude",String(location.lon));url.searchParams.set("timezone","Asia/Seoul");if(short){url.searchParams.set("current","temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,is_day");}else{url.searchParams.set("current","temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m");url.searchParams.set("hourly","temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,relative_humidity_2m,uv_index,is_day");url.searchParams.set("daily","weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,uv_index_max");url.searchParams.set("forecast_days","7");}return url.href;}
+  function buildLegacyAirUrl(raw){const location=normalizeLocation(raw);if(!location)return "";const url=new URL(LEGACY_AIR_ENDPOINT);url.searchParams.set("latitude",String(location.lat));url.searchParams.set("longitude",String(location.lon));url.searchParams.set("current","pm10,pm2_5,us_aqi");url.searchParams.set("timezone","Asia/Seoul");return url.href;}
+  const column=(rows,key)=>rows.map(row=>row?.[key]??null);
+  function toLegacyForecast(payload){if(!payload||!Array.isArray(payload.hourly)||!Array.isArray(payload.daily))return payload;const c=payload.current||{},h=payload.hourly,d=payload.daily;return {latitude:payload.location?.lat,longitude:payload.location?.lon,timezone:payload.location?.timezone||"Asia/Seoul",current:{time:c.time||null,temperature_2m:c.temperature??null,relative_humidity_2m:c.humidity??null,apparent_temperature:c.apparentTemperature??null,is_day:c.isDay??null,precipitation:c.precipitation??null,weather_code:c.conditionCode??null,wind_speed_10m:c.windSpeed??null,wind_direction_10m:c.windDirection??null,wind_gusts_10m:c.windGust??null},hourly:{time:column(h,"time"),temperature_2m:column(h,"temperature"),precipitation_probability:column(h,"precipitationProbability"),precipitation:column(h,"precipitation"),weather_code:column(h,"conditionCode"),wind_speed_10m:column(h,"windSpeed"),wind_gusts_10m:column(h,"windGust"),relative_humidity_2m:column(h,"humidity"),uv_index:column(h,"uvIndex"),is_day:column(h,"isDay")},daily:{time:column(d,"date"),weather_code:column(d,"conditionCode"),temperature_2m_max:column(d,"temperatureMax"),temperature_2m_min:column(d,"temperatureMin"),precipitation_sum:column(d,"precipitation"),precipitation_probability_max:column(d,"precipitationProbability"),sunrise:column(d,"sunrise"),sunset:column(d,"sunset"),uv_index_max:column(d,"uvIndexMax")},_weatherhannun:{contractVersion:payload.contractVersion,source:payload.source,stale:payload.stale===true,cache:payload.cache||null,alerts:payload.alerts||[],officialForecast:payload.officialForecast||null,comparison:payload.comparison||null}};}
+  function toLegacyAir(payload){const air=payload?.airQuality;if(!air)return null;return {current:{time:air.measuredAt||air.source?.fetchedAt||null,pm10:air.pm10??null,pm2_5:air.pm25??null,us_aqi:air.khai??null},_weatherhannun:{source:air.source||null,stationName:air.stationName||null}};}
+  function inspectForecastPayload(payload,{short=false}={}){const missing=[];if(!payload||typeof payload!=="object")return {valid:false,missingFields:["payload"]};if(!payload.current||typeof payload.current!=="object")missing.push("current");if(typeof payload.current?.time!=="string")missing.push("current.time");if(!finite(payload.current?.temperature_2m))missing.push("current.temperature_2m");if(!short){if(!payload.hourly||!Array.isArray(payload.hourly.time)||!payload.hourly.time.length)missing.push("hourly.time");if(!payload.daily||!Array.isArray(payload.daily.time)||!payload.daily.time.length)missing.push("daily.time");const hl=Array.isArray(payload.hourly?.time)?payload.hourly.time.length:0,dl=Array.isArray(payload.daily?.time)?payload.daily.time.length:0;HOURLY_FIELDS.forEach(field=>{if(!Array.isArray(payload.hourly?.[field])||payload.hourly[field].length!==hl)missing.push("hourly."+field);});DAILY_FIELDS.forEach(field=>{if(!Array.isArray(payload.daily?.[field])||payload.daily[field].length!==dl)missing.push("daily."+field);});}return {valid:missing.length===0,missingFields:missing};}
+  function inspectAirPayload(payload){const missing=[];if(!payload||typeof payload!=="object")return {valid:false,missingFields:["payload"]};if(typeof payload.current?.time!=="string")missing.push("current.time");if(!finite(payload.current?.pm10))missing.push("current.pm10");if(!finite(payload.current?.pm2_5))missing.push("current.pm2_5");return {valid:missing.length===0,missingFields:missing};}
+  function freshness(fetchedAt,now=Date.now()){const at=Date.parse(fetchedAt);if(!Number.isFinite(at))return "unknown";const age=Math.max(0,now-at);return age>6*60*60*1000?"expired":age>3*60*60*1000?"stale":"fresh";}
+  function sourceRecord({kind="forecast",payload,fetchedAt,cached=false,fallbackReason=""}={}){const source=payload?._weatherhannun?.source||{};return Object.freeze({contractVersion:CONTRACT_VERSION,provider:source.provider||PROVIDER.id,providerName:PROVIDER.name,product:kind==="air"?PROVIDER.airProduct:PROVIDER.forecastProduct,licenseId:source.license||"provider-specific",kind:kind==="air"?"air_quality":"forecast",observedAt:source.observedAt||null,issuedAt:source.issuedAt||null,validAt:payload?.current?.time||null,fetchedAt:source.fetchedAt||fetchedAt||null,freshness:freshness(source.fetchedAt||fetchedAt),cached:cached===true,missingFields:Object.freeze((kind==="air"?inspectAirPayload(payload):inspectForecastPayload(payload)).missingFields.slice()),fallbackReason:String(fallbackReason||"").slice(0,180),attribution:source.attribution||null});}
+  function releaseReadiness(){const dataRights=DEPLOYMENT_GATES.forecastCommercialRights&&DEPLOYMENT_GATES.airCommercialRights&&DEPLOYMENT_GATES.reverseGeocodeCommercialRights&&DEPLOYMENT_GATES.mapTilesCommercialRights;const advertisingBlockers=[];if(!dataRights)advertisingBlockers.push("역지오코딩·지도 상업 이용권 미검증");if(!DEPLOYMENT_GATES.consentFlowVerified)advertisingBlockers.push("광고 동의 흐름 미검증");if(!DEPLOYMENT_GATES.productionAdUnitConfigured)advertisingBlockers.push("날씨한눈 전용 운영 광고 단위 미설정");const subscriptionBlockers=[];if(!dataRights)subscriptionBlockers.push("유료 서비스용 전체 데이터 이용권 미검증");if(!DEPLOYMENT_GATES.playBillingConfigured)subscriptionBlockers.push("Play Billing 상품·복원 계약 미설정");return Object.freeze({contractVersion:CONTRACT_VERSION,operatingMode:PROVIDER.mode,advertising:Object.freeze({allowed:advertisingBlockers.length===0,blockers:Object.freeze(advertisingBlockers)}),subscriptions:Object.freeze({allowed:subscriptionBlockers.length===0,blockers:Object.freeze(subscriptionBlockers)}),officialObservations:Object.freeze({available:true,reason:"국내는 기상청 초단기실황을 사용합니다."}),officialWarnings:Object.freeze({available:false,reason:"기상청 특보 수집기는 인증키 설정·운영 검증 대기 중입니다."}),radar:Object.freeze({available:false,reason:"허가된 레이더 영상 공급 경로가 연결되지 않았습니다."})});}
+  return Object.freeze({CONTRACT_VERSION,FORECAST_ENDPOINT,AIR_ENDPOINT,LEGACY_FORECAST_ENDPOINT,LEGACY_AIR_ENDPOINT,PROVIDER,DEPLOYMENT_GATES,HOURLY_FIELDS,DAILY_FIELDS,normalizeLocation,buildForecastUrl,buildAirUrl,buildLegacyForecastUrl,buildLegacyAirUrl,toLegacyForecast,toLegacyAir,inspectForecastPayload,inspectAirPayload,freshness,sourceRecord,releaseReadiness});
 });

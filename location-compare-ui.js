@@ -265,7 +265,8 @@
     try {
       var response = await fetch(core.buildForecastUrl(destinationPlace), { signal: controller.signal });
       if (!response.ok) throw new Error("목적지 예보 응답 " + response.status);
-      var weather = await response.json();
+      var canonical = await response.json();
+      var weather = window.WeatherProviderCore?.toLegacyForecast?.(canonical) || canonical;
       if (!weather || weather.error || !weather.hourly || !Array.isArray(weather.hourly.time)) throw new Error("목적지 예보 형식 오류");
       if (ticket !== requestTicket) return;
       destinationWeather = weather;

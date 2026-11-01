@@ -88,7 +88,8 @@
     try{
       const response=await fetch(url,{signal:controller.signal});
       if(!response.ok)throw new Error(`예보 응답 ${response.status}`);
-      const payload=await response.json();
+      const canonical=await response.json();
+      const payload=provider?.toLegacyForecast?.(canonical)||canonical;
       const contract=provider?.inspectForecastPayload?.(payload);
       if(!contract?.valid)throw new Error("필수 시간별 예보값이 없습니다.");
       return {site,payload,sourceLabel:provider?.PROVIDER?.name||provider?.PROVIDER?.id||"모델 예보"};

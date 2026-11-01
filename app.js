@@ -82,6 +82,18 @@
   function airUrl(loc) {
     return PROVIDER?PROVIDER.buildAirUrl(loc):"";
   }
+  async function fetchUnifiedWeather(loc) {
+    try {
+      var canonical=await getJson(forecastUrl(loc,false));
+      var normalized=PROVIDER&&PROVIDER.toLegacyForecast?PROVIDER.toLegacyForecast(canonical):canonical;
+      return {weather:normalized,air:PROVIDER&&PROVIDER.toLegacyAir?PROVIDER.toLegacyAir(canonical):null,fallback:false};
+    }catch(primaryError){
+      if(!PROVIDER||!PROVIDER.buildLegacyForecastUrl)throw primaryError;
+      var fallback=await Promise.allSettled([getJson(PROVIDER.buildLegacyForecastUrl(loc,{short:false})),getJson(PROVIDER.buildLegacyAirUrl(loc))]);
+      if(fallback[0].status!=="fulfilled")throw primaryError;
+      return {weather:fallback[0].value,air:fallback[1].status==="fulfilled"?fallback[1].value:null,fallback:true,primaryError:primaryError};
+    }
+  }
   async function getJson(url) {
     if(!url)throw new Error("데이터 공급자 설정을 불러오지 못했습니다.");
     var ctrl=new AbortController();
@@ -120,22 +132,23 @@
       STATE.weather=cache.weather;STATE.air=cachedAirValid?cache.air:null;STATE.fetchedAt=cache.at||null;STATE.hourly=makeHours(STATE.weather);STATE.dataStatus="cached";renderAll();
     }
     try {
-      var results=await Promise.allSettled([getJson(forecastUrl(loc,false)),getJson(airUrl(loc))]);
+      var result=await fetchUnifiedWeather(loc);
       if(ticket!==STATE.ticket)return;
-      var weather=results[0].status==="fulfilled"?results[0].value:null;
-      var airCandidate=results[1].status==="fulfilled"?results[1].value:null;
+      var weather=result.weather;
+      var airCandidate=result.air;
       var air=PROVIDER&&PROVIDER.inspectAirPayload(airCandidate).valid?airCandidate:null;
       var contract=PROVIDER&&PROVIDER.inspectForecastPayload(weather);
       if(!contract||!contract.valid) throw new Error("날씨 데이터 계약에 필요한 값이 없습니다: "+((contract&&contract.missingFields)||["공급자 모듈"]).join(", "));
       STATE.weather=weather;
       STATE.air=air;
-      STATE.dataStatus="live";
+      STATE.dataStatus=result.fallback?"fallback":"live";
       STATE.fetchedAt=new Date().toISOString();
       STATE.hourly=makeHours(weather);
       if(!loc.temporary)storeSet("weatherhannun_last",{loc:loc,at:STATE.fetchedAt,weather:weather,air:air});
-      if(!loc.temporary)storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:PROVIDER&&PROVIDER.PROVIDER.id});
+      if(!loc.temporary)storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:weather._weatherhannun?.source?.provider||PROVIDER&&PROVIDER.PROVIDER.id,fallback:result.fallback});
       renderAll();
       window.dispatchEvent(new CustomEvent("weatherhannun:forecast-result",{detail:{ok:true}}));
+      if(result.fallback)toast("공식 API 연결 대기 중으로 임시 모델 예보를 표시합니다.");
       if(!air) toast("대기질 API 연결이 불안정합니다. 날씨는 정상 표시됩니다.");
     }catch(e) {
       if(ticket!==STATE.ticket)return;
@@ -177,10 +190,11 @@
     var at=STATE.fetchedAt?new Date(STATE.fetchedAt).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"}):"조회 시각 없음";
     var last=STATE.fetchedAt?Date.parse(STATE.fetchedAt):NaN;
     var old=Number.isFinite(last)&&Date.now()-last>180*60000;
-    var label=old?"오래된 저장 예보 · 재조회 필요":STATE.dataStatus==="live"?"API 조회 "+at:STATE.dataStatus==="cached-error"?"연결 오류 · 저장 예보":"저장된 예보 "+at;
+    var label=old?"오래된 저장 예보 · 재조회 필요":STATE.dataStatus==="live"?"공통 API 조회 "+at:STATE.dataStatus==="fallback"?"임시 모델 예보 "+at:STATE.dataStatus==="cached-error"?"연결 오류 · 저장 예보":"저장된 예보 "+at;
     text("updatedBadge",label);
-    text("modelTime","예보 유효시각 "+(c.time||"정보 없음").replace("T"," ")+" (KST) · 모델 산출시각 별도 미제공");
-    text("dataFooterStatus",(STATE.dataStatus==="live"?"모델 예보 조회 성공":STATE.dataStatus==="cached-error"?"API 연결 실패 · 저장 예보":old?"오래된 저장 예보":"저장된 모델 예보")+(STATE.air?" · 대기질 예측 조회":" · 대기질 정보 없음"));
+    var src=w._weatherhannun&&w._weatherhannun.source;
+    text("modelTime","예보 유효시각 "+(c.time||"정보 없음").replace("T"," ")+(src&&src.issuedAt?" · 발표 "+String(src.issuedAt).replace("T"," "):""));
+    text("dataFooterStatus",(STATE.dataStatus==="live"?(src&&src.attribution||"공통 날씨 API 조회 성공"):STATE.dataStatus==="fallback"?"임시 모델 예보 · 공식 API 미연결":STATE.dataStatus==="cached-error"?"API 연결 실패 · 저장 예보":old?"오래된 저장 예보":"저장된 예보")+(STATE.air?" · 대기질 조회":" · 대기질 정보 없음"));
     renderHourly();
     renderWeek();
     renderDecisions();
@@ -477,9 +491,9 @@
     text("mapUpdated","주요 도시 예보 조회 중");
     $("cityGrid").innerHTML='<div class="empty-state">전국 주요 도시의 현재 날씨를 가져오고 있습니다…</div>';
     try{
-      var results=await Promise.allSettled(CITY_LIST.map(function(city){return getJson(forecastUrl(city,true));}));
+      var results=await Promise.allSettled(CITY_LIST.map(function(city){return fetchUnifiedWeather(city);}));
       STATE.cityData=CITY_LIST.map(function(city,i){
-        var v=results[i].status==="fulfilled"?results[i].value.current:null;
+        var v=results[i].status==="fulfilled"?results[i].value.weather.current:null;
         return {name:city.name,lat:city.lat,lon:city.lon,temp:v?.temperature_2m,apparent:v?.apparent_temperature,precipitation:v?.precipitation,wind:v?.wind_speed_10m,gust:v?.wind_gusts_10m,code:v?.weather_code,isDay:v?.is_day};
       });
       text("mapUpdated","도시별 모델 예보 · "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"})+" 갱신");
@@ -505,13 +519,10 @@
     if(nationalPayloads&&!force&&Date.now()-nationalFetched<15*60000){renderNationalWeather();return;}
     nationalBusy=true;$("nationalReload").disabled=true;renderNationalWeather();$("nationalTime").textContent='전국 예보를 불러오는 중…';
     try{
-      var cities=window.WeatherNationalCore.cities,url=new URL(forecastUrl(cities[0],true));
-      url.searchParams.set('latitude',cities.map(function(c){return c.lat;}).join(','));
-      url.searchParams.set('longitude',cities.map(function(c){return c.lon;}).join(','));
-      url.searchParams.set('hourly','temperature_2m,weather_code,is_day');url.searchParams.set('forecast_days','7');
-      var result=await getJson(url.href);
-      if(!Array.isArray(result)||result.length!==cities.length)throw new Error('전국 예보 응답을 확인할 수 없습니다.');
-      nationalPayloads=result;nationalFetched=Date.now();nationalFailed=false;renderNationalWeather();
+      var cities=window.WeatherNationalCore.cities;
+      var results=await Promise.allSettled(cities.map(function(city){return fetchUnifiedWeather(city);}));
+      if(results.every(function(result){return result.status!=="fulfilled";}))throw new Error('전국 예보 응답을 확인할 수 없습니다.');
+      nationalPayloads=results.map(function(result){return result.status==="fulfilled"?result.value.weather:null;});nationalFetched=Date.now();nationalFailed=false;renderNationalWeather();
     }catch(e){nationalFailed=true;$("nationalTime").textContent='전국 예보 연결 실패'+(nationalPayloads?' · 이전 조회 자료 표시':' · 다시 시도해 주세요');}
     finally{nationalBusy=false;$("nationalReload").disabled=false;}
   }
