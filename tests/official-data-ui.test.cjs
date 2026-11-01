@@ -13,7 +13,7 @@ test("map separates official warnings, radar observations and radar forecasts",(
   "레이더 강수 예측",
   "관측 기준시각·범례"
  ])assert.ok(html.includes(token),token);
- assert.match(html,/앱 내부 지도 레이어는 이용권·관측시각·범례 연동을 검증한 뒤 활성화/);
+ assert.match(html,/공식 특보·레이더는 원문에서 확인/);
 });
 
 test("official data is resolved from a key-free licensed snapshot and cached offline",()=>{

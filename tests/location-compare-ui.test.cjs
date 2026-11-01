@@ -14,7 +14,7 @@ test("location comparison is a dedicated same-time screen reachable from locatio
   for (const token of [
     'id="view-compare"', 'id="compareDestination"', 'id="compareTime"',
     'id="compareResults"', 'data-view="compare"', "50% 이상 또는 0.3 mm/h 이상",
-    "현재 지역과 목적지의 같은 시간"
+    "현재 지역·목적지 날씨 비교"
   ]) assert.ok(html.includes(token), `missing comparison control ${token}`);
   assert.match(app, /"map","compare","settings"/);
   assert.match(app, /weatherhannun:view/);
@@ -52,7 +52,7 @@ test("forecast-only yesterday view is explicit and never invents an observation 
   assert.match(html, /data-daily-delta/);
   assert.match(template, /data-daily-delta/);
   assert.match(script, /관측 자료 대기/);
-  assert.match(script, /모델 예보로 대신 계산하지 않습니다/);
+  assert.match(script, /공식 관측 기준/);
   assert.match(script, /core\.compare\(latest && latest\.observations\)/);
   assert.match(script, /weatherhannun:stitch-ready/);
   assert.doesNotMatch(script, /MutationObserver/);
