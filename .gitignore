@@ -2,3 +2,5 @@
 **/.DS_Store
 .serena/
 **/node_modules/
+**/firebase-debug.log
+**/.firebase/
