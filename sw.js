@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v69-activity-interests";
+const CACHE="weatherhannun-shell-v70-current-location";
 const BASE=self.registration.scope;
 const SHELL=[
   "./activity-interests-core.js?v=1",
@@ -19,8 +19,8 @@ const SHELL=[
   "./assets/brand/weatherhannun-32.png?v=18","./assets/brand/weatherhannun-180.png?v=18",
   "./assets/brand/weatherhannun-192.png?v=18","./assets/brand/weatherhannun-512.png?v=18",
   "./data/korea-regions-202602.json","./region-search-core.js?v=16","./region-search-ui.js?v=19",
-  "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=19",
-  "./location-manager.css?v=19","./briefing-core.js?v=31","./briefing-highlights.js?v=20","./briefing-ui.js?v=21",
+  "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=20",
+  "./location-manager.css?v=20","./briefing-core.js?v=31","./briefing-highlights.js?v=20","./briefing-ui.js?v=21",
   "./briefing-ui.css?v=21","./briefing-highlights.css?v=20","./app.js?v=42","./alert-rules-core.js?v=32",
   "./forecast-insights.js?v=32","./forecast-insights.css?v=26","./manifest.webmanifest?v=18",
   "./icon.svg?v=18","./data-status.html","./official-rights.html"

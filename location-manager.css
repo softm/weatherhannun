@@ -94,3 +94,16 @@ html[data-stitch-live=true] #locationQuickBar{width:min(670px,calc(100% - 24px))
  .location-fast-items .location-fast-place.active{display:none}
  .location-fast-place{max-width:118px}
 }
+
+/* Current weather location stays visible; editing tools live in the location dialog. */
+html #locationQuickBar.location-shortcuts{display:flex;align-items:center;justify-content:space-between;gap:12px;width:min(840px,calc(100% - 24px));padding:12px 14px;margin:0 auto 10px;background:var(--st-surface,#fff);border:1px solid var(--st-border,#e5e9ee);border-radius:10px;overflow:visible}
+#locationQuickBar .location-active-summary{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+#locationQuickBar .location-active-summary>.material-symbols-outlined{color:var(--st-primary,#2563eb);font-size:24px;flex:none}
+#locationQuickBar .location-active-copy{display:flex;flex-direction:column;min-width:0;gap:2px}
+#locationQuickBar .location-active-copy small{font-size:11px;color:var(--st-muted,#64748b)}
+#locationQuickBar .location-active-copy strong{font-size:18px;line-height:1.35;color:var(--st-text,#172334);overflow-wrap:anywhere}
+#locationQuickBar .location-active-copy>span{font-size:11px;color:var(--st-muted,#64748b)}
+#locationQuickBar .location-change-button{display:flex;align-items:center;justify-content:center;gap:5px;flex:none;min-height:44px;padding:8px 12px;border:1px solid var(--st-border,#e5e9ee);border-radius:8px;background:transparent;color:var(--st-text,#172334);font-weight:700}
+#locationQuickBar .location-change-button .material-symbols-outlined{font-size:18px}
+html[data-weather-theme="dark"] #locationQuickBar.location-shortcuts{background:#142235;border-color:#304258}
+html[data-weather-theme="dark"] #locationQuickBar .location-active-copy strong,html[data-weather-theme="dark"] #locationQuickBar .location-change-button{color:#e8eff9}

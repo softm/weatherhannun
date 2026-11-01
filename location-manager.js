@@ -59,18 +59,8 @@
     const quick=$("locationQuickBar");
     if(quick){
       quick.hidden=false;
-      const orderedPlaces=[...places].sort((a,b)=>Number(core.same(b,active))-Number(core.same(a,active)));
-      const placeButtons=orderedPlaces.map(p=>{
-        const selected=core.same(p,active);
-        const detail=p.address&&p.address!==p.name?p.address+(p.regionCenter?" · 지역 대표 좌표":" · 추정주소"):p.name+" 날씨 보기";
-        return '<button type="button" class="location-fast-place'+(selected?" active":"")+'" data-location-select="'+esc(p.id)+'" aria-pressed="'+String(selected)+'" aria-current="'+(selected?"location":"false")+'" title="'+esc(detail)+'"><span class="location-fast-check" aria-hidden="true">✓</span><span class="location-fast-name">'+esc(p.name)+'</span></button>';
-      }).join("");
-      quick.innerHTML='<div class="location-fast-items" role="group" aria-label="저장 지역 전환 및 지역 관리">'+
-      placeButtons+
-      (!activeSaved&&active?'<button type="button" class="location-fast-save" data-location-save-current>+ 이 지역 저장</button>':'')+
-      '<button type="button" class="location-fast-gps" data-geo-quick>⌖ 현위치</button>'+
-      '<button type="button" class="location-fast-compare" data-location-compare>⇄ 지역 비교</button>'+
-      '<button type="button" class="location-fast-manage" data-location-manage aria-label="지역 검색 및 저장 관리">+ 지역 찾기</button></div>';
+      const mode=active?.source==="gps"?"GPS 기준 · 추정 위치":active?.regionCenter?"지역 대표 위치 기준":"선택한 지역 기준";
+      quick.innerHTML='<div class="location-active-summary"><span class="material-symbols-outlined" aria-hidden="true">location_on</span><div class="location-active-copy"><small>현재 날씨 지역</small><strong>'+esc(currentName())+'</strong><span>'+esc(mode)+'</span></div></div><button type="button" class="location-change-button" data-location-manage aria-haspopup="dialog" aria-controls="locationDialog" aria-label="현재 날씨 지역 '+esc(currentName())+' 변경">변경<span class="material-symbols-outlined" aria-hidden="true">edit_location_alt</span></button>';
     }
   }
   function choose(raw,source="manual",keepDialogOpen=false){
@@ -291,7 +281,7 @@
     });
     $("welcomeLater")?.addEventListener("click",()=>{
       finishIntro();
-      status("언제든 '⌖ 현위치' 또는 '지역관리'에서 위치를 바꿀 수 있습니다.");
+      status("상단 지역 옆 ‘변경’을 눌러 위치를 바꿀 수 있습니다.");
     });
     render();
     initialPermissionFlow();
