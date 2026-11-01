@@ -1,10 +1,10 @@
 import {test, expect} from '@playwright/test';
 import fs from 'node:fs';
 const forecast=JSON.parse(fs.readFileSync(new URL('../fixtures/mobile-weather.json',import.meta.url)));
-async function start(page,missing=false){
+async function start(page,missing=false,wet=false){
  await page.clock.setFixedTime(new Date(forecast.current.time+'+09:00'));
  await page.route('**/weatherApi?**',r=>r.fulfill({status:503,body:'{}'}));
- await page.route('https://api.open-meteo.com/**',r=>{const data=structuredClone(forecast);if(missing)for(const key of ['temperature_2m','precipitation_probability','precipitation','wind_speed_10m','wind_gusts_10m'])data.hourly[key]=data.hourly.time.map(()=>null);return r.fulfill({json:data});});
+ await page.route('https://api.open-meteo.com/**',r=>{const data=structuredClone(forecast);if(wet)data.hourly.precipitation=data.hourly.time.map(()=>1);if(missing)for(const key of ['temperature_2m','precipitation_probability','precipitation','wind_speed_10m','wind_gusts_10m'])data.hourly[key]=data.hourly.time.map(()=>null);return r.fulfill({json:data});});
  await page.route('https://air-quality-api.open-meteo.com/**',r=>r.fulfill({status:503,body:'{}'}));
  await page.addInitScript(()=>{localStorage.setItem('weatherhannun_geo_intro_v1','done');sessionStorage.setItem('weatherhannun:startup-briefing:session:v1','shown');localStorage.setItem('weatherhannun_location',JSON.stringify({name:'서울',lat:37.5665,lon:126.978,source:'manual'}));});
  await page.goto('/');
@@ -54,7 +54,7 @@ test('missing metrics never become zero or a continuous chart',async({page})=>{
  await expect(page.locator('.selected-hour-extra dd').first()).toHaveText('--');
 });
 test('visible narrator, 10/30-second modes, saved region and temporary map selection',async({page})=>{
- await start(page);const short=await page.locator('.stitch-caster-briefing').textContent();
+ await start(page);await expect(page.locator('.rain-decision-card')).toBeHidden();const short=await page.locator('.stitch-caster-briefing').textContent();
  await page.locator('[data-brief-mode="detail"]').click();await expect(page.locator('[data-brief-mode="detail"]')).toHaveAttribute('aria-pressed','true');
  expect((await page.locator('.stitch-caster-briefing').textContent()).length).toBeGreaterThan(short.length);
  await page.evaluate(()=>{window.WeatherHannunCloudTTS={configured:()=>true,stop(){},play:async text=>{window.testSpoken=text;}};});
@@ -76,7 +76,7 @@ test('address search, GPS, refresh loading, custom dates and details links',asyn
  await page.locator('#dialogClose').click();await page.locator('[data-geo-quick]').click();await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('weatherhannun_location')).source)).toBe('gps');
  await page.route('**/weatherApi?**',async r=>{await new Promise(resolve=>setTimeout(resolve,1000));await r.fulfill({status:503,body:'{}'});});
  await page.locator('#headerMenuButton').click();await page.locator('#refreshButton').click();await expect(page.locator('#refreshButton')).toBeDisabled();await expect(page.locator('#refreshButton')).toBeEnabled({timeout:20000});
- await page.locator('.rain-decision-link').click();await expect(page.locator('#view-hourly')).toHaveClass(/active/);
+ await view(page,'hourly');
  await page.locator('[data-rain-period="custom"]').click();const day=await page.locator('#rainDateStart').inputValue();await page.locator('#rainDateEnd').fill(day);await page.locator('#applyRainDates').click();
  expect(await page.locator('.explorer-hour').count()).toBeLessThanOrEqual(24);
  await view(page,'today');await page.locator('.stitch-week-row').nth(1).click();await expect(page.locator('[data-week-index="1"]')).toHaveAttribute('aria-expanded','true');
@@ -95,4 +95,9 @@ test('mobile reading contrast, touch targets and navigation clearance',async({pa
  expect(contrast).toBeGreaterThanOrEqual(4.5);
  for(const selector of ['[data-brief-mode="detail"]','[data-stitch-brief-play]','.mobile-nav button'])expect((await page.locator(selector).first().boundingBox()).height).toBeGreaterThanOrEqual(44);
  await view(page,'hourly');await page.locator('.hourly-alert').scrollIntoViewIfNeeded();const box=await page.locator('.hourly-alert').boundingBox(),nav=await page.locator('.mobile-nav').boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(nav.y);
+});
+
+test('rain card appears only when rain needs attention and still opens hourly details',async({page})=>{
+ await start(page,false,true);await expect(page.locator('.rain-decision-card')).toBeVisible();
+ await page.locator('.rain-decision-link').click();await expect(page.locator('#view-hourly')).toHaveClass(/active/);
 });
