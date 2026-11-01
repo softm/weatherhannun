@@ -49,7 +49,7 @@
   document.querySelectorAll('[data-rain-period]').forEach(b=>b.addEventListener('click',()=>{period=b.dataset.rainPeriod;render(true);}));
   $('applyRainDates').addEventListener('click',()=>{if($('rainDateStart').value&&$('rainDateStart').value<=$('rainDateEnd').value){period='custom';render(true);}});
  }
- window.addEventListener('weatherhannun:data',e=>{latest=e.detail;const key=latest.loc?.lat+','+latest.loc?.lon,stamp=key+'|'+latest.at+'|'+latest.weather?.current?.time;if(stamp===renderKey)return;const reset=locationKey!==key;locationKey=key;renderKey=stamp;all=C.rows(latest.weather);render(reset);});
+ window.addEventListener('weatherhannun:data',e=>{latest=e.detail;const key=latest.loc?.lat+','+latest.loc?.lon,stamp=key+'|'+latest.at+'|'+latest.weather?.current?.time;if(stamp===renderKey)return;const reset=locationKey!==key;locationKey=key;renderKey=stamp;all=C.rows(latest.weather,new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()).replace(' ','T'));render(reset);});
  window.addEventListener('weatherhannun:select-hour',e=>{const i=visible.findIndex(x=>x.time===e.detail?.time);if(i>=0)select(i,true);});
  window.addEventListener('weatherhannun:view',e=>{if(e.detail.view==='hourly'&&visible.length)select(Math.max(0,visible.findIndex(x=>x.time===selected)),true);});
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();

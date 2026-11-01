@@ -2,7 +2,7 @@
 const CACHE="weatherhannun-shell-v95-mobile-ux";
 const BASE=self.registration.scope;
 const SHELL=[
-  "./hourly-explorer-core.js?v=1","./hourly-explorer.js?v=1","./mobile-experience.css?v=1",
+  "./hourly-explorer-core.js?v=2","./hourly-explorer.js?v=2","./mobile-experience.css?v=1",
   "./national-weather-core.js?v=1",
   "./activity-interests-core.js?v=1",
   "./","./index.html","./styles.css","./header-menu.css?v=1","./header-menu.js?v=2","./clean-weather.css?v=5","./action-progress.css?v=40","./action-progress.js?v=40","./day-flow.css?v=7","./day-flow-core.js?v=3","./day-flow-ui.js?v=6","./national-map.css?v=43","./startup-briefing.css?v=45","./startup-briefing-core.js?v=45","./startup-briefing.js?v=45","./stitch-theme.css?v=18","./stitch-mobile.css?v=18",

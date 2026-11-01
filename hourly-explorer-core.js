@@ -2,9 +2,9 @@
  'use strict';
  const finite=x=>typeof x==='number'&&Number.isFinite(x);
  const format=(x,d=0)=>finite(x)?x.toFixed(d):'--';
- function rows(weather){
+ function rows(weather,at){
   const h=weather?.hourly;if(!Array.isArray(h?.time))return [];
-  const now=weather.current?.time?.slice(0,13)||'';
+  const now=(at||weather.current?.time||'').slice(0,13);
   const start=h.time.findIndex(t=>t.slice(0,13)>=now);if(start<0)return [];
   return h.time.slice(start,start+168).map((time,i)=>{const k=start+i;return {time,temp:h.temperature_2m?.[k],rain:h.precipitation_probability?.[k],mm:h.precipitation?.[k],code:h.weather_code?.[k],isDay:h.is_day?.[k],wind:h.wind_speed_10m?.[k],gust:h.wind_gusts_10m?.[k],humidity:h.relative_humidity_2m?.[k],feels:h.apparent_temperature?.[k],uv:h.uv_index?.[k]};});
  }
