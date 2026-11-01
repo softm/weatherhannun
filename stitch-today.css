@@ -199,3 +199,7 @@ html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero.stit
 #stitch-live-dashboard .stitch-restored-narrator .justify-between{flex-wrap:wrap;gap:4px}
 #stitch-live-dashboard .stitch-restored-narrator .font-title-md{font-size:13px}
 #stitch-live-dashboard .stitch-restored-narrator p{display:block;margin-top:7px;font-size:13px;line-height:1.65;color:var(--st-fg)}
+
+/* 홈 현재 날씨에는 조회 시각만 남기고 관측소·거리 설명은 숨긴다. */
+#stitch-live-dashboard .stitch-dashboard-hero [data-official-source],
+#stitch-live-dashboard .stitch-dashboard-hero [data-official-source]+span{display:none!important}
