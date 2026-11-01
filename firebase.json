@@ -1,0 +1,10 @@
+{
+  "functions": [
+    {
+      "source": "services/google-tts",
+      "codebase": "weather-briefing-tts",
+      "runtime": "nodejs22",
+      "ignore": ["node_modules", ".git", "*.log", ".env*", "test"]
+    }
+  ]
+}
