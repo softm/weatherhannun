@@ -2,6 +2,7 @@ import {test, expect} from '@playwright/test';
 import fs from 'node:fs';
 const forecast=JSON.parse(fs.readFileSync(new URL('../fixtures/mobile-weather.json',import.meta.url)));
 async function start(page,missing=false){
+ await page.clock.setFixedTime(new Date(forecast.current.time+'+09:00'));
  await page.route('**/weatherApi?**',r=>r.fulfill({status:503,body:'{}'}));
  await page.route('https://api.open-meteo.com/**',r=>{const data=structuredClone(forecast);if(missing)for(const key of ['temperature_2m','precipitation_probability','precipitation','wind_speed_10m','wind_gusts_10m'])data.hourly[key]=data.hourly.time.map(()=>null);return r.fulfill({json:data});});
  await page.route('https://air-quality-api.open-meteo.com/**',r=>r.fulfill({status:503,body:'{}'}));
@@ -82,7 +83,7 @@ test('address search, GPS, refresh loading, custom dates and details links',asyn
  await view(page,'today');await page.locator('.air-quality-glance').click();await expect(page.locator('#view-air')).toHaveClass(/active/);
 });
 test('active official warning stays exposed with original source link',async({page})=>{
- await page.route('**/data/official/latest.json?**',r=>r.fulfill({json:{schemaVersion:1,status:'ready',generatedAt:new Date().toISOString(),rights:[{verified:true}],kma:{observations:{current:[],previous:[]},warnings:[{upperRegionName:'서울특별시',regionName:'서울',warningCode:'RAIN'}]},airKorea:{measurements:[]}}}));
+ await page.route('**/data/official/latest.json?**',r=>r.fulfill({json:{schemaVersion:1,status:'ready',generatedAt:new Date(forecast.current.time+'+09:00').toISOString(),rights:[{verified:true}],kma:{observations:{current:[],previous:[]},warnings:[{upperRegionName:'서울특별시',regionName:'서울',warningCode:'RAIN'}]},airKorea:{measurements:[]}}}));
  await start(page);const warning=page.locator('#stitch-live-dashboard .official-glance-line');
  await expect(warning).toHaveAttribute('data-warning-state','local');await expect(warning).toBeVisible();
  expect(await warning.evaluate(e=>e.parentElement.classList.contains('stitch-dashboard-hero'))).toBe(true);
