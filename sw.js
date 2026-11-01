@@ -5,7 +5,7 @@ const SHELL=[
   "./national-weather-core.js?v=1",
   "./activity-interests-core.js?v=1",
   "./","./index.html","./styles.css","./header-menu.css?v=1","./header-menu.js?v=2","./clean-weather.css?v=5","./action-progress.css?v=40","./action-progress.js?v=40","./day-flow.css?v=7","./day-flow-core.js?v=3","./day-flow-ui.js?v=6","./national-map.css?v=43","./startup-briefing.css?v=45","./startup-briefing-core.js?v=45","./startup-briefing.js?v=45","./stitch-theme.css?v=18","./stitch-mobile.css?v=18",
-  "./settings.css?v=35","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=39","./account-header.js?v=8",
+  "./settings.css?v=37","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=39","./account-header.js?v=8",
   "./agriculture-planner.css?v=34","./agriculture-planner-core.js?v=34","./agriculture-planner.js?v=35",
   "./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",
   "./stitch-today.template.html?v=43","./stitch-today.js?v=44","./stitch-today.css?v=25",
@@ -23,7 +23,7 @@ const SHELL=[
   "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=23",
   "./location-manager.css?v=24","./briefing-core.js?v=32","./briefing-highlights.js?v=20","./briefing-cloud-tts.js?v=1","./briefing-ui.js?v=22",
   "./briefing-ui.css?v=23","./briefing-hub.css?v=3","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=47","./alert-rules-core.js?v=32",
-  "./forecast-insights.js?v=34","./forecast-insights.css?v=26","./manifest.webmanifest?v=18",
+  "./forecast-insights.js?v=35","./forecast-insights.css?v=26","./manifest.webmanifest?v=18",
   "./icon.svg?v=18","./data-status.html","./official-rights.html"
 ].map(x=>new URL(x,BASE).href);
 async function warmShell(){

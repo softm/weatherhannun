@@ -584,8 +584,34 @@ html[data-weather-theme="light"] .settings-actions button.secondary {
 
 .notification-preview-copy strong {
   color: #fff;
-  font-size: 15px;
+  font-size: 11px;
+  font-weight: 750;
   letter-spacing: -.2px;
+  opacity: .78;
+}
+
+.notification-preview-main {
+  display: flex !important;
+  align-items: baseline;
+  gap: 9px;
+  margin-top: 2px;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+.notification-preview-main b {
+  color: #fff;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+
+.notification-preview-main em {
+  color: #9ff5df;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 850;
 }
 
 .notification-preview-copy > span {
@@ -620,6 +646,74 @@ html[data-weather-theme="light"] .settings-actions button.secondary {
 .notification-preview-actions .material-symbols-outlined {
   color: #67e6c8;
   font-size: 16px;
+}
+
+.notification-preview-send {
+  width: 100%;
+  margin: 16px 0 7px;
+}
+
+.notification-preview-send #previewNotification {
+  display: flex;
+  width: 100%;
+  min-height: 62px;
+  padding: 8px 14px 8px 10px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 11px;
+  color: #fff;
+  background: linear-gradient(135deg, #1671e8, #0f58c5);
+  border: 2px solid #86bcff;
+  border-radius: 16px;
+  box-shadow: 0 5px 0 #083e91, 0 12px 26px rgba(17, 99, 213, .34);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.notification-preview-send #previewNotification:hover {
+  background: linear-gradient(135deg, #2581f5, #1765d3);
+}
+
+.notification-preview-send #previewNotification:active {
+  box-shadow: 0 2px 0 #083e91, 0 8px 18px rgba(17, 99, 213, .28);
+  transform: translateY(3px);
+}
+
+.notification-preview-send-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: #0f58c5;
+  background: #fff;
+  border-radius: 12px;
+  font-size: 23px;
+  font-variation-settings: "FILL" 1;
+}
+
+.notification-preview-send-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
+}
+
+.notification-preview-send-copy b {
+  font-size: 14px;
+}
+
+.notification-preview-send-copy small {
+  margin-top: 3px;
+  color: #d9ebff;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.notification-preview-send-arrow {
+  font-size: 21px;
 }
 
 .watch-subheading {
@@ -671,6 +765,14 @@ html[data-weather-theme="light"] .notification-preview-surface {
 html[data-weather-theme="light"] .notification-preview-heading b,
 html[data-weather-theme="light"] .notification-preview-copy strong {
   color: #10243a;
+}
+
+html[data-weather-theme="light"] .notification-preview-main b {
+  color: #0b2743;
+}
+
+html[data-weather-theme="light"] .notification-preview-main em {
+  color: #08735c;
 }
 
 html[data-weather-theme="light"] .notification-preview-heading small,
@@ -863,6 +965,11 @@ html[data-weather-theme="light"] .notification-preview-actions > span {
     justify-content: center;
   }
 
+  .notification-preview-send #previewNotification {
+    width: 100%;
+    min-height: 54px;
+  }
+
   .watch-subheading {
     align-items: flex-start;
     flex-direction: column;
@@ -904,9 +1011,8 @@ html[data-weather-theme="light"] .notification-preview-actions > span {
     display: none;
   }
 
-  .notification-preview-copy strong {
-    font-size: 13px;
-  }
+  .notification-preview-main b { font-size: 27px; }
+  .notification-preview-main em { font-size: 13px; }
 
   .notification-preview-actions > span {
     padding-inline: 5px;

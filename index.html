@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="./region-search.css?v=17">
   <link rel="stylesheet" href="./startup-briefing.css?v=45">
   <link rel="stylesheet" href="./stitch-mobile.css?v=18">
-  <link rel="stylesheet" href="./settings.css?v=35">
+  <link rel="stylesheet" href="./settings.css?v=37">
   <link rel="stylesheet" href="./screen-weather-settings.css?v=34">
   <link rel="stylesheet" href="./agriculture-planner.css?v=34">
   <link rel="stylesheet" href="./weather-icons.css?v=17">
@@ -53,7 +53,7 @@
   <script defer src="./briefing-hub.js?v=2"></script>
   <script defer src="./weather-icons.js?v=17"></script>
   <script defer src="./alert-rules-core.js?v=32"></script>
-  <script defer src="./forecast-insights.js?v=34"></script>
+  <script defer src="./forecast-insights.js?v=35"></script>
   <script defer src="./stitch-layout.js?v=18"></script>
   <script defer src="./daily-delta-core.js?v=27"></script>
   <script defer src="./official-data-core.js?v=40"></script>
@@ -423,10 +423,10 @@
             <div class="notification-preview-surface" aria-live="polite">
               <span class="notification-preview-brand" aria-hidden="true"><img src="./assets/brand/weatherhannun-192.png?v=18" alt=""></span>
               <span id="notificationPreviewWeatherIcon" class="notification-preview-weather weather-icon-host" aria-hidden="true"></span>
-              <span class="notification-preview-copy"><strong id="notificationPreviewTitle">선택 지역 · 날씨 요약 준비 중</strong><span id="notificationPreviewBody">체감·최고/최저·강수 시각과 우산 판단을 요약합니다.</span><small id="notificationPreviewSchedule">오늘 준비 07:00 · 내일 계획 19:00</small></span>
+              <span class="notification-preview-copy"><strong id="notificationPreviewTitle" class="notification-preview-location">선택 지역</strong><span class="notification-preview-main"><b id="notificationPreviewTemperature">--°</b><em id="notificationPreviewCondition">날씨 확인 중</em></span><span id="notificationPreviewBody">체감·최고/최저·강수 시각과 우산 판단을 요약합니다.</span><small id="notificationPreviewSchedule">오늘 준비 07:00 · 내일 계획 19:00</small></span>
             </div>
             <div class="notification-preview-actions" aria-label="알림에서 실행할 수 있는 기능"><span><span class="material-symbols-outlined" aria-hidden="true">volume_up</span>브리핑 듣기</span><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span>시간별</span><span><span class="material-symbols-outlined" aria-hidden="true">tune</span>알림 설정</span></div>
-            <div class="watch-action"><button type="button" id="previewNotification">미리보기 알림 보내기</button></div><p id="previewNotificationStatus" class="watch-note" role="status">예시 알림 1회 · 저장 조건 유지</p>
+            <div class="watch-action notification-preview-send"><button type="button" id="previewNotification"><span class="notification-preview-send-icon material-symbols-outlined" aria-hidden="true">notifications_active</span><span class="notification-preview-send-copy"><b>미리보기 알림 보내기</b><small>내 휴대폰 알림창에서 확인</small></span><span class="material-symbols-outlined notification-preview-send-arrow" aria-hidden="true">arrow_forward</span></button></div><p id="previewNotificationStatus" class="watch-note" role="status">예시 알림 1회 · 저장 조건 유지</p>
           </article>
           <div class="watch-choices watch-rule-grid">
             <label><span><input id="watchRain" type="checkbox" checked>☂ 12시간 내 비</span><span class="watch-value">강수확률 <select id="rainThreshold" aria-label="비 알림 강수확률"><option value="30">30%</option><option value="50">50%</option><option value="65">65%</option><option value="70">70%</option><option value="80">80%</option></select> 이상</span></label>

@@ -201,7 +201,7 @@
   function currentControl(id,fallback){const control=el(id);return control?control.value||fallback:fallback;}
   function checkedControl(id,fallback){const control=el(id);return control?control.checked:fallback;}
   function renderNotificationPreview(){
-    const title=el("notificationPreviewTitle"),body=el("notificationPreviewBody"),schedule=el("notificationPreviewSchedule"),icon=el("notificationPreviewWeatherIcon");
+    const title=el("notificationPreviewTitle"),temperature=el("notificationPreviewTemperature"),condition=el("notificationPreviewCondition"),body=el("notificationPreviewBody"),schedule=el("notificationPreviewSchedule"),icon=el("notificationPreviewWeatherIcon");
     if(!title||!body||!schedule)return;
     const current=data?.weather?.current||{};
     const allRows=rows();
@@ -219,7 +219,9 @@
     const maxRain=rainProbabilities.length?Math.max(...rainProbabilities):null;
     const completeRainEvidence=next.length===12&&next.every(row=>finite(row.rain)&&finite(row.mm));
     const location=String(latestLocation?.name||data?.loc?.name||"선택 지역");
-    title.textContent=finite(temp)?location+" · "+number(temp)+"° · "+weatherName(code):location+" · 날씨 요약";
+    title.textContent=location;
+    if(temperature)temperature.textContent=finite(temp)?number(temp)+"°":"--°";
+    if(condition)condition.textContent=weatherName(code)||"날씨 요약";
     const summary=[];
     if(finite(feels))summary.push("체감 "+number(feels)+"°");
     if(finite(high)||finite(low))summary.push("최고 "+number(high)+"° / 최저 "+number(low)+"°");
