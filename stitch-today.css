@@ -192,3 +192,10 @@ html[data-stitch-live="true"] #stitch-live-dashboard .stitch-dashboard-hero.stit
 #stitch-live-dashboard .stitch-current-context{margin-top:10px;text-align:left}
 #stitch-live-dashboard .stitch-current-context .daily-delta-block{margin-top:0;padding-top:8px;padding-bottom:8px}
 #stitch-live-dashboard .stitch-current-context .official-glance-line{margin-top:6px;padding-top:7px}
+
+#stitch-live-dashboard .stitch-restored-narrator{display:flex;align-items:flex-start;gap:10px;margin-top:14px;padding:12px 0 0;border-top:1px solid var(--st-line);color:var(--st-fg)}
+#stitch-live-dashboard .stitch-restored-narrator img{width:40px;height:40px;object-fit:cover}
+#stitch-live-dashboard .stitch-restored-narrator>.relative{flex:none}
+#stitch-live-dashboard .stitch-restored-narrator .justify-between{flex-wrap:wrap;gap:4px}
+#stitch-live-dashboard .stitch-restored-narrator .font-title-md{font-size:13px}
+#stitch-live-dashboard .stitch-restored-narrator p{display:block;margin-top:7px;font-size:13px;line-height:1.65;color:var(--st-fg)}

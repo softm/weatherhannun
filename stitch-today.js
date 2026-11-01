@@ -118,8 +118,9 @@
   var flowSlot=document.createElement('div');flowSlot.dataset.briefDayFlow='';
   var player=brief.querySelector('.stitch-briefing-player');
   var combined=document.createElement('div');combined.className='stitch-unified-briefing stitch-current-briefing';
-  nodes.briefMessage.hidden=true;
-  combined.append(flowSlot,player,nodes.briefMessage);
+  var narrator=brief.children[1];narrator.classList.add('stitch-restored-narrator');
+  nodes.briefMessage.hidden=false;
+  combined.append(flowSlot,narrator,player);
   hero.append(combined);hero.classList.add('stitch-current-combined');
   var context=document.createElement('div');context.className='stitch-current-context';
   hero.querySelectorAll('.daily-delta-block,.official-glance-line').forEach(function(item){context.append(item);});
