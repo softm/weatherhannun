@@ -57,3 +57,9 @@ test("missing risk fields never create frost or wind alerts", () => {
   const alerts = rules.pick(rows, { version: 2, frost: true, wind: true });
   assert.equal(alerts.some(alert => alert.id === "frost" || alert.id === "wind"), false);
 });
+
+ test("notification modes preserve explicit choices and default invalid values",()=>{
+  const core=require("../alert-rules-core.js");
+  for(const notificationMode of ["standard","hub","headsup"]) assert.equal(core.normalizePreferences({notificationMode}).notificationMode,notificationMode);
+  for(const notificationMode of [undefined,"invalid",null]) assert.equal(core.normalizePreferences({notificationMode}).notificationMode,"standard");
+ });

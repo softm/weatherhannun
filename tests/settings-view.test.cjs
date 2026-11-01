@@ -38,11 +38,14 @@ test("appearance, location, alerts and app information live in the settings view
     'id="membershipManage"',
     'id="productMetricsConsent"',
     'id="productMetricsReset"',
-    'id="watchSettings"',
     './privacy.html',
     './data-status.html'
   ]) assert.ok(settings.includes(token), `missing settings control ${token}`);
 
+  const briefing = html.slice(html.indexOf('id="view-briefing"'), html.indexOf('id="view-hourly"'));
+  assert.ok(briefing.includes('id="watchSettings"'));
+  assert.ok(!html.includes('id="view-notifications"'));
+  assert.match(read("app.js"), /if\(openAlerts\)view="briefing"/);
   assert.ok(!activity.includes('id="watchSettings"'), "alerts must not remain mixed into activity recommendations");
 });
 
