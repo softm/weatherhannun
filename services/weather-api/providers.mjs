@@ -1,4 +1,5 @@
 import {apparentTemperature, emptyContract, dfsGrid, kmaBase, kmaConditionCode, numberOrNull, parseKmaPrecipitation} from "./core.mjs";
+import proj4 from "proj4";
 
 const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 export async function fetchJson(url, {headers = {}, attempts = 3, timeoutMs = 12_000, fetchImpl = fetch} = {}) {
@@ -79,12 +80,26 @@ export async function collectKma(location, serviceKey, {now = new Date(), ...opt
   return {...emptyContract({...location, country: "KR", timezone: "Asia/Seoul", grid: {nx, ny}}, "kma"), current, hourly, daily: aggregateDaily(hourly), source: {provider: "kma", issuedAt: issueIso(villageBase), observedAt: current?.time || null, fetchedAt: new Date().toISOString(), attribution: "기상청 초단기실황·초단기예보·단기예보", license: "공공누리 제1유형 표시", partial: observationResult.status !== "fulfilled" || ultraResult.status !== "fulfilled"}};
 }
 
-export async function collectAirKorea(stationName, serviceKey, options = {}) {
-  if (!stationName) return null; if (!serviceKey || serviceKey === "UNCONFIGURED") throw new Error("airkorea_key_missing");
+const AIRKOREA_TM = "+proj=tmerc +lat_0=38 +lon_0=127.0028902777778 +k=1 +x_0=200000 +y_0=500000 +ellps=bessel +towgs84=-146.43,507.89,681.46 +units=m +no_defs";
+export async function resolveAirKoreaStation(location, serviceKey, options = {}) {
+  if (location?.stationName) return {stationName: location.stationName, distanceKm: null};
+  if (!Number.isFinite(location?.lat) || !Number.isFinite(location?.lon)) throw new Error("airkorea_location_missing");
+  const [tmX, tmY] = proj4("EPSG:4326", AIRKOREA_TM, [location.lon, location.lat]);
+  const url = new URL("https://apis.data.go.kr/B552584/MsrstnInfoInqireSvc/getNearbyMsrstnList");
+  Object.entries({serviceKey, returnType: "json", tmX: tmX.toFixed(3), tmY: tmY.toFixed(3), ver: "1.1"}).forEach(([key, value]) => url.searchParams.set(key, value));
+  const data = await fetchJson(url, options), item = data?.response?.body?.items?.find(candidate => candidate.stationName);
+  if (!item) throw new Error("airkorea_station_empty");
+  return {stationName: item.stationName, distanceKm: numberOrNull(item.tm)};
+}
+
+export async function collectAirKorea(location, serviceKey, options = {}) {
+  if (!serviceKey || serviceKey === "UNCONFIGURED") throw new Error("airkorea_key_missing");
+  const station = typeof location === "string" ? {stationName: location, distanceKm: null} : await resolveAirKoreaStation(location, serviceKey, options);
+  const stationName = station.stationName;
   const url = new URL("https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty");
   Object.entries({serviceKey, returnType: "json", numOfRows: "1", pageNo: "1", stationName, dataTerm: "DAILY", ver: "1.3"}).forEach(([key, value]) => url.searchParams.set(key, value));
   const data = await fetchJson(url, options), item = data?.response?.body?.items?.[0]; if (!item) throw new Error("airkorea_empty");
-  return {stationName, measuredAt: item.dataTime || null, pm10: numberOrNull(item.pm10Value), pm25: numberOrNull(item.pm25Value), khai: numberOrNull(item.khaiValue), pm10Grade: numberOrNull(item.pm10Grade1h ?? item.pm10Grade), pm25Grade: numberOrNull(item.pm25Grade1h ?? item.pm25Grade), source: {provider: "airkorea", attribution: "한국환경공단 에어코리아", fetchedAt: new Date().toISOString()}};
+  return {stationName, distanceKm: station.distanceKm, measuredAt: item.dataTime || null, pm10: numberOrNull(item.pm10Value), pm25: numberOrNull(item.pm25Value), khai: numberOrNull(item.khaiValue), pm10Grade: numberOrNull(item.pm10Grade1h ?? item.pm10Grade), pm25Grade: numberOrNull(item.pm25Grade1h ?? item.pm25Grade), source: {provider: "airkorea", attribution: "한국환경공단 에어코리아", fetchedAt: new Date().toISOString(), license: "공공누리 제3유형 출처표시·변경금지"}};
 }
 
 export async function collectWwis(cityId, language = "en", options = {}) {

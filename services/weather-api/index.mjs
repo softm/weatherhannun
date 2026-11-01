@@ -21,8 +21,8 @@ const configured = value => Boolean(value && value !== "UNCONFIGURED");
 async function collect(location, {kmaKey = "", airKey = ""} = {}) {
   const korean = isSouthKorea(location);
   const payload = korean ? await collectKma(location, kmaKey) : await collectMetNorway(location);
-  if (korean && location.stationName && configured(airKey)) {
-    try { payload.airQuality = await collectAirKorea(location.stationName, airKey); }
+  if (korean && configured(airKey)) {
+    try { payload.airQuality = await collectAirKorea(location, airKey); }
     catch (error) { logger.warn("AirKorea partial failure", {code: error.message, location: locationDocumentId(location)}); }
   }
   const result = validateContract(payload); if (!result.valid) throw new Error(`invalid_contract:${result.missing.join(",")}`); return payload;
@@ -32,7 +32,8 @@ async function serveWeather(request, response) {
   if (request.method !== "GET") return json(response, 405, {error: "method_not_allowed"});
   let location; try { location = locationFromQuery(request.query); } catch { return json(response, 400, {error: "invalid_coordinates"}); }
   const korean = isSouthKorea(location); const cache = await readFreshOrLastGood(db, location, korean ? 10 * 60_000 : 30 * 60_000);
-  if (cache.fresh) return json(response, 200, {...cache.fresh, cache: {hit: true, fallback: false}});
+  const needsAirQualityRefresh = korean && configured(airKoreaApiKey.value()) && !cache.fresh?.airQuality;
+  if (cache.fresh && !needsAirQualityRefresh) return json(response, 200, {...cache.fresh, cache: {hit: true, fallback: false}});
   try {
     const payload = await collect(location, {kmaKey: kmaApiKey.value(), airKey: airKoreaApiKey.value()}); const write = await writeIfChanged(cache.ref, payload, {country: korean ? "KR" : "GLOBAL"});
     if (write.changed) await saveForecastHistory(db, location, payload); return json(response, 200, {...payload, cache: {hit: false, changed: write.changed}});
@@ -71,9 +72,9 @@ export const kmaMidtermSync = onSchedule({...scheduled("20 6,18 * * *"), secrets
 export const kmaWarningSync = onSchedule({...scheduled("every 5 minutes"), secrets: [kmaApiKey]}, async () => db.collection("weather_workflow_status").doc("kma-warning-sync").set({lastRunAt: FieldValue.serverTimestamp(), state: configured(kmaApiKey.value()) ? "collector_pending_official_endpoint_validation" : "blocked_missing_secret"}, {merge: true}));
 
 export const airKoreaSync = onSchedule({...scheduled("every 30 minutes"), secrets: [airKoreaApiKey]}, async () => {
-  const locations = (await selectedLocations({country: "KR", savedOnly: true, limit: 200})).filter(location => location.stationName);
+  const locations = await selectedLocations({country: "KR", savedOnly: true, limit: 200});
   for (const location of locations) {
-    try { const value = await collectAirKorea(location.stationName, airKoreaApiKey.value()); await db.collection("air_quality_cache").doc(location.id).set({value, updatedAt: FieldValue.serverTimestamp()}, {merge: true}); }
+    try { const value = await collectAirKorea(location, airKoreaApiKey.value()); await db.collection("air_quality_cache").doc(location.id).set({value, stationName: value.stationName, updatedAt: FieldValue.serverTimestamp()}, {merge: true}); }
     catch (error) { logger.warn("AirKorea sync failed", {id: location.id, code: error.message}); }
   }
 });
