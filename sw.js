@@ -25,7 +25,7 @@ const SHELL=[
   "./location-manager.css?v=24","./briefing-core.js?v=32","./briefing-highlights.js?v=20","./briefing-cloud-tts.js?v=1","./briefing-ui.js?v=22",
   "./briefing-ui.css?v=23","./briefing-hub.css?v=3","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=49","./alert-rules-core.js?v=33",
   "./forecast-insights.js?v=37","./forecast-insights.css?v=26","./manifest.webmanifest?v=18",
-  "./icon.svg?v=18","./data-status.html","./official-rights.html"
+  "./dialog-inspired-theme.css?v=1","./icon.svg?v=18","./data-status.html","./official-rights.html"
 ].map(x=>new URL(x,BASE).href);
 async function warmShell(){
   const cache=await caches.open(CACHE);

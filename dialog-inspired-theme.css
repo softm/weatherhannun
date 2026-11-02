@@ -1,0 +1,97 @@
+/* Dialog-derived visual language: calm blue surfaces, tactile actions and semantic chips. */
+:root{
+  --ui-canvas:#eef6fc;
+  --ui-surface:#f8fbfe;
+  --ui-surface-strong:#fff;
+  --ui-border:#bed8ec;
+  --ui-border-strong:#a8cce8;
+  --ui-ink:#10243a;
+  --ui-muted:#587087;
+  --ui-primary:#2376e8;
+  --ui-primary-dark:#0f58bd;
+  --ui-primary-soft:#e2f0ff;
+  --ui-positive:#08735c;
+  --ui-positive-soft:#e5f7f1;
+  --ui-warning:#a95317;
+  --ui-warning-soft:#fff0df;
+  --ui-danger:#b33434;
+  --ui-danger-soft:#ffebea;
+  --ui-shadow:0 10px 26px rgba(42,92,132,.11);
+  --ui-shadow-raised:0 5px 0 #0b4ca8,0 13px 26px rgba(35,118,232,.24);
+}
+html[data-weather-theme="dark"]{
+  --ui-canvas:#091727;--ui-surface:#11243a;--ui-surface-strong:#162b43;
+  --ui-border:#31516d;--ui-border-strong:#426b8e;--ui-ink:#e8f3ff;--ui-muted:#abc1d6;
+  --ui-primary:#69a8ff;--ui-primary-dark:#327bd8;--ui-primary-soft:#17375c;
+  --ui-positive:#74d8bc;--ui-positive-soft:#153c36;--ui-warning:#f1b56f;--ui-warning-soft:#493521;
+  --ui-danger:#ffaaa5;--ui-danger-soft:#4b292e;--ui-shadow:0 12px 28px rgba(0,0,0,.22);
+  --ui-shadow-raised:0 5px 0 #245895,0 13px 26px rgba(0,0,0,.26);
+}
+
+body{background:var(--ui-canvas)!important;color:var(--ui-ink)}
+
+/* Elevated surfaces: use the same soft panel and blue-grey outline as screen weather. */
+:is(.stitch-card,.glass-card,.settings-card,.briefing-settings,.brief-hub-player,.brief-type-panel,.weekly-insight-banner,.week-list-card,.compare-toolbar,.official-data-panel,.notification-preview){
+  border-color:var(--ui-border)!important;
+  border-radius:18px!important;
+  box-shadow:var(--ui-shadow)!important;
+}
+:is(.settings-card,.briefing-settings,.brief-hub-player,.brief-type-panel,.week-list-card,.compare-toolbar,.official-data-panel){background:var(--ui-surface-strong)!important}
+
+/* Primary actions are unmistakable buttons with a physical pressed state. */
+:is(#previewNotification,#saveWatch,#applyRainDates,.settings-actions button:not(.secondary),.brief-hub-play){
+  min-height:48px;
+  color:#fff!important;
+  background:var(--ui-primary)!important;
+  border:2px solid color-mix(in srgb,var(--ui-primary) 58%,#fff)!important;
+  border-radius:14px!important;
+  box-shadow:var(--ui-shadow-raised)!important;
+  font-weight:850!important;
+  transition:transform .14s ease,box-shadow .14s ease,background-color .14s ease;
+}
+:is(#previewNotification,#saveWatch,#applyRainDates,.settings-actions button:not(.secondary),.brief-hub-play):active{
+  transform:translateY(3px);
+  box-shadow:0 2px 0 var(--ui-primary-dark),0 7px 16px rgba(35,118,232,.18)!important;
+}
+:is(.settings-actions button.secondary,.watch-action button.alt,.ghost-button,.brief-hub-types button,.rain-tabs button){
+  min-height:44px;color:var(--ui-primary-dark)!important;background:var(--ui-primary-soft)!important;
+  border:1px solid var(--ui-border-strong)!important;border-radius:12px!important;font-weight:800!important;
+}
+
+/* Chips communicate state, not decoration. */
+:is(.brief-schedule-status,.freshness,.notification-preview-live,.screen-weather-badge,.quick-badge,.national-map-badge,.day-flow-confidence){
+  padding:6px 10px!important;border:1px solid var(--ui-border-strong)!important;border-radius:999px!important;
+  color:var(--ui-positive)!important;background:var(--ui-positive-soft)!important;font-weight:850!important;
+}
+:is(.quick-badge.warn,[data-state="warning"],.status-warning){color:var(--ui-warning)!important;background:var(--ui-warning-soft)!important;border-color:#e8c08f!important}
+:is(.quick-badge.bad,[data-state="danger"],.status-danger){color:var(--ui-danger)!important;background:var(--ui-danger-soft)!important;border-color:#e7aaa6!important}
+
+/* Data tiles echo the dialog's readable metric blocks. */
+:is(.mini-stat,.weather-metrics>div,.stitch-dashboard-metrics article,.brief-hub-evidence span,.national-summary-card){
+  background:var(--ui-surface)!important;border:1px solid var(--ui-border)!important;border-radius:14px!important;
+}
+:is(.temperature strong,[data-official-temp],.score-number,.mini-stat strong,.notification-preview-main b){
+  font-family:"Space Grotesk","DM Sans",sans-serif;font-weight:700!important;color:var(--ui-ink)!important;
+}
+
+/* Inputs and dialogs share the same crisp outline and generous tap geometry. */
+:is(dialog,.location-dialog,.startup-briefing-dialog){
+  color:var(--ui-ink)!important;background:var(--ui-surface)!important;
+  border:2px solid var(--ui-border)!important;border-radius:24px!important;box-shadow:0 24px 70px rgba(10,39,65,.28)!important;
+}
+:is(input,select,textarea):not([type="checkbox"]):not([type="radio"]){
+  min-height:44px;color:var(--ui-ink);background:var(--ui-surface-strong);border:1px solid var(--ui-border);border-radius:11px;
+}
+:is(input,select,textarea):focus{border-color:var(--ui-primary)!important;outline:3px solid color-mix(in srgb,var(--ui-primary) 22%,transparent)!important;outline-offset:1px}
+
+/* Preserve the compact home flow while carrying the color and control language through it. */
+html[data-stitch-live="true"] #stitch-live-dashboard :is(button,.stitch-hour-current){border-radius:12px}
+html[data-stitch-live="true"] #stitch-live-dashboard .stitch-hour-current{background:var(--ui-primary)!important}
+html[data-stitch-live="true"] #stitch-live-dashboard :is(.daily-delta-block,.official-glance-line){border-color:var(--ui-border)!important}
+
+@media(max-width:710px){
+  :is(.stitch-card,.glass-card,.settings-card,.briefing-settings,.brief-hub-player,.brief-type-panel,.notification-preview){border-radius:16px!important}
+  :is(#previewNotification,#saveWatch,.settings-actions button:not(.secondary)){width:100%;min-height:54px}
+  :is(.settings-actions,.watch-action){display:grid;grid-template-columns:1fr;gap:10px}
+}
+@media(prefers-reduced-motion:reduce){:is(button,input,select,textarea){transition:none!important}}
