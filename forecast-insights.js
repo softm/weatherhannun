@@ -288,7 +288,10 @@
         status.textContent=bridge?"앱 업데이트 후 미리보기 알림을 사용할 수 있습니다.":"실제 미리보기 알림은 Android 앱에서 사용할 수 있습니다. 위 예시로 내용을 확인하세요.";return;
       }
       try{
-        const result=bridge.previewNotification();
+        const selectedMode=document.querySelector("[name=notificationMode]:checked")?.value||"standard";
+        const result=typeof bridge.previewNotificationForMode==="function"
+          ?bridge.previewNotificationForMode(selectedMode)
+          :bridge.previewNotification();
         status.textContent=result==="sent"?"미리보기 알림을 보냈습니다. 화면 위에서 아래로 내려 알림창을 확인하세요.":result==="blocked"?"알림이 차단되어 있습니다. 알림 권한과 휴대폰의 날씨한눈 알림 설정을 확인하세요.":"알림을 보내지 못했습니다. 잠시 후 다시 시도하세요.";
       }catch(_){status.textContent="미리보기 알림을 보내지 못했습니다.";}
     });

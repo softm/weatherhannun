@@ -156,10 +156,18 @@ html .rain-decision-card[hidden]{display:none!important}
 
 /* Briefing and notifications share one destination. */
 #view-briefing #watchSettings{margin-top:12px;scroll-margin-top:76px;min-width:0}
-.notification-modes{border:0;margin:12px 0;padding:0;display:grid;gap:8px}
-.notification-modes legend{font-size:16px;font-weight:700;margin-bottom:8px}
-.notification-modes label{display:flex;align-items:center;gap:10px;min-height:56px;padding:10px 12px;border:1px solid var(--st-line);border-radius:12px;cursor:pointer;background:var(--st-surface)}
+.notification-modes{border:0;margin:8px 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.notification-modes legend{font-size:14px;font-weight:700;margin-bottom:6px}
+.notification-modes label{display:flex;align-items:flex-start;gap:7px;min-height:48px;padding:8px 9px;border:1px solid var(--st-line);border-radius:11px;cursor:pointer;background:var(--st-surface)}
 .notification-modes label:has(input:checked){border-color:var(--st-accent);box-shadow:inset 3px 0 var(--st-accent)}
-.notification-modes input{width:20px;height:20px;flex-shrink:0;accent-color:var(--st-accent)}
+.notification-modes input{width:17px;height:17px;flex-shrink:0;accent-color:var(--st-accent)}
 .notification-modes b,.notification-modes small{display:block}
-.notification-modes b{font-size:15px}.notification-modes small{font-size:13px;color:var(--ux-muted);line-height:1.5}
+.notification-modes b{font-size:13px;line-height:1.25}.notification-modes small{margin-top:2px;font-size:11px;color:var(--ux-muted);line-height:1.3}
+
+@media(max-width:760px){
+  .notification-modes{gap:5px}
+  .notification-modes label{align-items:center;justify-content:center;gap:4px;min-height:42px;padding:6px 4px;text-align:center}
+  .notification-modes input{width:15px;height:15px}
+  .notification-modes b{font-size:11px;letter-spacing:-.35px}
+  .notification-modes small{display:none}
+}
