@@ -77,22 +77,23 @@
     else renderAll();
   }
   function forecastUrl(loc,short) {
-    return PROVIDER?PROVIDER.buildForecastUrl(loc,{short:!!short}):"";
+    return PROVIDER?PROVIDER.buildLegacyForecastUrl(loc,{short:!!short}):"";
   }
   function airUrl(loc) {
     return PROVIDER?PROVIDER.buildAirUrl(loc):"";
   }
   async function fetchUnifiedWeather(loc) {
-    try {
-      var canonical=await getJson(forecastUrl(loc,false));
-      var normalized=PROVIDER&&PROVIDER.toLegacyForecast?PROVIDER.toLegacyForecast(canonical):canonical;
-      return {weather:normalized,air:PROVIDER&&PROVIDER.toLegacyAir?PROVIDER.toLegacyAir(canonical):null,fallback:false};
-    }catch(primaryError){
-      if(!PROVIDER||!PROVIDER.buildLegacyForecastUrl)throw primaryError;
-      var fallback=await Promise.allSettled([getJson(PROVIDER.buildLegacyForecastUrl(loc,{short:false})),getJson(PROVIDER.buildLegacyAirUrl(loc))]);
-      if(fallback[0].status!=="fulfilled")throw primaryError;
-      return {weather:fallback[0].value,air:fallback[1].status==="fulfilled"?fallback[1].value:null,fallback:true,primaryError:primaryError};
-    }
+    if(!PROVIDER||!PROVIDER.buildLegacyForecastUrl)throw new Error("예보 공급자 설정을 불러오지 못했습니다.");
+    // The official observation, warning, radar and AirKorea snapshot is produced by
+    // GitHub Actions and merged by official-data-ui.js. Do not block first paint on
+    // the Firebase collector: fetch the model forecast immediately and let the
+    // licensed static snapshot enhance it independently.
+    var result=await Promise.allSettled([
+      getJson(PROVIDER.buildLegacyForecastUrl(loc,{short:false})),
+      getJson(PROVIDER.buildLegacyAirUrl(loc))
+    ]);
+    if(result[0].status!=="fulfilled")throw result[0].reason;
+    return {weather:result[0].value,air:result[1].status==="fulfilled"?result[1].value:null,fallback:false,staticOfficial:true};
   }
   async function getJson(url) {
     if(!url)throw new Error("데이터 공급자 설정을 불러오지 못했습니다.");
@@ -148,7 +149,7 @@
       if(!loc.temporary)storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:weather._weatherhannun?.source?.provider||PROVIDER&&PROVIDER.PROVIDER.id,fallback:result.fallback});
       renderAll();
       window.dispatchEvent(new CustomEvent("weatherhannun:forecast-result",{detail:{ok:true}}));
-      if(result.fallback)toast("공식 API 연결 대기 중으로 임시 모델 예보를 표시합니다.");
+      if(result.fallback)toast("모델 예보를 표시합니다. 공식 관측 자료는 별도로 갱신합니다.");
       if(!air) toast("대기질 API 연결이 불안정합니다. 날씨는 정상 표시됩니다.");
     }catch(e) {
       if(ticket!==STATE.ticket)return;

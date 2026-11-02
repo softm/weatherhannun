@@ -4,7 +4,7 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.WeatherHannunLocationCompare = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
-  var FORECAST_ENDPOINT = "https://asia-northeast3-softm-hannun-api.cloudfunctions.net/weatherApi";
+  var FORECAST_ENDPOINT = "https://api.open-meteo.com/v1/forecast";
 
   function finite(value) {
     return typeof value === "number" && Number.isFinite(value);
@@ -41,9 +41,12 @@
     var normalized = normalizePlace(place);
     if (!normalized) return "";
     var url = new URL(FORECAST_ENDPOINT);
-    url.searchParams.set("lat", String(normalized.lat));
-    url.searchParams.set("lon", String(normalized.lon));
-    url.searchParams.set("name", normalized.name);
+    url.searchParams.set("latitude", String(normalized.lat));
+    url.searchParams.set("longitude", String(normalized.lon));
+    url.searchParams.set("timezone", "Asia/Seoul");
+    url.searchParams.set("current", "temperature_2m,apparent_temperature,weather_code,is_day");
+    url.searchParams.set("hourly", "temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,is_day");
+    url.searchParams.set("forecast_days", "3");
     return url.href;
   }
 

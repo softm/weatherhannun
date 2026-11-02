@@ -2,7 +2,17 @@
 (function () {
   var core = window.WeatherHannunOfficialData;
   if (!core) return;
+  var STORAGE_KEY = "weatherhannun_official_snapshot_v1";
   var feed = null, weather = null, resolved = null, lastLoadedAt = 0;
+  function storedFeed() {
+    try {
+      var value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      return value && value.schemaVersion === 1 && value.status === "ready" ? value : null;
+    } catch (_) { return null; }
+  }
+  function rememberFeed(value) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(value)); } catch (_) { }
+  }
   function formatTime(value) {
     if (!value) return "시각 없음";
     var date = new Date(value);
@@ -82,9 +92,11 @@
     return fetch("./data/official/latest.json?refresh="+Date.now(), { cache: "no-store" }).then(function (response) {
       if (!response.ok) throw new Error("official snapshot " + response.status);
       return response.json();
-    }).then(function (json) { feed = json; lastLoadedAt=Date.now(); renderPanel(); resolve(); }).catch(function () { if(!feed)feed = { schemaVersion: 1, status: "unavailable" }; renderPanel(); });
+    }).then(function (json) { feed = json; rememberFeed(json); lastLoadedAt=Date.now(); renderPanel(); resolve(); }).catch(function () { if(!feed)feed = { schemaVersion: 1, status: "unavailable" }; renderPanel(); resolve(); });
   }
   function init() {
+    feed = storedFeed();
+    if (feed) { renderPanel(); resolve(); }
     loadFeed();
     setInterval(loadFeed,15*60*1000);
     document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&Date.now()-lastLoadedAt>10*60*1000)loadFeed();});

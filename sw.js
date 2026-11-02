@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v97-date-row";
+const CACHE="weatherhannun-shell-v98-static-official";
 const BASE=self.registration.scope;
 const SHELL=[
   "./hourly-explorer-core.js?v=2","./hourly-explorer.js?v=2","./mobile-experience.css?v=5",
@@ -13,8 +13,8 @@ const SHELL=[
   "./stitch-today.utilities.css","./rain-decision-core.js?v=31","./rain-decision-ui.js?v=24",
   "./rain-decision.css?v=21","./outfit-decision-core.js?v=31","./outfit-decision-ui.js?v=26",
   "./outfit-decision.css?v=24","./daily-delta-core.js?v=27","./daily-delta-ui.js?v=29",
-  "./location-compare-core.js?v=33","./location-compare-ui.js?v=34","./location-compare.css?v=30",
-  "./weather-provider-core.js?v=42","./monetization-core.js?v=32","./monetization-settings.js?v=34","./plus-personalization-core.js?v=34","./plus-personalization.js?v=35","./product-metrics-core.js?v=33","./product-metrics.js?v=33","./activity-decision-core.js?v=28","./official-data-core.js?v=40","./official-data.css?v=40","./official-data-ui.js?v=42","./data/official/latest.json",
+  "./location-compare-core.js?v=34","./location-compare-ui.js?v=34","./location-compare.css?v=30",
+  "./weather-provider-core.js?v=43","./monetization-core.js?v=32","./monetization-settings.js?v=34","./plus-personalization-core.js?v=34","./plus-personalization.js?v=35","./product-metrics-core.js?v=33","./product-metrics.js?v=33","./activity-decision-core.js?v=28","./official-data-core.js?v=40","./official-data.css?v=40","./official-data-ui.js?v=43","./data/official/latest.json",
   "./assets/stitch/today-presenter.jpg","./assets/stitch/sun.svg",
   "./assets/stitch/partly-cloudy.svg","./assets/stitch/storm.svg","./assets/stitch/snow.svg",
   "./assets/stitch/rain.svg","./assets/stitch/wind.svg","./assets/stitch/humidity.svg",
@@ -23,7 +23,7 @@ const SHELL=[
   "./data/korea-regions-202602.json","./region-search-core.js?v=16","./region-search-ui.js?v=19",
   "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=23",
   "./location-manager.css?v=24","./briefing-core.js?v=32","./briefing-highlights.js?v=20","./briefing-cloud-tts.js?v=1","./briefing-ui.js?v=22",
-  "./briefing-ui.css?v=23","./briefing-hub.css?v=3","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=49","./alert-rules-core.js?v=33",
+  "./briefing-ui.css?v=23","./briefing-hub.css?v=3","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=50","./alert-rules-core.js?v=33",
   "./forecast-insights.js?v=38","./forecast-insights.css?v=26","./manifest.webmanifest?v=18",
   "./dialog-inspired-theme.css?v=1","./icon.svg?v=18","./data-status.html","./official-rights.html"
 ].map(x=>new URL(x,BASE).href);
