@@ -94,7 +94,7 @@
       h.slice(24,36).every(function(x){return finite(x.temp);});
     var nowTemp=finite(c.temperature_2m)?asNumber(c.temperature_2m)+"°C":"기온 정보 없음";
     var start=where+"의 현재 모델 예보는 "+weatherText(c.weather_code)+" 기온은 "+nowTemp+"입니다.";
-    var short=lead?start+" "+lead.title+" — "+dateText(lead.time)+" 예보를 확인해 주세요.":riskCoverageComplete?start+" 향후 24시간의 주요 위험 기준에 해당하는 변화는 발견되지 않았습니다.":start+" 일부 시간대 자료가 없어 주요 위험 신호가 낮다고 판단하지 않습니다.";
+    var short=lead?start+" "+lead.title+" — "+dateText(lead.time)+" 예보를 확인해 주세요.":riskCoverageComplete?start+" 향후 24시간의 주요 위험 기준에 해당하는 변화는 발견되지 않았습니다.":start+" 지금 확인되는 날씨와 변화만 안내합니다.";
     var d=weather.daily||{};
     var dayLow=d.temperature_2m_min&&d.temperature_2m_min[0];
     var dayHigh=d.temperature_2m_max&&d.temperature_2m_max[0];
@@ -114,7 +114,7 @@
       else if(air.pm2_5>35)detail+=" 초미세먼지 모델 예측은 나쁨 구간입니다. 외출 전 마스크를 준비하고 환기는 짧게 하세요.";
       else if(air.pm2_5<=15)detail+=" 초미세먼지 모델 예측은 좋음 구간으로 환기와 야외활동에 무난합니다.";
     }
-    return {valid:true,headline:lead?lead.title:riskCoverageComplete?"가까운 시간의 뚜렷한 위험 신호 낮음":"주요 위험 판단 자료 부족",short:short,detail:detail,events:events.slice(0,5),evidence:evidence,freshness:fresh,source:"Open-Meteo 모델 예보",where:where,validAt:c.time||null};
+    return {valid:true,headline:lead?lead.title:riskCoverageComplete?"가까운 시간의 뚜렷한 위험 신호 낮음":"현재 날씨 요약",short:short,detail:detail,events:events.slice(0,5),evidence:evidence,freshness:fresh,source:"Open-Meteo 모델 예보",where:where,validAt:c.time||null};
   }
   return Object.freeze({analyse:analyse,hoursOf:hoursOf,dataFreshness:dataFreshness,dateText:dateText});
 });
