@@ -72,6 +72,8 @@ test("partial risk coverage never becomes a reassuring no-event briefing",()=>{
  s.weather.hourly.precipitation[5]=null;
  const x=core.analyse(s,{now:Date.UTC(2026,9,25,0,1)});
  assert.equal(x.events.length,0);
- assert.equal(x.headline,"주요 위험 판단 자료 부족");
- assert.match(x.short,/판단하지 않습니다/);
+ assert.equal(x.headline,"현재 날씨 요약");
+ assert.match(x.short,/지금 확인되는 날씨와 변화만 안내합니다/);
+ assert.doesNotMatch(x.short,/일부 시간대|자료 부족|자료 누락/);
+ assert.doesNotMatch(x.short,/위험 신호 낮음/);
 });
