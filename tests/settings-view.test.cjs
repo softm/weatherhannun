@@ -74,17 +74,26 @@ test("alert settings explain timing and preview the native notification summary"
   const insights = read("forecast-insights.js");
 
   for (const token of [
+    'id="notificationPermissionBadge"',
+    'id="notificationControlTitle"',
+    'id="nextAlertSummary"',
+    'id="openSystemNotificationSettings"',
+    'id="resumeWeatherAlerts"',
     'id="notificationPreviewTitle"',
     'id="notificationPreviewBody"',
     'id="notificationPreviewSchedule"',
     'id="morningTime"',
     'id="eveningTime"',
-    "시간별",
-    "활동 추천",
+    "오늘만 끄기",
+    "위험·생활 변화 알림",
     "알림 설정"
   ]) assert.ok(html.includes(token), `missing notification preview token ${token}`);
 
   assert.match(insights, /function renderNotificationPreview\(\)/);
+  assert.match(insights, /function renderNotificationControlSummary\(\)/);
+  assert.match(insights, /openNotificationSettings/);
+  assert.match(insights, /notificationPauseState/);
+  assert.match(insights, /resumeNotifications/);
   assert.match(insights, /12시간 비 최고/);
   assert.match(insights, /우산 챙겨요/);
   assert.match(insights, /addEventListener\("change",renderNotificationPreview\)/);
