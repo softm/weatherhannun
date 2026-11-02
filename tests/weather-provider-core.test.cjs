@@ -53,13 +53,13 @@ test("source metadata keeps forecast, valid, fetched and observed times distinct
 
 test("commercial ads and subscriptions stay blocked until every product gate passes",()=>{
  const gate=provider.releaseReadiness();
- assert.equal(gate.operatingMode,"official_first_with_legacy_fallback");
+ assert.equal(gate.operatingMode,"static_official_snapshot_with_model_forecast");
  assert.equal(gate.advertising.allowed,false);
  assert.equal(gate.subscriptions.allowed,false);
  assert.ok(gate.advertising.blockers.length>=2);
  assert.equal(gate.officialObservations.available,true);
- assert.equal(gate.officialWarnings.available,false);
- assert.equal(gate.radar.available,false);
+ assert.equal(gate.officialWarnings.available,true);
+ assert.equal(gate.radar.available,true);
  assert.equal(Object.isFrozen(provider.DEPLOYMENT_GATES),true);
 });
 

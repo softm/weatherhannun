@@ -17,5 +17,5 @@ test('간결한 화면 자산은 페이지와 오프라인 셸에 포함된다',
   const html=read('index.html'),sw=read('sw.js');
   assert.match(html,/clean-weather\.css\?v=5/);
   assert.match(sw,/clean-weather\.css\?v=5/);
-  assert.match(sw,/weatherhannun-shell-v97-date-row/);
+  assert.match(sw,/weatherhannun-shell-v98-static-official/);
 });

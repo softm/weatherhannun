@@ -25,7 +25,7 @@ test("official data is resolved from a key-free licensed snapshot and cached off
  assert.match(ui,/visibilitychange/);
  assert.match(ui,/resolved\.latestAvailable/);
  assert.match(ui,/weatherhannun:official-data/);
- for(const asset of ["official-data-core.js?v=40","official-data.css?v=40","official-data-ui.js?v=42","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
+ for(const asset of ["official-data-core.js?v=40","official-data.css?v=40","official-data-ui.js?v=43","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
 });
 
 test("today glance promotes measured PM10 and PM2.5 with source, time and action advice",()=>{
