@@ -190,6 +190,7 @@
   }
   function renderAlerts(){
     renderNotificationPreview();
+    renderNotificationControlSummary();
     const root=el("alertList");if(!root||!data)return;
     const notices=pickNotices();
     root.innerHTML=notices.length?notices.map(a=>'<div class="notice-result"><b>'+safe(a.title)+'</b><span>'+safe(a.body)+'</span></div>').join(""):'<p class="muted-text">설정한 기준에서 가까운 경보 조건이 없거나 조건을 선택하지 않았습니다.</p>';
@@ -200,6 +201,42 @@
   }
   function currentControl(id,fallback){const control=el(id);return control?control.value||fallback:fallback;}
   function checkedControl(id,fallback){const control=el(id);return control?control.checked:fallback;}
+  function nextScheduleAt(time,now){
+    if(!/^\d{2}:\d{2}$/.test(String(time||"")))return null;
+    const parts=time.split(":").map(Number),next=new Date(now);
+    next.setHours(parts[0],parts[1],0,0);
+    if(next<=now)next.setDate(next.getDate()+1);
+    return next;
+  }
+  function formatNextSchedule(value){
+    if(!(value instanceof Date)||Number.isNaN(value.getTime()))return "";
+    return value.toLocaleString("ko-KR",{timeZone:"Asia/Seoul",weekday:"short",hour:"2-digit",minute:"2-digit"});
+  }
+  function renderNotificationControlSummary(){
+    const bridge=nativeBridge(),badge=el("notificationPermissionBadge"),title=el("notificationControlTitle"),detail=el("notificationControlDetail"),next=el("nextAlertSummary"),home=el("homeAlertStatus"),resume=el("resumeWeatherAlerts");
+    if(!title||!detail||!next)return;
+    let permission="unknown",paused=false;
+    if(bridge){
+      permission=nativePermission();
+      try{paused=typeof bridge.notificationPauseState==="function"&&bridge.notificationPauseState()==="paused";}catch(_){}
+    }else permission=("Notification" in window)?Notification.permission:"unsupported";
+    if(badge){
+      badge.dataset.state=permission==="granted"?"granted":permission==="denied"?"denied":"prompt";
+      badge.textContent=permission==="granted"?"알림 허용됨":permission==="denied"?"알림 차단됨":permission==="unsupported"?"알림 미지원":"권한 필요";
+    }
+    const ruleIds=["watchRain","watchDry","watchClear","watchFrost","watchWind"],ruleCount=ruleIds.filter(id=>checkedControl(id,!!prefs[id.replace(/^watch/,"").toLowerCase()])).length;
+    const mode=document.querySelector("[name=notificationMode]:checked")?.value||prefs.notificationMode||"standard";
+    const modeName=mode==="hub"?"상시 날씨":mode==="headsup"?"헤드업":"일반 알림";
+    const schedules=[];
+    if(checkedControl("morningSummary",prefs.morning))schedules.push({name:"오늘 브리핑",at:nextScheduleAt(currentControl("morningTime",prefs.morningTime||"07:00"),new Date())});
+    if(checkedControl("eveningSummary",prefs.evening))schedules.push({name:"내일 계획",at:nextScheduleAt(currentControl("eveningTime",prefs.eveningTime||"19:00"),new Date())});
+    schedules.sort((a,b)=>a.at-b.at);
+    title.textContent=paused?"오늘 알림을 쉬고 있습니다.":permission!=="granted"?"알림 권한을 허용해 주세요.":ruleCount||schedules.length||mode==="hub"?"날씨 알림이 준비되어 있습니다.":"활성화된 알림이 없습니다.";
+    detail.textContent=modeName+" · 조건 "+ruleCount+"개"+(checkedControl("quietHours",prefs.quiet)?" · 방해금지 "+currentControl("quietStart",prefs.quietStart||"22:00")+"–"+currentControl("quietEnd",prefs.quietEnd||"06:00"):"");
+    next.textContent=paused?"내일 0시부터 자동으로 다시 시작합니다.":schedules.length?"다음 · "+schedules[0].name+" "+formatNextSchedule(schedules[0].at):ruleCount?"다음 · 선택한 조건이 새로 충족될 때":"정기 요약과 조건 알림을 선택해 주세요.";
+    if(home)home.textContent=paused?"오늘 알림 일시중지 · 내일 자동 재개":schedules.length?"다음 "+schedules[0].name+" · "+formatNextSchedule(schedules[0].at):ruleCount?ruleCount+"개 날씨 조건 감지 중":"알림 조건과 시각을 설정하세요.";
+    if(resume)resume.hidden=!paused;
+  }
   function renderNotificationPreview(){
     const title=el("notificationPreviewTitle"),temperature=el("notificationPreviewTemperature"),condition=el("notificationPreviewCondition"),body=el("notificationPreviewBody"),schedule=el("notificationPreviewSchedule"),icon=el("notificationPreviewWeatherIcon");
     if(!title||!body||!schedule)return;
@@ -235,6 +272,7 @@
     if(checkedControl("quietHours",prefs.quiet))schedules.push("방해금지 "+currentControl("quietStart",prefs.quietStart||"22:00")+"–"+currentControl("quietEnd",prefs.quietEnd||"06:00"));
     schedule.textContent=schedules.join(" · ")||"정기 요약 꺼짐 · 선택한 조건 변화만 알림";
     if(icon)icon.innerHTML=sky(code,isDay);
+    renderNotificationControlSummary();
   }
   function saveAlertPreferences(){
     prefs=rules.normalizePreferences({version:2,configured:true,notificationMode:document.querySelector("[name=notificationMode]:checked")?.value,rain:el("watchRain").checked,rainThreshold:Number(el("rainThreshold").value),dry:el("watchDry").checked,dryThreshold:Number(el("dryThreshold").value),clear:el("watchClear").checked,clearHours:Number(el("clearHours").value),frost:el("watchFrost").checked,wind:el("watchWind").checked,morning:el("morningSummary").checked,morningTime:el("morningTime").value,evening:el("eveningSummary").checked,eveningTime:el("eveningTime").value,quiet:el("quietHours").checked,quietStart:el("quietStart").value,quietEnd:el("quietEnd").value});
@@ -279,9 +317,20 @@
       control.checked=control.value===prefs.notificationMode;
       control.addEventListener("change",()=>{
         el("notificationModeNote").textContent=control.value==="headsup"?"저장 후 적용 · 헤드업 표시와 소리는 Android 알림 설정·방해금지 상태에 따라 달라집니다.":control.value==="hub"?"저장 후 적용 · 약 15분 주기로 갱신하며 Android 버전에 따라 직접 지울 수 있습니다.":"저장 후 적용 · 조건과 예약에 맞춰 일반 알림을 보냅니다.";
+        renderNotificationControlSummary();
       });
     });
     const save=el("saveWatch");if(save)save.addEventListener("click",saveAlertPreferences);
+    const systemSettings=el("openSystemNotificationSettings");if(systemSettings)systemSettings.addEventListener("click",()=>{
+      const bridge=nativeBridge();
+      if(bridge&&typeof bridge.openNotificationSettings==="function"){bridge.openNotificationSettings();return;}
+      el("allowNotify")?.click();
+    });
+    const resume=el("resumeWeatherAlerts");if(resume)resume.addEventListener("click",()=>{
+      const bridge=nativeBridge();
+      try{if(bridge&&typeof bridge.resumeNotifications==="function")bridge.resumeNotifications();}catch(_){}
+      renderNotificationControlSummary();
+    });
     const preview=el("previewNotification");if(preview)preview.addEventListener("click",()=>{
       const status=el("previewNotificationStatus"),bridge=nativeBridge();
       if(!bridge||typeof bridge.previewNotification!=="function"){

@@ -462,6 +462,127 @@ html[data-weather-theme="light"] .settings-actions button.secondary {
   }
 }
 
+.watch-settings-heading,
+.notification-control-summary,
+.notification-control-actions {
+  display: flex;
+  align-items: center;
+}
+
+.watch-settings-heading {
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.watch-settings-heading h3,
+.watch-settings-heading .watch-intro {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.notification-permission-badge {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  color: #f4d58d;
+  background: rgba(245, 184, 68, .12);
+  border: 1px solid rgba(245, 184, 68, .34);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.notification-permission-badge[data-state="granted"] {
+  color: #6ee8c4;
+  background: rgba(34, 193, 145, .12);
+  border-color: rgba(71, 221, 179, .34);
+}
+
+.notification-permission-badge[data-state="denied"] {
+  color: #ffb5a7;
+  background: rgba(231, 91, 73, .12);
+  border-color: rgba(239, 112, 95, .34);
+}
+
+.notification-control-summary {
+  gap: 13px;
+  margin: 15px 0 18px;
+  padding: 15px;
+  color: #eaf7ff;
+  background: linear-gradient(135deg, rgba(31, 111, 220, .25), rgba(34, 185, 147, .12));
+  border: 1px solid rgba(111, 177, 233, .34);
+  border-radius: 18px;
+}
+
+.notification-control-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  color: #8ed8ff;
+  background: rgba(73, 153, 245, .16);
+  border: 1px solid rgba(126, 198, 245, .30);
+  border-radius: 13px;
+  font-variation-settings: "FILL" 1;
+}
+
+.notification-control-summary > div:nth-child(2) {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.notification-control-summary small,
+.notification-control-summary strong,
+.notification-control-summary span,
+.notification-control-summary b {
+  display: block;
+}
+
+.notification-control-summary small { color: #9fb9cb; font-size: 10px; }
+.notification-control-summary strong { margin-top: 3px; font-size: 14px; }
+.notification-control-summary > div > span { margin-top: 4px; color: #b6cedd; font-size: 11px; }
+.notification-control-summary > div > b { margin-top: 7px; color: #84efcf; font-size: 11px; }
+
+.notification-control-actions {
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+.notification-control-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 38px;
+  padding: 8px 10px;
+  color: #dcefff;
+  background: rgba(19, 55, 86, .72);
+  border: 1px solid rgba(128, 184, 222, .35);
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.notification-control-actions button .material-symbols-outlined { font-size: 17px; }
+.notification-control-actions #resumeWeatherAlerts { color: #082e25; background: #77e6c4; border-color: #77e6c4; }
+
+html[data-weather-theme="light"] .notification-control-summary {
+  color: #102b45;
+  background: linear-gradient(135deg, #eaf4ff, #ecfbf6);
+  border-color: #bad8ef;
+}
+
+html[data-weather-theme="light"] .notification-control-summary small,
+html[data-weather-theme="light"] .notification-control-summary > div > span { color: #587187; }
+html[data-weather-theme="light"] .notification-control-summary > div > b { color: #08785e; }
+html[data-weather-theme="light"] .notification-control-actions button { color: #17466f; background: #fff; border-color: #bcd6e9; }
+
+@media (max-width: 710px) {
+  .watch-settings-heading { align-items: flex-start; }
+  .notification-control-summary { align-items: flex-start; flex-wrap: wrap; padding: 13px; }
+  .notification-control-actions { flex: 1 0 100%; }
+  .notification-control-actions button { flex: 1 1 0; justify-content: center; }
+}
+
 .notification-preview {
   margin: 18px 0;
   padding: 15px;
