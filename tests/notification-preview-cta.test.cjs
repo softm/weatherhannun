@@ -21,8 +21,9 @@ test("미리보기 알림 보내기는 모바일에서 눈에 띄는 주요 버�
   assert.match(html, /id="notificationPreviewCondition"/);
   assert.match(css, /\.notification-preview-main b\s*\{[^}]*font-size: 30px/);
   assert.match(logic, /temperature\.textContent=finite\(temp\)\?number\(temp\)\+"°"/);
-  assert.match(html, /settings\.css\?v=37/);
-  assert.match(html, /forecast-insights\.js\?v=37/);
-  assert.match(worker, /settings\.css\?v=37/);
-  assert.match(worker, /forecast-insights\.js\?v=37/);
+  assert.match(logic, /previewNotificationForMode\(selectedMode\)/);
+  assert.match(html, /mobile-experience\.css\?v=5/);
+  assert.match(html, /forecast-insights\.js\?v=38/);
+  assert.match(worker, /mobile-experience\.css\?v=5/);
+  assert.match(worker, /forecast-insights\.js\?v=38/);
 });
