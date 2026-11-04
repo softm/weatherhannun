@@ -58,7 +58,7 @@
       title:now ? '현재 시간대 비 가능성 높음' : timeLabel(rows[first].time, current.slice(0, 10)) + '부터 비 가능성',
       detail:(now ? '현재 시간대부터' : timeLabel(rows[first].time, current.slice(0, 10)) + '부터') + ' · ' + run.length + '시간 연속 예보' +
         (runMax !== null ? ' · 최대 ' + Math.round(runMax) + '%' : '') + (completeMm ? ' · 해당 구간 예상 ' + runMm.toFixed(1) + 'mm' : ''),
-      caution:'시간 단위 모델 예보이며 실제 비 시작·종료 시각이나 관측 사실이 아닙니다.',
+      caution:'',
       hours:rows.length, startTime:rows[first].time, consecutiveHours:run.length,maxProbability:runMax
     };
   }

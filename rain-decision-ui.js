@@ -29,7 +29,8 @@
     var label = node('p','rain-decision-label','비·우산 판단 · 앞으로 12시간');
     bits.title = node('strong','rain-decision-title','강수 모델 예보 연결 중');
     bits.detail = node('p','rain-decision-detail','예보 수치를 확인하고 있습니다.');
-    bits.caution = node('small','rain-decision-caution','시간 단위 모델 예보 · 실제 관측 아님');
+    bits.caution = node('small','rain-decision-caution','');
+    bits.caution.hidden = true;
     copy.append(label,bits.title,bits.detail,bits.caution);
     var link = node('button','rain-decision-link','시간별 확인');
     link.type='button';
@@ -57,7 +58,9 @@
     card.className = 'rain-decision-card rain-decision-card--' + (stale && answer.state === 'low' ? 'unknown' : answer.state);
     bits.title.textContent = stale && answer.state === 'low' ? '저장된 강수 예보 · 새로고침 필요' : answer.title;
     bits.detail.textContent = answer.detail;
-    bits.caution.textContent = (stale ? '오래된 저장 예보 · 새로고침 필요. ' : '') + (answer.caution || '시간 단위 모델 예보 · 실제 관측과 다를 수 있습니다.');
+    var caution = (stale ? '오래된 저장 예보 · 새로고침 필요. ' : '') + (answer.caution || '');
+    bits.caution.textContent = caution;
+    bits.caution.hidden = !caution;
   }
   function init() {
     var host = document.getElementById('view-today');
