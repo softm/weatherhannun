@@ -19,7 +19,7 @@ test('rain later: reports an approximate model hour with evidence, not minute ti
   assert.equal(v.consecutiveHours,2);
   assert.match(v.detail,/최대 80%/);
   assert.match(v.detail,/1\.3mm/);
-  assert.match(v.caution,/시간 단위 모델 예보/);
+  assert.equal(v.caution,'');
 });
 test('forecast high precipitation in current hour is not asserted as observed rain',()=>{
   const v=summarise(weather({p:{0:75,1:50}}));

@@ -125,5 +125,5 @@ test('page and offline shell load the complete outfit guide', () => {
     assert.ok(html.includes(asset), `page must load ${asset}`);
     assert.ok(worker.includes(asset), `offline shell must warm ${asset}`);
   }
-  assert.ok(html.indexOf('rain-decision-ui.js?v=24') < html.indexOf('outfit-decision-ui.js?v=26'));
+  assert.ok(html.indexOf('rain-decision-ui.js?v=25') < html.indexOf('outfit-decision-ui.js?v=26'));
 });
