@@ -5,11 +5,20 @@ const path = require("node:path");
 
 const read = file => fs.readFileSync(path.join(__dirname, "..", file), "utf8");
 
-test("first-screen forecast never waits for the Firebase weather collector", () => {
+test("first-screen forecast uses the common Firebase API and keeps the official snapshot enhancement", () => {
   const app = read("app.js");
-  assert.doesNotMatch(app, /cloudfunctions\.net\/weatherApi/);
-  assert.match(app, /buildLegacyForecastUrl/);
+  const provider = read("weather-provider-core.js");
+  assert.match(provider, /cloudfunctions\.net\/weatherApi/);
+  assert.match(app, /buildForecastUrl/);
+  assert.doesNotMatch(app, /buildLegacyForecastUrl/);
   assert.match(app, /staticOfficial:true/);
+});
+
+test("production clients contain no direct Open-Meteo endpoint", () => {
+  for (const file of ["weather-provider-core.js", "app.js", "location-compare-core.js"]) {
+    const source = read(file);
+    assert.doesNotMatch(source, /api\.open-meteo\.com|air-quality-api\.open-meteo\.com/, file);
+  }
 });
 
 test("official workflow snapshot is restored locally before network refresh", () => {

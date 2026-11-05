@@ -34,7 +34,7 @@ test("snapshot bridge preserves source and missing-value safety", () => {
   const script = read("screen-weather-settings.js");
 
   assert.match(script, /finite\(current\.temperature_2m\)/);
-  assert.match(script, /Open-Meteo 모델 예보/);
+  assert.match(script, /기상청·AirKorea 공식 자료/);
   assert.match(script, /WeatherHannunRainDecision\.summarise/);
   assert.match(script, /pm10:\s*finite\(air\.pm10\)/);
   assert.match(script, /pm25:\s*finite\(air\.pm2_5\)/);
