@@ -28,7 +28,7 @@
       icon:caution?"notifications_active":"auto_awesome",
       events:events.map(event=>({icon:text(event.icon,"•"),title:text(event.title,"예보 변화"),time:briefingApi.dateText(event.time),evidence:text(event.evidence,"수치 확인 필요")})),
       evidence:evidence.map(item=>({label:text(item.label,"예보 항목"),value:text(item.value,"정보 없음")})),
-      source:text(briefing.source,"모델 예보")+" · 관측 실황 아님"
+      source:text(briefing.source,"기상청 공식 예보")
     };
   }
   function shouldShow(state){

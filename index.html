@@ -164,7 +164,7 @@
               <div class="briefing-player" aria-label="날씨 브리핑 음성 재생"><button type="button" id="briefingPlay" class="briefing-play" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span><span>브리핑 듣기</span></button><button type="button" class="briefing-room-link" data-view="briefing"><span class="material-symbols-outlined" aria-hidden="true">podcasts</span><span>브리핑 룸</span></button><span id="briefingPlayStatus" class="briefing-play-status" aria-live="polite">10초 요약을 음성으로 들을 수 있어요.</span></div>
               <div class="briefing-mode" role="group" aria-label="브리핑 길이"><button type="button" data-brief-mode="short" class="active" aria-pressed="true">10초 요약</button><button type="button" data-brief-mode="detail" aria-pressed="false">30초 상세</button></div>
               <details class="briefing-details"><summary>해설 근거·예보 수치 확인</summary><dl id="briefingEvidence" class="briefing-evidence"></dl></details>
-              <div class="briefing-foot"><span id="briefingSource">Open-Meteo 모델 예보 · 실제 관측 아님</span><span id="briefingValidAt">예보 유효시각 확인 중</span></div>
+              <div class="briefing-foot"><span id="briefingSource">기상청 공식 예보 · AirKorea 관측</span><span id="briefingValidAt">예보 유효시각 확인 중</span></div>
             </article>
             <aside class="briefing-aside" aria-label="앞으로 변하는 날씨"><span class="section-overline">WHAT CHANGES NEXT</span><h3>앞으로 달라지는 날씨</h3><div id="briefingChangeEvents" aria-live="polite"><p class="muted-text">예보 변화를 계산하고 있습니다.</p></div><p class="briefing-caution">모델 예보 요약 · 공식 특보 별도 확인</p></aside>
           </section>
@@ -341,7 +341,7 @@
             <svg class="national-land" viewBox="0 0 360 500" aria-hidden="true"><path d="M202 65 L214 90 232 103 242 126 261 147 270 173 280 196 286 220 280 243 293 270 287 293 292 314 276 338 258 351 245 371 229 378 217 364 204 380 187 373 172 390 154 381 144 395 127 389 115 403 98 392 84 397 91 376 78 363 90 350 85 334 96 325 89 306 102 295 99 276 88 263 103 249 111 231 102 218 115 204 109 187 123 182 117 165 131 158 143 165 153 153 147 140 163 126 176 119 183 101 196 98 Z"/><path d="M52 450 Q70 433 98 438 L108 448 Q81 464 53 460Z M45 153l9 -3 5 7 -9 4Z M312 169l6 -3 4 6 -7 4Z M329 180l4 -2 2 3 -4 2Z"/><g fill="none" stroke="#d9e9ed" stroke-width="1.2"><path d="M122 183L179 193 239 144 M111 232L167 233 179 193 270 203 M100 277L163 279 167 233 225 252 280 243 M96 326L155 328 163 279 225 252 245 371 M155 328L172 390 M155 328L231 334"/></g></svg>
             <div id="nationalPins" class="national-pins"></div>
           </div>
-          <div class="national-source"><div><strong id="nationalTime" aria-live="polite">전국 예보 준비 중</strong><small>Open-Meteo 모델 예보 · 오전 09시 / 오후 15시 · KST<br>지역 대표 위치 · 지도와 도서 위치는 보기 쉽게 조정했습니다.</small></div><button id="nationalReload" type="button" aria-label="전국 날씨 새로고침">↻</button></div>
+          <div class="national-source"><div><strong id="nationalTime" aria-live="polite">전국 예보 준비 중</strong><small>기상청 공식 예보 · 한국 표준시<br>지역 대표 위치 · 지도와 도서 위치는 보기 쉽게 조정했습니다.</small></div><button id="nationalReload" type="button" aria-label="전국 날씨 새로고침">↻</button></div>
         </section>
         <section id="nationalOverview" class="national-overview stitch-card" aria-live="polite"><div class="national-overview-copy"><span class="section-overline">NATIONAL BRIEFING</span><h3 id="nationalHeadline">전국 핵심 상황을 확인하고 있습니다.</h3><p id="nationalSummary">주요 도시의 기온·강수·바람을 같은 시각으로 비교합니다.</p></div><div id="nationalMetrics" class="national-metrics"></div><div class="national-layer-tabs" aria-label="전국 지도 비교 항목"><button type="button" data-map-metric="temperature" class="active" aria-pressed="true">기온</button><button type="button" data-map-metric="rain" aria-pressed="false">강수</button><button type="button" data-map-metric="wind" aria-pressed="false">바람</button></div></section>
         <div id="mapShell" class="map-shell glass-card">
@@ -361,7 +361,7 @@
           <figure class="official-radar-preview"><img id="officialRadarImage" alt="기상청 HSR 레이더 합성 관측" hidden><figcaption id="officialRadarMeta">레이더 이용권·관측시각·범례를 확인하고 있습니다.</figcaption></figure>
         </aside>
         <div id="cityGrid" class="city-grid"></div>
-        <p class="map-attribution">지도·GPS 주변 주소 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · 날씨 데이터 © Open-Meteo.com</p>
+        <p class="map-attribution">지도·GPS 주변 주소 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · 국내 날씨 기상청 · 대기질 AirKorea · 해외 MET Norway</p>
       </section>
 
       <section id="view-compare" class="screen content-bound" aria-label="현재 지역과 목적지 날씨 비교">
@@ -523,7 +523,7 @@
   </dialog>
   <dialog id="startupWeatherBriefing" aria-labelledby="startupBriefingTitle" aria-describedby="startupBriefingSummary">
     <section class="startup-briefing-hero"><div class="startup-briefing-top"><div class="startup-briefing-brand"><span id="startupBriefingIcon" class="startup-briefing-icon material-symbols-outlined" aria-hidden="true">auto_awesome</span><span><b id="startupBriefingEyebrow">오늘의 날씨 인사이트</b><small id="startupBriefingPlace">선택 지역</small></span></div><button id="startupBriefingClose" class="startup-close" type="button" aria-label="오늘 날씨 브리핑 닫기"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div><h2 id="startupBriefingTitle">오늘 날씨 브리핑</h2><p id="startupBriefingSummary">오늘 먼저 확인할 날씨 변화를 정리하고 있습니다.</p></section>
-    <section class="startup-briefing-content"><div id="startupBriefingFacts" class="startup-facts"></div><div id="startupBriefingEvents" class="startup-events"></div><div class="startup-briefing-actions"><button id="startupBriefingDetail" class="startup-primary" type="button">오늘 날씨 자세히 보기</button><button id="startupBriefingDismissToday" class="startup-secondary" type="button">오늘은 다시 보지 않기</button></div><button id="startupBriefingLater" class="startup-briefing-later" type="button">지금은 닫기</button><p id="startupBriefingSource" class="startup-source">Open-Meteo 모델 예보 · 관측 실황 아님</p></section>
+    <section class="startup-briefing-content"><div id="startupBriefingFacts" class="startup-facts"></div><div id="startupBriefingEvents" class="startup-events"></div><div class="startup-briefing-actions"><button id="startupBriefingDetail" class="startup-primary" type="button">오늘 날씨 자세히 보기</button><button id="startupBriefingDismissToday" class="startup-secondary" type="button">오늘은 다시 보지 않기</button></div><button id="startupBriefingLater" class="startup-briefing-later" type="button">지금은 닫기</button><p id="startupBriefingSource" class="startup-source">기상청 공식 예보 · AirKorea 관측</p></section>
   </dialog>
   <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
 <script type="module" src="https://softm.github.io/shared/platform/v1/boot.mjs?site=weatherhannun&amp;v=20261029-weather-header-1"></script>

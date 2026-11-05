@@ -77,23 +77,15 @@
     else renderAll();
   }
   function forecastUrl(loc,short) {
-    return PROVIDER?PROVIDER.buildLegacyForecastUrl(loc,{short:!!short}):"";
+    return PROVIDER?PROVIDER.buildForecastUrl(loc):"";
   }
   function airUrl(loc) {
     return PROVIDER?PROVIDER.buildAirUrl(loc):"";
   }
   async function fetchUnifiedWeather(loc) {
-    if(!PROVIDER||!PROVIDER.buildLegacyForecastUrl)throw new Error("예보 공급자 설정을 불러오지 못했습니다.");
-    // The official observation, warning, radar and AirKorea snapshot is produced by
-    // GitHub Actions and merged by official-data-ui.js. Do not block first paint on
-    // the Firebase collector: fetch the model forecast immediately and let the
-    // licensed static snapshot enhance it independently.
-    var result=await Promise.allSettled([
-      getJson(PROVIDER.buildLegacyForecastUrl(loc,{short:false})),
-      getJson(PROVIDER.buildLegacyAirUrl(loc))
-    ]);
-    if(result[0].status!=="fulfilled")throw result[0].reason;
-    return {weather:result[0].value,air:result[1].status==="fulfilled"?result[1].value:null,fallback:false,staticOfficial:true};
+    if(!PROVIDER||!PROVIDER.buildForecastUrl)throw new Error("예보 공급자 설정을 불러오지 못했습니다.");
+    var canonical=await getJson(PROVIDER.buildForecastUrl(loc));
+    return {weather:PROVIDER.toLegacyForecast(canonical),air:PROVIDER.toLegacyAir(canonical),fallback:false,staticOfficial:true};
   }
   async function getJson(url) {
     if(!url)throw new Error("데이터 공급자 설정을 불러오지 못했습니다.");
@@ -149,7 +141,7 @@
       if(!loc.temporary)storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:weather._weatherhannun?.source?.provider||PROVIDER&&PROVIDER.PROVIDER.id,fallback:result.fallback});
       renderAll();
       window.dispatchEvent(new CustomEvent("weatherhannun:forecast-result",{detail:{ok:true}}));
-      if(result.fallback)toast("모델 예보를 표시합니다. 공식 관측 자료는 별도로 갱신합니다.");
+      if(result.fallback)toast("저장된 예보를 표시합니다. 공식 자료를 다시 확인합니다.");
       if(!air) toast("대기질 API 연결이 불안정합니다. 날씨는 정상 표시됩니다.");
     }catch(e) {
       if(ticket!==STATE.ticket)return;
@@ -186,16 +178,16 @@
     var nextRain=rainWindow.find(function(x){return (finite(x.rain)&&x.rain>=50)||(finite(x.mm)&&x.mm>=.3);});
     var rainWindowComplete=rainWindow.length===12&&rainWindow.every(function(x){return finite(x.rain)&&finite(x.mm);});
     var cold=STATE.hourly.slice(0,36).some(function(x){return finite(x.temp)&&x.temp<=3;});
-    var note=nextRain?whenLabel(nextRain.time)+"경 비 신호 "+(finite(nextRain.rain)&&nextRain.rain>=50?num(nextRain.rain)+"%":num(nextRain.mm,1)+"mm/h"):cold?"48시간 이내 저온 구간이 있습니다. 작물 냉해와 결빙에 유의하세요.":rainWindowComplete?"현재 모델 예보에서 12시간 내 뚜렷한 강수 신호가 낮습니다.":"강수 자료 일부가 없어 시간별 예보를 확인해 주세요.";
+    var note=nextRain?whenLabel(nextRain.time)+"경 비 신호 "+(finite(nextRain.rain)&&nextRain.rain>=50?num(nextRain.rain)+"%":num(nextRain.mm,1)+"mm/h"):cold?"48시간 이내 저온 구간이 있습니다. 작물 냉해와 결빙에 유의하세요.":rainWindowComplete?"앞으로 12시간 뚜렷한 강수 신호가 낮습니다.":"시간별 예보를 확인해 주세요.";
     text("noticeStrip",note);
     var at=STATE.fetchedAt?new Date(STATE.fetchedAt).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"}):"조회 시각 없음";
     var last=STATE.fetchedAt?Date.parse(STATE.fetchedAt):NaN;
     var old=Number.isFinite(last)&&Date.now()-last>180*60000;
-    var label=old?"오래된 저장 예보 · 재조회 필요":STATE.dataStatus==="live"?"공통 API 조회 "+at:STATE.dataStatus==="fallback"?"임시 모델 예보 "+at:STATE.dataStatus==="cached-error"?"연결 오류 · 저장 예보":"저장된 예보 "+at;
+    var label=old?"저장 예보 · 재조회 필요":STATE.dataStatus==="live"?"공식 예보 조회 "+at:STATE.dataStatus==="fallback"?"저장 예보 "+at:STATE.dataStatus==="cached-error"?"연결 오류 · 저장 예보":"저장된 예보 "+at;
     text("updatedBadge",label);
     var src=w._weatherhannun&&w._weatherhannun.source;
     text("modelTime","예보 유효시각 "+(c.time||"정보 없음").replace("T"," ")+(src&&src.issuedAt?" · 발표 "+String(src.issuedAt).replace("T"," "):""));
-    text("dataFooterStatus",(STATE.dataStatus==="live"?(src&&src.attribution||"공통 날씨 API 조회 성공"):STATE.dataStatus==="fallback"?"임시 모델 예보 · 공식 API 미연결":STATE.dataStatus==="cached-error"?"API 연결 실패 · 저장 예보":old?"오래된 저장 예보":"저장된 예보")+(STATE.air?" · 대기질 조회":" · 대기질 정보 없음"));
+    text("dataFooterStatus",(STATE.dataStatus==="live"?(src&&src.attribution||"공통 날씨 API 조회 성공"):STATE.dataStatus==="fallback"?"저장 예보":STATE.dataStatus==="cached-error"?"API 연결 실패 · 저장 예보":old?"저장 예보 · 갱신 필요":"저장된 예보")+(STATE.air?" · AirKorea 대기질":" · 대기질 정보 없음"));
     renderHourly();
     renderWeek();
     renderDecisions();

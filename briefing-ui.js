@@ -73,7 +73,7 @@
     briefing=core.analyse(payload);
     $("briefingHeadline").textContent=briefing.headline;
     paintBriefingText();
-    $("briefingSource").textContent=briefing.source+" · 관측 실황 아님";
+    $("briefingSource").textContent=briefing.source;
     const state=payload.status==="live"?"방금 API 조회":payload.status==="cached-error"?"통신 오류 · 저장된 예보":"저장된 예보";
     const out=briefing.freshness.state==="stale"?"오래된 예보 · 재조회 필요":state;
     $("briefingFreshness").textContent=out;

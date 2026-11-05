@@ -34,7 +34,7 @@
     const nightRows=m.night.length?m.night:m.next12;
     const nightLow=minKnown(nightRows.map(x=>x.temp)),nightRain=maxKnown(nightRows.map(x=>x.rain));
     const sleep=`${where} 취침 전 브리핑입니다. 밤 시간대 예상 최저 기온은 ${number(nightLow)}도, 최고 강수확률은 ${number(nightRain)}퍼센트입니다. 기상특보와 실내 환경은 별도로 확인하세요.`;
-    const shared=[{label:"자료",value:"Open-Meteo 모델 예보"},{label:"관측 여부",value:"관측 실황 아님"}];
+    const shared=[{label:"자료",value:"기상청 공식 예보"},{label:"대기질",value:"AirKorea 관측"}];
     return [
       {id:"summary",icon:"view_agenda",title:"한눈 요약",caption:"지금 가장 중요한 변화",text:base.detail,evidence:base.evidence},
       {id:"commute",icon:"directions_car",title:"출근·외출",caption:"비·바람·이동 준비",text:commute,evidence:shared},

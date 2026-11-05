@@ -194,7 +194,7 @@
       precipitation: finite(current.precipitation) ? current.precipitation : null,
       rainGuidance: String(rain && rain.title || '').trim().slice(0, 120),
       updatedAt: latestWeather.at,
-      sourceLabel: 'Open-Meteo 모델 예보'
+      sourceLabel: '기상청·AirKorea 공식 자료'
     };
     var saved = false;
     if (widgetAndroid) {

@@ -142,7 +142,7 @@
   var quick=document.getElementById('quickActivity'),lead=document.getElementById('decisionLead');
   if(cards[0]&&quick&&lead)cards[0].parentElement.replaceChildren(lead,quick);
   var noteSource=document.createElement('p');
-  noteSource.className='stitch-source-note';noteSource.textContent='Open-Meteo 모델 예보 · 관측소 실측 아님';
+  noteSource.className='stitch-source-note';noteSource.textContent='기상청 공식 예보 · AirKorea 관측';
   hero.insertAdjacentElement('afterend',noteSource);
   var weekly=createWeeklyRail();
   nodes.weekly=weekly;nodes.weekList=weekly.querySelector('.stitch-week-list');
@@ -175,7 +175,7 @@
   put(nodes.airText,pm==='정보 없음'?'대기질 예측 정보 없음':pm.includes('나쁨')||fine.includes('나쁨')?'대기질 주의 · 활동 전 확인':'대기질 모델 예측 · 실외 활동 참고');
   put(nodes.airAdvice,pm==='정보 없음'?'대기질 정보를 다시 확인해 주세요.':pm.includes('나쁨')||fine.includes('나쁨')?'외출 전 마스크를 준비하고 환기는 짧게 하세요.':'환기와 야외활동에 무난해요.');
   // Retain original colored 2-chip presentation while replacing fictional values.
-  ['[data-official-pm10]','[data-official-pm25]'].forEach((selector,i)=>{var el=nodes.air.querySelector(selector);if(el){el.textContent=(i?'초미세 ':'미세 ')+(i?fine:pm)+' '+fmt(i?air.pm2_5:air.pm10)+'㎍/㎥';el.title='Open-Meteo 대기질 모델 예측값';}});
+  ['[data-official-pm10]','[data-official-pm25]'].forEach((selector,i)=>{var el=nodes.air.querySelector(selector);if(el){el.textContent=(i?'초미세 ':'미세 ')+(i?fine:pm)+' '+fmt(i?air.pm2_5:air.pm10)+'㎍/㎥';el.title='AirKorea 관측값';}});
   put(nodes.briefName,loc+' 기상브리핑');
   // The Stitch prototype has amber/emerald emphasis, but a textContent
   // update used to erase all inline colors. Render weather-backed semantic
