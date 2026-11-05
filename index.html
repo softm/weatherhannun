@@ -384,6 +384,18 @@
         <div class="page-header settings-page-header"><div><span class="section-overline">APP SETTINGS</span><h2>날씨한눈 설정</h2></div><span class="material-symbols-outlined settings-page-symbol" aria-hidden="true">settings</span></div>
 
         <div class="settings-grid">
+          <section id="screenWeatherSettings" class="settings-card screen-weather-settings stitch-card" aria-labelledby="screenWeatherSettingsTitle">
+            <div class="settings-card-heading"><span class="settings-card-icon material-symbols-outlined" aria-hidden="true">phone_android</span><div><span class="section-overline">ANDROID · 기본 ON</span><h3 id="screenWeatherSettingsTitle">화면 켤 때 날씨</h3></div><span id="screenWeatherStatusBadge" class="screen-weather-badge">확인 중</span></div>
+            <p>잠금 해제 뒤 작은 날씨 카드를 표시합니다. 잠금화면을 교체하거나 광고를 표시하지 않으며, 기능 사용 중 Android 실행 상태 알림이 유지됩니다.</p>
+            <label class="screen-weather-toggle"><span><b>화면 켤 때 표시</b><small>기본 ON · 첫 실행에서 오버레이 권한 안내</small></span><input id="screenWeatherEnabled" type="checkbox" role="switch" aria-describedby="screenWeatherSupportNote"></label>
+            <div class="screen-weather-options">
+              <label>표시 시간<select id="screenWeatherDuration"><option value="0" selected>직접 닫기</option><option value="3">3초</option><option value="5">5초</option><option value="10">10초</option></select></label>
+              <label>재표시 제한<select id="screenWeatherCooldown"><option value="0">매번</option><option value="15">15분</option><option value="30" selected>30분</option><option value="60">60분</option></select></label>
+            </div>
+            <div class="settings-actions screen-weather-actions"><button type="button" id="screenWeatherPermission"><span class="material-symbols-outlined" aria-hidden="true">layers</span>오버레이 권한</button><button type="button" id="screenWeatherPreview" class="secondary"><span class="material-symbols-outlined" aria-hidden="true">preview</span>미리보기</button></div>
+            <p id="screenWeatherSupportNote" class="screen-weather-note" aria-live="polite">Android 앱 지원 상태를 확인하고 있습니다.</p>
+          </section>
+
           <section class="settings-card stitch-card" aria-labelledby="appearanceSettingsTitle">
             <div class="settings-card-heading"><span class="settings-card-icon material-symbols-outlined" aria-hidden="true">palette</span><div><span class="section-overline">APPEARANCE</span><h3 id="appearanceSettingsTitle">화면 모드</h3></div></div>
             <p>밝게·어둡게 · 이 기기에 저장</p>
@@ -409,17 +421,6 @@
             <p id="homeWidgetSupportNote" class="screen-weather-note" aria-live="polite">Android 앱 지원 상태를 확인하고 있습니다.</p>
           </section>
 
-          <section id="screenWeatherSettings" class="settings-card screen-weather-settings stitch-card" aria-labelledby="screenWeatherSettingsTitle">
-            <div class="settings-card-heading"><span class="settings-card-icon material-symbols-outlined" aria-hidden="true">phone_android</span><div><span class="section-overline">ANDROID · 기본 ON</span><h3 id="screenWeatherSettingsTitle">화면 켤 때 날씨</h3></div><span id="screenWeatherStatusBadge" class="screen-weather-badge">확인 중</span></div>
-            <p>잠금 해제 뒤 작은 날씨 카드를 표시합니다. 잠금화면을 교체하거나 광고를 표시하지 않으며, 기능 사용 중 Android 실행 상태 알림이 유지됩니다.</p>
-            <label class="screen-weather-toggle"><span><b>화면 켤 때 표시</b><small>기본 ON · 첫 실행에서 오버레이 권한 안내</small></span><input id="screenWeatherEnabled" type="checkbox" role="switch" aria-describedby="screenWeatherSupportNote"></label>
-            <div class="screen-weather-options">
-              <label>표시 시간<select id="screenWeatherDuration"><option value="0" selected>직접 닫기</option><option value="3">3초</option><option value="5">5초</option><option value="10">10초</option></select></label>
-              <label>재표시 제한<select id="screenWeatherCooldown"><option value="0">매번</option><option value="15">15분</option><option value="30" selected>30분</option><option value="60">60분</option></select></label>
-            </div>
-            <div class="settings-actions screen-weather-actions"><button type="button" id="screenWeatherPermission"><span class="material-symbols-outlined" aria-hidden="true">layers</span>오버레이 권한</button><button type="button" id="screenWeatherPreview" class="secondary"><span class="material-symbols-outlined" aria-hidden="true">preview</span>미리보기</button></div>
-            <p id="screenWeatherSupportNote" class="screen-weather-note" aria-live="polite">Android 앱 지원 상태를 확인하고 있습니다.</p>
-          </section>
         </div>
 
         <section id="membershipSettings" class="settings-card membership-settings stitch-card" aria-labelledby="membershipSettingsTitle">
