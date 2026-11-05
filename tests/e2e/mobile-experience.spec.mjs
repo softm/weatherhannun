@@ -53,6 +53,18 @@ test('missing metrics never become zero or a continuous chart',async({page})=>{
  await expect(page.locator('#hourlyChart')).toContainText('기온 정보 없음');await page.locator('#hourlyExtra summary').click();
  await expect(page.locator('.selected-hour-extra dd').first()).toHaveText('--');
 });
+test('custom date controls appear only below the period tabs when selected',async({page})=>{
+ await start(page);await view(page,'hourly');
+ const picker=page.locator('.hourly-date-picker');
+ await expect(picker).toBeHidden();
+ await page.locator('[data-rain-period="custom"]').click();
+ await expect(picker).toBeVisible();
+ const pickerBox=await picker.boundingBox(),tabsBox=await page.locator('.rain-tabs').boundingBox();
+ expect(pickerBox.y).toBeGreaterThanOrEqual(tabsBox.y+tabsBox.height);
+ await expect(page.getByText('세부정보',{exact:true})).toHaveCount(0);
+ await page.locator('[data-rain-period="24"]').click();
+ await expect(picker).toBeHidden();
+});
 test('visible narrator, 10/30-second modes, saved region and temporary map selection',async({page})=>{
  await start(page);await expect(page.locator('.rain-decision-card')).toBeHidden();const short=await page.locator('.stitch-caster-briefing').textContent();
  await page.locator('[data-brief-mode="detail"]').click();await expect(page.locator('[data-brief-mode="detail"]')).toHaveAttribute('aria-pressed','true');
@@ -77,7 +89,9 @@ test('address search, GPS, refresh loading, custom dates and details links',asyn
  await page.route('**/weatherApi?**',async r=>{await new Promise(resolve=>setTimeout(resolve,1000));await r.fulfill({status:503,body:'{}'});});
  await page.locator('#headerMenuButton').click();await page.locator('#refreshButton').click();await expect(page.locator('#refreshButton')).toBeDisabled();await expect(page.locator('#refreshButton')).toBeEnabled({timeout:20000});
  await view(page,'hourly');
+ await expect(page.locator('.hourly-date-picker')).toBeHidden();
  await page.locator('[data-rain-period="custom"]').click();const day=await page.locator('#rainDateStart').inputValue();await page.locator('#rainDateEnd').fill(day);await page.locator('#applyRainDates').click();
+ await expect(page.locator('.hourly-date-picker')).toBeVisible();
  expect(await page.locator('.explorer-hour').count()).toBeLessThanOrEqual(24);
  await view(page,'today');await page.locator('.stitch-week-row').nth(1).click();await expect(page.locator('[data-week-index="1"]')).toHaveAttribute('aria-expanded','true');
  await view(page,'today');await page.locator('.air-quality-glance').click();await expect(page.locator('#view-air')).toHaveClass(/active/);
