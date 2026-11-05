@@ -1,11 +1,13 @@
 import {test, expect} from '@playwright/test';
 import fs from 'node:fs';
 const forecast=JSON.parse(fs.readFileSync(new URL('../fixtures/mobile-weather.json',import.meta.url)));
+function canonical(data){
+ const rows=(block,keys)=>block.time.map((time,index)=>Object.fromEntries([['time',time],...keys.map(([to,from])=>[to,block[from]?.[index]??null])]));
+ return {contractVersion:'weatherhannun.v2',location:{name:'서울',lat:37.5665,lon:126.978,timezone:'Asia/Seoul'},current:{time:data.current.time,temperature:data.current.temperature_2m,humidity:data.current.relative_humidity_2m,apparentTemperature:data.current.apparent_temperature,isDay:data.current.is_day,precipitation:data.current.precipitation,conditionCode:data.current.weather_code,windSpeed:data.current.wind_speed_10m,windDirection:data.current.wind_direction_10m},hourly:rows(data.hourly,[['temperature','temperature_2m'],['precipitationProbability','precipitation_probability'],['precipitation','precipitation'],['conditionCode','weather_code'],['windSpeed','wind_speed_10m'],['windGust','wind_gusts_10m'],['humidity','relative_humidity_2m'],['uvIndex','uv_index'],['isDay','is_day']]),daily:rows(data.daily,[['conditionCode','weather_code'],['temperatureMax','temperature_2m_max'],['temperatureMin','temperature_2m_min'],['precipitation','precipitation_sum'],['precipitationProbability','precipitation_probability_max'],['sunrise','sunrise'],['sunset','sunset'],['uvIndexMax','uv_index_max']]).map(row=>({...row,date:row.time.slice(0,10)})),airQuality:{measuredAt:data.current.time,pm10:28,pm25:16,khai:54},source:{provider:'kma',attribution:'기상청'}};
+}
 async function start(page,missing=false,wet=false){
  await page.clock.setFixedTime(new Date(forecast.current.time+'+09:00'));
- await page.route('**/weatherApi?**',r=>r.fulfill({status:503,body:'{}'}));
- await page.route('https://api.open-meteo.com/**',r=>{const data=structuredClone(forecast);if(wet)data.hourly.precipitation=data.hourly.time.map(()=>1);if(missing)for(const key of ['temperature_2m','precipitation_probability','precipitation','wind_speed_10m','wind_gusts_10m'])data.hourly[key]=data.hourly.time.map(()=>null);return r.fulfill({json:data});});
- await page.route('https://air-quality-api.open-meteo.com/**',r=>r.fulfill({status:503,body:'{}'}));
+ await page.route('**/weatherApi?**',r=>{const data=structuredClone(forecast);if(wet)data.hourly.precipitation=data.hourly.time.map(()=>1);if(missing)for(const key of ['temperature_2m','precipitation_probability','precipitation','wind_speed_10m','wind_gusts_10m'])data.hourly[key]=data.hourly.time.map(()=>null);return r.fulfill({json:canonical(data)});});
  await page.addInitScript(()=>{localStorage.setItem('weatherhannun_geo_intro_v1','done');sessionStorage.setItem('weatherhannun:startup-briefing:session:v1','shown');localStorage.setItem('weatherhannun_location',JSON.stringify({name:'서울',lat:37.5665,lon:126.978,source:'manual'}));});
  await page.goto('/');
  await expect(page.locator('#stitch-live-dashboard [data-official-temp]')).not.toHaveText('--');
