@@ -300,7 +300,7 @@
     document.querySelectorAll("[data-rain-period]").forEach(button=>button.addEventListener("click",()=>{
       period=button.dataset.rainPeriod;
       const picker=document.querySelector(".hourly-date-picker");
-      if(picker)picker.open=period==="custom";
+      if(picker)picker.hidden=period!=="custom";
       updateButtons();rainSummary();
     }));
     const start=el("rainDateStart"),end=el("rainDateEnd"),apply=el("applyRainDates");

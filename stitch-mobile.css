@@ -507,9 +507,7 @@ html[data-weather-theme="light"] .map-shell {
   padding-top: 10px;
 }
 
-.hourly-date-picker:not([open]) .rain-dates {
-  display: none;
-}
+.hourly-date-picker[hidden] { display: none !important; }
 
 .hourly-date-picker .rain-dates {
   display: grid;

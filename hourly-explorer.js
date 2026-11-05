@@ -46,7 +46,7 @@
   $('hourlyAll').addEventListener('toggle',table);
   $('hourlyAllRows').addEventListener('click',e=>{const b=e.target.closest('[data-table-hour]');if(b){select(Number(b.dataset.tableHour),true);$('hourlyDetailRows').scrollIntoView({block:'center',behavior:'smooth'});}});
   $('hourlyNow').addEventListener('click',()=>select(0,true));
-  document.querySelectorAll('[data-rain-period]').forEach(b=>b.addEventListener('click',()=>{period=b.dataset.rainPeriod;render(true);}));
+  document.querySelectorAll('[data-rain-period]').forEach(b=>b.addEventListener('click',()=>{period=b.dataset.rainPeriod;const picker=document.querySelector('.hourly-date-picker');if(picker)picker.hidden=period!=='custom';render(true);}));
   $('applyRainDates').addEventListener('click',()=>{if($('rainDateStart').value&&$('rainDateStart').value<=$('rainDateEnd').value){period='custom';render(true);}});
  }
  window.addEventListener('weatherhannun:data',e=>{latest=e.detail;const key=latest.loc?.lat+','+latest.loc?.lon,stamp=key+'|'+latest.at+'|'+latest.weather?.current?.time;if(stamp===renderKey)return;const reset=locationKey!==key;locationKey=key;renderKey=stamp;all=C.rows(latest.weather,new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()).replace(' ','T'));render(reset);});

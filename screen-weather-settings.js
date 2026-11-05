@@ -175,6 +175,7 @@
     var location = latestWeather && latestWeather.loc;
     if ((!android && !widgetAndroid) || !current || !location || !finite(current.temperature_2m) || !latestWeather.at) return false;
     var rain = window.WeatherHannunRainDecision && window.WeatherHannunRainDecision.summarise(latestWeather.weather);
+    var air = latestWeather?.air?.current || {};
     var payload = {
       locationName: String(location.name || '선택 지역').slice(0, 75),
       latitude: finite(Number(location.lat)) ? Number(location.lat) : null,
@@ -188,6 +189,9 @@
       low: finite(daily?.temperature_2m_min?.[0]) ? daily.temperature_2m_min[0] : null,
       humidity: finite(current.relative_humidity_2m) ? current.relative_humidity_2m : null,
       windSpeed: finite(current.wind_speed_10m) ? current.wind_speed_10m : null,
+      pm10: finite(air.pm10) ? air.pm10 : null,
+      pm25: finite(air.pm2_5) ? air.pm2_5 : null,
+      precipitation: finite(current.precipitation) ? current.precipitation : null,
       rainGuidance: String(rain && rain.title || '').trim().slice(0, 120),
       updatedAt: latestWeather.at,
       sourceLabel: 'Open-Meteo 모델 예보'
