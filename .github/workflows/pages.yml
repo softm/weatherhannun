@@ -45,11 +45,26 @@ jobs:
       - name: Configure Pages
         if: github.event_name != 'schedule' || steps.official.outputs.configured == 'true'
         uses: actions/configure-pages@v5
+      - name: Build public Pages artifact
+        if: github.event_name != 'schedule' || steps.official.outputs.configured == 'true'
+        run: |
+          rm -rf .pages-public
+          mkdir .pages-public
+          find . -maxdepth 1 -type f \( \
+            -name '*.html' -o -name '*.css' -o -name '*.js' -o \
+            -name '*.svg' -o -name '*.webmanifest' -o -name '*.txt' \
+          \) -exec cp {} .pages-public/ \;
+          cp -R assets data .pages-public/
+          test ! -e .pages-public/services
+          test ! -e .pages-public/scripts
+          test ! -e .pages-public/tests
+          test ! -e .pages-public/.github
+          test ! -e .pages-public/firebase.json
       - name: Upload static site
         if: github.event_name != 'schedule' || steps.official.outputs.configured == 'true'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: '.'
+          path: '.pages-public'
       - name: Deploy
         if: github.event_name != 'schedule' || steps.official.outputs.configured == 'true'
         id: deployment
