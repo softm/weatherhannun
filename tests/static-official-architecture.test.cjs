@@ -36,3 +36,13 @@ test("scheduled official resources overwrite stable latest files", () => {
   assert.match(collector, /writeFile\(radarFile/);
   assert.doesNotMatch(collector, /appendFile/);
 });
+
+test("GitHub Pages publishes only the explicit public artifact", () => {
+  const workflow = read(".github/workflows/pages.yml");
+  assert.match(workflow, /Build public Pages artifact/);
+  assert.match(workflow, /path: '\.pages-public'/);
+  assert.doesNotMatch(workflow, /path: '\.'/);
+  for (const privatePath of ["services", "scripts", "tests", ".github", "firebase.json"]) {
+    assert.match(workflow, new RegExp(`test ! -e \\.pages-public/${privatePath.replace(".", "\\.")}`));
+  }
+});
