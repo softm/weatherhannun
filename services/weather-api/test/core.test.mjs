@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {coordinates, dfsGrid, isSouthKorea, kmaBase, kmaConditionCode, parseKmaPrecipitation, validateContract} from "../core.mjs";
-import {collectAirKorea, normalizeMetNorway} from "../providers.mjs";
+import {collectAirKorea, normalizeMetNorway, normalizeServiceKey} from "../providers.mjs";
+import {locationDocumentId} from "../storage.mjs";
 
 test("coordinates rejects malformed values", () => { assert.throws(() => coordinates({lat: "x", lon: 127}), /invalid_coordinates/); assert.deepEqual(coordinates({lat: "37.5", lon: "127"}), {lat: 37.5, lon: 127}); });
 test("South Korea classification is conservative", () => { assert.equal(isSouthKorea({lat: 37.5665, lon: 126.978}), true); assert.equal(isSouthKorea({lat: 33.4996, lon: 126.5312}), true); assert.equal(isSouthKorea({lat: 35.6812, lon: 139.7671}), false); });
@@ -21,4 +22,14 @@ test("AirKorea resolves the nearest station from coordinates before reading meas
   const air = await collectAirKorea({lat: 37.5665, lon: 126.978}, "test-key", {fetchImpl, attempts: 1});
   assert.equal(air.stationName, "중구"); assert.equal(air.distanceKm, 1.2); assert.equal(air.pm10, 22); assert.equal(air.pm25, 11);
   assert.equal(requested.length, 2); assert.ok(Number.isFinite(Number(requested[0].searchParams.get("tmX")))); assert.ok(Number.isFinite(Number(requested[0].searchParams.get("tmY"))));
+});
+test("encoded public-data keys are decoded exactly once", () => {
+  assert.equal(normalizeServiceKey("abc%2Bdef%3D"), "abc+def=");
+  assert.equal(normalizeServiceKey("abc+def="), "abc+def=");
+  assert.equal(normalizeServiceKey("bad%ZZ"), "bad%ZZ");
+});
+test("domestic cache identity follows the KMA grid while overseas keeps rounded coordinates", () => {
+  assert.equal(locationDocumentId({lat: 37.5665, lon: 126.978}), "kr_60_127");
+  assert.equal(locationDocumentId({lat: 37.5659, lon: 126.9775}), "kr_60_127");
+  assert.match(locationDocumentId({lat: 51.5074, lon: -0.1278}), /^global_/);
 });
