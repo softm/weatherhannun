@@ -14,29 +14,45 @@ const kmaApiKey = defineSecret("KMA_API_KEY");
 const airKoreaApiKey = defineSecret("AIRKOREA_API_KEY");
 const wwisApproved = defineString("WWIS_COMMERCIAL_APPROVED", {default: "false"});
 
-const json = (response, status, body) => response.status(status).set("Cache-Control", "no-store").json(body);
+const json = (response, status, body, cacheControl = "no-store") => response.status(status).set("Cache-Control", cacheControl).json(body);
 const locationFromQuery = query => ({...coordinates(query), name: String(query.name || "선택 지역").slice(0, 80), stationName: String(query.stationName || "").slice(0, 80)});
 const configured = value => Boolean(value && value !== "UNCONFIGURED");
 
-async function collect(location, {kmaKey = "", airKey = ""} = {}) {
+async function collect(location, {kmaKey = "", airKey = "", requestMode = false} = {}) {
   const korean = isSouthKorea(location);
-  const payload = korean ? await collectKma(location, kmaKey) : await collectMetNorway(location);
+  const requestOptions = requestMode ? {attempts: 1, timeoutMs: 7_000} : {};
+  const payload = korean ? await collectKma(location, kmaKey, requestOptions) : await collectMetNorway(location, requestOptions);
   if (korean && configured(airKey)) {
-    try { payload.airQuality = await collectAirKorea(location, airKey); }
+    try { payload.airQuality = await collectAirKorea(location, airKey, requestOptions); }
     catch (error) { logger.warn("AirKorea partial failure", {code: error.message, location: locationDocumentId(location)}); }
   }
   const result = validateContract(payload); if (!result.valid) throw new Error(`invalid_contract:${result.missing.join(",")}`); return payload;
+}
+
+async function registerLocation(location, cacheMetadata = {}) {
+  const now = Date.now();
+  if (now - Number(cacheMetadata.lastRegisteredAt || 0) < 30 * 60_000) return;
+  const id = locationDocumentId(location), country = isSouthKorea(location) ? "KR" : "GLOBAL";
+  await Promise.all([
+    db.collection("weather_locations").doc(id).set({...location, id, country, lastActiveAt: now, updatedAt: FieldValue.serverTimestamp()}, {merge: true}),
+    db.collection("weather_api_cache").doc(id).set({lastRegisteredAt: now}, {merge: true}),
+  ]);
 }
 
 async function serveWeather(request, response) {
   if (request.method !== "GET") return json(response, 405, {error: "method_not_allowed"});
   let location; try { location = locationFromQuery(request.query); } catch { return json(response, 400, {error: "invalid_coordinates"}); }
   const korean = isSouthKorea(location); const cache = await readFreshOrLastGood(db, location, korean ? 10 * 60_000 : 30 * 60_000);
+  await registerLocation(location, cache.metadata).catch(error => logger.warn("Location registration failed", {code: error.message}));
   const needsAirQualityRefresh = korean && configured(airKoreaApiKey.value()) && !cache.fresh?.airQuality;
-  if (cache.fresh && !needsAirQualityRefresh) return json(response, 200, {...cache.fresh, cache: {hit: true, fallback: false}});
+  const publicCache = "public, max-age=300, s-maxage=600, stale-while-revalidate=1800";
+  if (cache.fresh && !needsAirQualityRefresh) return json(response, 200, {...cache.fresh, cache: {hit: true, fallback: false}}, publicCache);
+  // Never hold an app launch or notification job while an upstream provider is slow.
+  // The active-grid scheduler refreshes this entry; clients retain their local last-good value.
+  if (cache.lastGood) return json(response, 200, {...cache.lastGood, stale: true, cache: {hit: true, fallback: true, refreshQueued: true}}, publicCache);
   try {
-    const payload = await collect(location, {kmaKey: kmaApiKey.value(), airKey: airKoreaApiKey.value()}); const write = await writeIfChanged(cache.ref, payload, {country: korean ? "KR" : "GLOBAL"});
-    if (write.changed) await saveForecastHistory(db, location, payload); return json(response, 200, {...payload, cache: {hit: false, changed: write.changed}});
+    const payload = await collect(location, {kmaKey: kmaApiKey.value(), airKey: airKoreaApiKey.value(), requestMode: true}); const write = await writeIfChanged(cache.ref, payload, {country: korean ? "KR" : "GLOBAL"});
+    if (write.changed) await saveForecastHistory(db, location, payload); return json(response, 200, {...payload, cache: {hit: false, changed: write.changed}}, publicCache);
   } catch (error) {
     logger.error("Weather collection failed", {code: error.message, location: locationDocumentId(location), korean});
     if (cache.lastGood) return json(response, 200, {...cache.lastGood, stale: true, cache: {hit: true, fallback: true}, error: {code: "provider_unavailable"}});

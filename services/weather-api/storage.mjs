@@ -1,7 +1,14 @@
 import {FieldValue} from "firebase-admin/firestore";
-import {hashPayload, roundedLocationKey} from "./core.mjs";
+import {dfsGrid, hashPayload, isSouthKorea, roundedLocationKey} from "./core.mjs";
 
-export const locationDocumentId = location => location.id || roundedLocationKey(location);
+export const locationDocumentId = location => {
+  if (location.id) return location.id;
+  if (isSouthKorea(location)) {
+    const {nx, ny} = dfsGrid(location.lat, location.lon);
+    return `kr_${nx}_${ny}`;
+  }
+  return `global_${roundedLocationKey(location)}`;
+};
 export async function readFreshOrLastGood(db, location, maxAgeMs) {
   const ref = db.collection("weather_api_cache").doc(locationDocumentId(location)); const snapshot = await ref.get(); const data = snapshot.data();
   if (!data?.payload) return {ref, fresh: null, lastGood: null}; const age = Date.now() - Number(data.cachedAt || 0);
