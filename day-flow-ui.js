@@ -86,8 +86,11 @@
     var segments=Array.from(line.querySelectorAll('.day-flow-segment')),scrubbing=false,activeIndex=-1;
     function positionPopover(segment){
       var lineRect=line.getBoundingClientRect(),keyRect=segment.getBoundingClientRect(),popRect=popover.getBoundingClientRect();
-      var center=keyRect.left-lineRect.left+keyRect.width/2,half=popRect.width/2+4;
-      popover.style.left=Math.max(half,Math.min(lineRect.width-half,center))+'px';
+      var center=keyRect.left-lineRect.left+keyRect.width/2;
+      var left=Math.max(4,Math.min(lineRect.width-popRect.width-4,center-popRect.width/2));
+      var arrow=Math.max(12,Math.min(popRect.width-12,center-left));
+      popover.style.left=left+'px';
+      popover.style.setProperty('--day-popover-arrow',arrow+'px');
     }
     function select(index,focus){
       index=Math.max(0,Math.min(segments.length-1,index));
