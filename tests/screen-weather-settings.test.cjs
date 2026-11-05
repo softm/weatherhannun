@@ -36,6 +36,9 @@ test("snapshot bridge preserves source and missing-value safety", () => {
   assert.match(script, /finite\(current\.temperature_2m\)/);
   assert.match(script, /Open-Meteo 모델 예보/);
   assert.match(script, /WeatherHannunRainDecision\.summarise/);
+  assert.match(script, /pm10:\s*finite\(air\.pm10\)/);
+  assert.match(script, /pm25:\s*finite\(air\.pm2_5\)/);
+  assert.match(script, /precipitation:\s*finite\(current\.precipitation\)/);
   assert.match(script, /updateWidgetSnapshot/);
   assert.match(script, /latitude:/);
   assert.match(script, /longitude:/);
@@ -63,7 +66,7 @@ test("Android home widget receives current location and all three size fields", 
 test("offline shell contains both settings assets", () => {
   const html = read("index.html");
   const worker = read("sw.js");
-  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=39"]) {
+  for (const asset of ["screen-weather-settings.css?v=34", "screen-weather-settings.js?v=41"]) {
     assert.ok(html.includes(asset));
     assert.ok(worker.includes(asset));
   }

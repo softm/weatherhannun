@@ -23,7 +23,7 @@ test("미리보기 알림 보내기는 모바일에서 눈에 띄는 주요 버�
   assert.match(logic, /temperature\.textContent=finite\(temp\)\?number\(temp\)\+"°"/);
   assert.match(logic, /previewNotificationForMode\(selectedMode\)/);
   assert.match(html, /mobile-experience\.css\?v=5/);
-  assert.match(html, /forecast-insights\.js\?v=39/);
+  assert.match(html, /forecast-insights\.js\?v=40/);
   assert.match(worker, /mobile-experience\.css\?v=5/);
-  assert.match(worker, /forecast-insights\.js\?v=39/);
+  assert.match(worker, /forecast-insights\.js\?v=40/);
 });
