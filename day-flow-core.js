@@ -38,7 +38,7 @@
     return parts.join(' · ');
   }
   function build(payload){
-    var weather=payload&&payload.weather,reference=validTime(payload&&payload.now)||new Date(),items=rows(weather,24,reference),c=weather&&weather.current||{},change=nextChange(items),labels={rain:'비 가능성',wind:'강한 바람',cold:'추위',heat:'더위',good:'활동하기 무난한 날씨'};
+    var weather=payload&&payload.weather,referenceInput=payload&&payload.now,reference=validTime(referenceInput)||new Date(),items=rows(weather,24,referenceInput||reference),c=weather&&weather.current||{},change=nextChange(items),labels={rain:'비 가능성',wind:'강한 바람',cold:'추위',heat:'더위',good:'활동하기 무난한 날씨'};
     var now=finite(c.temperature_2m)?number(c.temperature_2m,1)+'℃'+(finite(c.apparent_temperature)?' · 체감 '+number(c.apparent_temperature,1)+'℃':''):'현재 기온 자료 없음';
     var changeText=change?hour(change.row.time)+' '+labels[change.to]+' 전환':items.length>=12?'12시간 큰 변화 없음':'다음 변화 판단 불가';
     var sample=items.slice(0,12),complete=sample.length===12&&sample.every(function(r){return finite(r.temp)&&finite(r.rain)&&finite(r.mm)&&finite(r.wind);});
