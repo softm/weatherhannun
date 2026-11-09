@@ -5,12 +5,19 @@
   function number(v,d){return finite(v)?v.toFixed(d||0).replace(/\.0+$/,''):'--';}
   function cell(a,i){return Array.isArray(a)?a[i]:undefined;}
   function hour(t){return typeof t==='string'&&t.includes('T')?t.slice(11,13)+'시':'시간 미상';}
-  function validTime(value){var date=value instanceof Date?value:new Date(value);return Number.isNaN(date.getTime())?null:date;}
+  function validTime(value,zoneSource){
+    var normalized=value;
+    if(typeof value==='string'&&!/(?:Z|[+-]\d{2}:\d{2})$/i.test(value)&&typeof zoneSource==='string'){
+      var zone=zoneSource.match(/(Z|[+-]\d{2}:\d{2})$/i);
+      if(zone)normalized=value+zone[1];
+    }
+    var date=normalized instanceof Date?normalized:new Date(normalized);return Number.isNaN(date.getTime())?null:date;
+  }
   function rows(weather,limit,referenceTime){
     var h=weather&&weather.hourly||{},times=h.time||[],reference=validTime(referenceTime)||new Date(),hourStart=new Date(reference.getTime());
     hourStart.setMinutes(0,0,0);
-    var start=times.findIndex(function(t){var date=validTime(t);return date&&date.getTime()>=hourStart.getTime();});
-    if(start<0){var last=validTime(times[times.length-1]);if(last&&last.getTime()<hourStart.getTime())return [];start=0;}
+    var start=times.findIndex(function(t){var date=validTime(t,referenceTime);return date&&date.getTime()>=hourStart.getTime();});
+    if(start<0){var last=validTime(times[times.length-1],referenceTime);if(last&&last.getTime()<hourStart.getTime())return [];start=0;}
     return times.slice(start,start+(limit||24)).map(function(time,offset){var i=start+offset;return {time:time,temp:cell(h.temperature_2m,i),rain:cell(h.precipitation_probability,i),mm:cell(h.precipitation,i),wind:cell(h.wind_speed_10m,i),gust:cell(h.wind_gusts_10m,i),code:cell(h.weather_code,i),isDay:cell(h.is_day,i)};});
   }
   function kind(row){
