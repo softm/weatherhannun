@@ -7,9 +7,15 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
   function text(value,fallback){return typeof value==="string"&&value.trim()?value.trim():fallback;}
+  function localDayKey(value){
+    const date=value instanceof Date?value:new Date(value);
+    if(Number.isNaN(date.getTime()))return null;
+    const pad=number=>String(number).padStart(2,"0");
+    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+  }
   function dayKey(briefing){
     const value=briefing&&briefing.validAt;
-    return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}/.test(value)?value.slice(0,10):null;
+    return value?localDayKey(value):null;
   }
   function build(payload,briefingApi){
     const briefing=briefingApi&&typeof briefingApi.analyse==="function"?briefingApi.analyse(payload):null;
@@ -32,7 +38,7 @@
     };
   }
   function shouldShow(state){
-    return Boolean(state&&state.valid&&state.dayKey&&!state.sessionSeen&&state.dismissedDay!==state.dayKey&&!state.blockingDialogOpen);
+    return Boolean(state&&state.valid&&state.actionable&&state.dayKey&&state.todayKey&&state.dayKey===state.todayKey&&state.shownDay!==state.todayKey&&state.dismissedDay!==state.todayKey&&!state.blockingDialogOpen);
   }
-  return Object.freeze({build,shouldShow,dayKey});
+  return Object.freeze({build,shouldShow,dayKey,localDayKey});
 });

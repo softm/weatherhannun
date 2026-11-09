@@ -4,7 +4,7 @@
   const briefingApi=window.WeatherHannunBriefingCore;
   const dialog=document.getElementById("startupWeatherBriefing");
   if(!core||!briefingApi||!dialog)return;
-  const SESSION="weatherhannun:startup-briefing:session:v1";
+  const SHOWN_DAY="weatherhannun:startup-briefing:shown-day:v2";
   const DISMISSED="weatherhannun:startup-briefing:dismissed-day:v1";
   let latest=null,timer=0,attempts=0;
   const $=id=>document.getElementById(id);
@@ -26,14 +26,14 @@
   function tryOpen(){
     clearTimeout(timer);
     const model=latest&&core.build(latest,briefingApi);
-    const allowed=core.shouldShow({valid:model?.valid,dayKey:model?.dayKey,sessionSeen:get(sessionStorage,SESSION)==="shown",dismissedDay:get(localStorage,DISMISSED),blockingDialogOpen:blockingDialogOpen()});
-    if(allowed&&dialog.showModal){render(model);dialog.showModal();set(sessionStorage,SESSION,"shown");attempts=0;return;}
+    const todayKey=core.localDayKey(new Date());
+    const allowed=core.shouldShow({valid:model?.valid,actionable:model?.tone==="caution",dayKey:model?.dayKey,todayKey,shownDay:get(localStorage,SHOWN_DAY),dismissedDay:get(localStorage,DISMISSED),blockingDialogOpen:blockingDialogOpen()});
+    if(allowed&&dialog.showModal){render(model);dialog.showModal();set(localStorage,SHOWN_DAY,todayKey);attempts=0;return;}
     if(model?.valid&&blockingDialogOpen()&&attempts++<30)timer=setTimeout(tryOpen,500);
   }
   function close(){if(dialog.open)dialog.close();}
   $("startupBriefingClose")?.addEventListener("click",close);
   $("startupBriefingLater")?.addEventListener("click",close);
-  $("startupBriefingDismissToday")?.addEventListener("click",()=>{const model=latest&&core.build(latest,briefingApi);if(model?.dayKey)set(localStorage,DISMISSED,model.dayKey);close();});
   $("startupBriefingDetail")?.addEventListener("click",()=>{close();document.querySelector('[data-view="today"]')?.click();setTimeout(()=>document.querySelector(".briefing-board")?.scrollIntoView({behavior:"smooth",block:"start"}),100);});
   window.addEventListener("weatherhannun:data",event=>{latest=event.detail;attempts=0;timer=setTimeout(tryOpen,450);});
 })();
