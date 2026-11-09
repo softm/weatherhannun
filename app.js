@@ -82,15 +82,21 @@
   function airUrl(loc) {
     return PROVIDER?PROVIDER.buildAirUrl(loc):"";
   }
-  async function fetchUnifiedWeather(loc) {
+  async function fetchUnifiedWeather(loc, timeoutMs) {
     if(!PROVIDER||!PROVIDER.buildForecastUrl)throw new Error("예보 공급자 설정을 불러오지 못했습니다.");
-    var canonical=await getJson(PROVIDER.buildForecastUrl(loc));
-    return {weather:PROVIDER.toLegacyForecast(canonical),air:PROVIDER.toLegacyAir(canonical),fallback:false,staticOfficial:true};
+    var canonical=await getJson(PROVIDER.buildForecastUrl(loc),timeoutMs);
+    return {
+      weather:PROVIDER.toLegacyForecast(canonical),
+      air:PROVIDER.toLegacyAir(canonical),
+      fallback:canonical.stale===true||canonical.cache?.fallback===true,
+      fetchedAt:canonical.source?.fetchedAt||null,
+      staticOfficial:true
+    };
   }
-  async function getJson(url) {
+  async function getJson(url, timeoutMs) {
     if(!url)throw new Error("데이터 공급자 설정을 불러오지 못했습니다.");
     var ctrl=new AbortController();
-    var timeout=setTimeout(function(){ctrl.abort();},13000);
+    var timeout=setTimeout(function(){ctrl.abort();},Math.max(3000,Number(timeoutMs)||13000));
     try {
       var res=await fetch(url,{signal:ctrl.signal});
       if (!res.ok) throw new Error("서버 응답 "+res.status);
@@ -98,6 +104,12 @@
       if(data.error) throw new Error(data.reason||"제공 데이터 오류");
       return data;
     } finally { clearTimeout(timeout); }
+  }
+  function weatherLoadMessage(error, hasSavedWeather) {
+    var message=String(error&&error.message||"");
+    if(hasSavedWeather) return "최신 예보 연결이 지연되고 있어 저장된 예보를 표시합니다.";
+    if(/서버 응답 5\d\d|AbortError|aborted|Failed to fetch/i.test(message)) return "최신 예보 연결이 지연되고 있습니다. 잠시 후 다시 시도해 주세요.";
+    return "날씨 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
   }
   function makeHours(w) {
     if (!w || !w.hourly || !Array.isArray(w.hourly.time)) return [];
@@ -110,8 +122,21 @@
       return {time:time,temp:h.temperature_2m?.[k],rain:h.precipitation_probability?.[k],mm:h.precipitation?.[k],code:h.weather_code?.[k],wind:h.wind_speed_10m?.[k],gust:h.wind_gusts_10m?.[k],humidity:h.relative_humidity_2m?.[k],uv:h.uv_index?.[k],isDay:h.is_day?.[k]};
     });
   }
+  function locationDistanceKm(a,b) {
+    if(!a||!b)return Infinity;
+    var lat1=Number(a.lat),lon1=Number(a.lon),lat2=Number(b.lat),lon2=Number(b.lon);
+    if(![lat1,lon1,lat2,lon2].every(Number.isFinite))return Infinity;
+    var rad=Math.PI/180,dLat=(lat2-lat1)*rad,dLon=(lon2-lon1)*rad;
+    var h=Math.sin(dLat/2)**2+Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLon/2)**2;
+    return 6371*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+  }
+  function usableWeatherCache(cache,loc) {
+    if(!cache||!cache.loc||!PROVIDER||!PROVIDER.inspectForecastPayload(cache.weather).valid)return false;
+    if(cache.loc.lat===loc.lat&&cache.loc.lon===loc.lon)return true;
+    // GPS 좌표는 측정할 때마다 조금씩 달라질 수 있다. 같은 GPS 지역의 근거리 캐시는 즉시 재사용한다.
+    return cache.loc.source==="gps"&&loc.source==="gps"&&locationDistanceKm(cache.loc,loc)<=5;
+  }
   async function loadWeather(force) {
-    var progressId=window.WeatherActionProgress?.begin("날씨 정보를 불러오는 중…");
     var ticket=++STATE.ticket;
     STATE.loading=true;
     $("updatedBadge").textContent="예보 갱신 중…";
@@ -119,13 +144,16 @@
     $("refreshButton").disabled=true;
     var loc=STATE.loc;
     var cache=storeGet("weatherhannun_last");
-    var cachedWeatherValid=cache&&PROVIDER&&PROVIDER.inspectForecastPayload(cache.weather).valid;
+    var cachedWeatherValid=usableWeatherCache(cache,loc);
     var cachedAirValid=cache&&cache.air&&PROVIDER&&PROVIDER.inspectAirPayload(cache.air).valid;
-    if (!force && cache && cache.loc && cache.loc.lat===loc.lat && cache.loc.lon===loc.lon && cachedWeatherValid) {
+    var restoredCache=!force&&cachedWeatherValid;
+    if (restoredCache) {
       STATE.weather=cache.weather;STATE.air=cachedAirValid?cache.air:null;STATE.fetchedAt=cache.at||null;STATE.hourly=makeHours(STATE.weather);STATE.dataStatus="cached";renderAll();
     }
+    // 캐시 복원 시 첫 화면은 이미 준비됐다. 서버 갱신은 상단 전체 진행 UI 없이 뒤에서 처리한다.
+    var progressId=restoredCache?null:window.WeatherActionProgress?.begin("날씨 정보를 불러오는 중…");
     try {
-      var result=await fetchUnifiedWeather(loc);
+      var result=await fetchUnifiedWeather(loc,restoredCache?6500:12000);
       if(ticket!==STATE.ticket)return;
       var weather=result.weather;
       var airCandidate=result.air;
@@ -135,7 +163,9 @@
       STATE.weather=weather;
       STATE.air=air;
       STATE.dataStatus=result.fallback?"fallback":"live";
-      STATE.fetchedAt=new Date().toISOString();
+      // 조회 버튼을 누른 시각이 아니라 공급자가 실제로 수집한 시각을 보존한다.
+      // 그래야 오래된 서버 캐시를 방금 조회한 최신 예보처럼 표시하지 않는다.
+      STATE.fetchedAt=result.fetchedAt||new Date().toISOString();
       STATE.hourly=makeHours(weather);
       if(!loc.temporary)storeSet("weatherhannun_last",{loc:loc,at:STATE.fetchedAt,weather:weather,air:air});
       if(!loc.temporary)storeSet("weatherhannun_fetch_meta",{at:STATE.fetchedAt,loc:loc.name,modelTime:weather.current.time,airTime:air&&air.current&&air.current.time,forecast:!!weather,air:!!air,contractVersion:PROVIDER&&PROVIDER.CONTRACT_VERSION,provider:weather._weatherhannun?.source?.provider||PROVIDER&&PROVIDER.PROVIDER.id,fallback:result.fallback});
@@ -150,7 +180,7 @@
       $("dataFooterStatus").textContent=STATE.weather?"저장된 예보 · 갱신 실패":"예보 연결 실패";
       if(STATE.weather)renderAll();
       window.dispatchEvent(new CustomEvent("weatherhannun:forecast-result",{detail:{ok:false}}));
-      toast(e.message+" 네트워크 상태를 확인해 주세요.");
+      toast(weatherLoadMessage(e,!!STATE.weather));
       if(!STATE.weather) $("weatherSummary").textContent="날씨 연결 실패";
     } finally {
       if(ticket===STATE.ticket){STATE.loading=false;$("refreshButton").disabled=false;}
