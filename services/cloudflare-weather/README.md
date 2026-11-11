@@ -23,6 +23,7 @@ Cloudflare 계정에서 Workers 및 D1을 사용할 수 있어야 합니다. 프
 ```bash
 cd services/cloudflare-weather
 npm install
+npm ci --prefix ../weather-api
 npx wrangler login
 npx wrangler d1 create weatherhannun
 cp wrangler.template.toml wrangler.toml
