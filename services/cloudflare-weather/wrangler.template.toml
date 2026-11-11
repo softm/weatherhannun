@@ -1,0 +1,16 @@
+name = "weatherhannun-api"
+main = "src/index.mjs"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://softm.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "weatherhannun"
+database_id = "__D1_DATABASE_ID__"
+
+[triggers]
+crons = ["*/10 * * * *"]
