@@ -56,6 +56,7 @@ curl -i 'https://실제-워커-호스트/weatherApi?lat=37.5665&lon=126.978&name
 
 실제 생성된 Worker URL이 확인되기 전에는 클라이언트의 기존 Firebase URL을 변경하지 않습니다.
 배포 후 Health, 해외/국내 실제 응답, 정상/지연 캐시, CORS와 Android WebView를 검증하세요.
+Android 네이티브 백그라운드 알림은 별도 저장소 softm/weatherhannun.android의 WeatherForecastClient.kt에서 기존 Firebase URL을 직접 참조합니다. 새 Worker URL을 확인한 뒤 해당 값도 변경하고 Android 업데이트를 빌드·배포해야 합니다. 웹 API 변경만으로 이미 설치된 Android 네이티브 호출이 자동 이전되지는 않습니다.
 Cloudflare에 새 서비스를 만든다는 것은 Firebase 리소스를 삭제한다는 의미가 아닙니다.
 
 ## 4. GitHub Actions 자동 배포
