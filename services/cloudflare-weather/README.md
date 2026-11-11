@@ -1,5 +1,28 @@
 # 날씨한눈 Cloudflare Workers 이전
 
+## 추가 배포 방법 — Cloudflare Git 연동 (브라우저 자동화·GitHub Secrets 불필요)
+
+**권장하는 무료 우회 경로:** Cloudflare의 자체 GitHub 연동(Workers Builds)으로 배포합니다. 기본 자동 생성 배포 토큰으로 Workers와 KV를 관리하며, 별도 TinyFish 결제는 필요하지 않습니다.
+
+1. [Workers & Pages](https://dash.cloudflare.com/324650409b822e9887bee48b932b4d71/workers-and-pages)에 접속해 **Create application → Connect GitHub**를 선택합니다.
+2. GitHub 저장소는 `softm/weatherhannun`, 브랜치는 `main`, 서비스명은 **weatherhannun-api**로 지정합니다.
+3. Cloudflare Build 설정을 다음과 같이 입력합니다.
+   - **Root directory:** `services/cloudflare-weather`
+   - **Build command:** `npm install --no-audit --no-fund && npm ci --prefix ../weather-api`
+   - **Deploy command:** `npm run deploy:git`
+4. 배포 스크립트가 `weatherhannun-api-CACHE` KV를 만들거나 재사용하고 Worker 바인딩을 생성합니다.
+5. 배포 후 해당 Worker의 **Settings → Variables & Secrets**에서 `KMA_API_KEY`를 Secret 유형으로 등록합니다. 해당 키는 공공데이터포털 기상청 단기·초단기 API용 키이며 Google Cloud 기능과 무관합니다.
+6. **선택:** `AIRKOREA_API_KEY`를 추가하면 `stationName`이 있는 요청에서 대기질을 연동합니다.
+7. 실제 Cloudflare Worker URL에서 `/weatherHealth`와 국내·해외 `/weatherApi` 응답을 확인합니다.
+8. 검증 뒤 웹의 `weather-provider-core.js`와 Android의 `WeatherForecastClient.kt`에 새 Worker URL을 적용합니다.
+
+KV 무료 플랜은 **읽기 10만 회/일, 쓰기 1,000회/일**입니다. 본 배포는 요청한 격자만 갱신하는 캐시 방식이므로 **별도의 Cron이 없습니다.** 지역별 트래픽이 늘면 KV 쓰기 한도를 먼저 측정해 D1 이전을 진행하세요.
+
+**현재 상태:** 이 구성은 GitHub에 저장된 배포 준비 코드입니다. Cloudflare 대시보드에서 GitHub 연결을 마치기 전까지 실제 서버가 생성되었다는 의미가 아닙니다.
+
+---
+
+
 현재 Google Cloud Functions의 weatherApi/weatherHealth와 동일한 경로 및 weatherhannun.v2 JSON 계약을 제공하는 Worker 구현입니다.
 기존 GitHub Pages 웹앱, Android WebView, 티맵자동실행 Firestore는 변경하지 않습니다.
 
