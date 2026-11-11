@@ -106,10 +106,9 @@ jobs:
             exit 1
           fi
           if [ "$missing" -ne 0 ]; then
-            if [ "$DEPLOY_STAGE" = "production" ]; then exit 1; fi
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Cloudflare deployment NOT attempted: missing credentials." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            echo "::error::Cloudflare deployment NOT attempted: missing required credentials."
+            echo "Cloudflare deployment NOT attempted: missing required GitHub Environment Secrets." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
       - name: Install Wrangler and provider dependencies
