@@ -3,7 +3,7 @@ import {spawn} from "node:child_process";
 const port=18794;
 const base="http://127.0.0.1:"+port;
 const worker=spawn("npx",["wrangler","dev","--local","--ip","127.0.0.1","--port",String(port)],{
-  stdio:["ignore","pipe","pipe"],env:{...process.env,CI:"true"}});
+  stdio:["ignore","pipe","pipe"],detached:true,env:{...process.env,CI:"true"}});
 let log="";
 for(const stream of [worker.stdout,worker.stderr])stream.on("data",x=>log+=String(x).slice(-1200));
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
@@ -28,4 +28,9 @@ try{
  if(domestic.status!==503||domestic.body.error!=="domestic_provider_not_configured")
   throw Error("Domestic missing-key safety check failed: "+JSON.stringify(domestic));
  console.log("Local Wrangler Worker + D1 HTTP tests: PASS");
-}finally{worker.kill("SIGTERM");}
+ }finally{
+  // npm/npx spawns Wrangler as a child; terminate the whole process group.
+  try{process.kill(-worker.pid,"SIGTERM");}catch{}
+  worker.stdout.destroy();
+  worker.stderr.destroy();
+}
