@@ -134,3 +134,21 @@ test("KV cached responses obey existing CORS policy", async () => {
     {CACHE: fakeKv({payload, fetchedAtMs: Date.now()})}, {}, {}, {origin: "https://evil.example"});
   assert.equal(r.status, 403);
 });
+
+test("Cloudflare native rate limiting returns 429 before provider calls", async () => {
+  let providerCalled = false;
+  const env = {
+    DB: fakeDb().DB,
+    CLIENT_RATE_LIMITER: {limit: async ({key}) => {
+      assert.equal(key, "203.0.113.18");
+      return {success: false};
+    }}
+  };
+  const res = await handleRequest(new Request(
+    "https://example.workers.dev/weatherApi?lat=37.5665&lon=126.978",
+    {headers: {Origin:"https://softm.github.io", "CF-Connecting-IP":"203.0.113.18"}}),
+    env, {}, {collect: async () => {providerCalled=true;return payload;}});
+  assert.equal(res.status, 429);
+  assert.equal((await res.json()).error, "rate_limited");
+  assert.equal(providerCalled, false);
+});
