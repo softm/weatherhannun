@@ -1,4 +1,4 @@
-name = "weatherhannun-api"
+name = "__WORKER_NAME__"
 main = "src/index.mjs"
 compatibility_date = "2026-11-01"
 compatibility_flags = ["nodejs_compat"]
@@ -6,11 +6,21 @@ workers_dev = true
 
 [vars]
 ALLOWED_ORIGINS = "https://softm.github.io"
+APP_ENV = "__APP_ENV__"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "weatherhannun"
+database_name = "__D1_DATABASE_NAME__"
 database_id = "__D1_DATABASE_ID__"
+migrations_dir = "migrations"
+
+[[ratelimits]]
+name = "CLIENT_RATE_LIMITER"
+namespace_id = "__RATE_NAMESPACE__"
+
+[ratelimits.simple]
+limit = 240
+period = 60
 
 [triggers]
 crons = ["*/10 * * * *"]
