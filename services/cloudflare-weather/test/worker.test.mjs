@@ -8,7 +8,7 @@ function fakeDb(record = null) {
     writes,
     DB: {
       prepare(sql) {
-        return {bind(...params) {return {
+        return {first: async () => record, bind(...params) {return {
           first: async () => record,
           all: async () => ({results: []}),
           run: async () => {writes.push({sql, params}); return {success: true};}
