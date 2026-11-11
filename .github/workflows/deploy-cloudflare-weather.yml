@@ -132,11 +132,16 @@ jobs:
       - name: Configure official data API secrets
         if: steps.gate.outputs.ready == 'true'
         run: |
-          if [ -n "$KMA_API_KEY" ]; then
+          # DATA_GO_KR_SERVICE_KEY was verified against the KMA VilageFcst endpoint
+          # (HTTP 200/resultCode 00). Prefer it over the rejected KMA_API_KEY.
+          if [ -n "$DATA_GO_KR_SERVICE_KEY" ]; then
+            printf '%s' "$DATA_GO_KR_SERVICE_KEY" | npx wrangler secret put KMA_API_KEY --config wrangler.toml >/dev/null
+            echo "KMA source: existing approved DATA_GO_KR_SERVICE_KEY (stored under Worker KMA_API_KEY)" >> "$GITHUB_STEP_SUMMARY"
+          elif [ -n "$KMA_API_KEY" ]; then
             printf '%s' "$KMA_API_KEY" | npx wrangler secret put KMA_API_KEY --config wrangler.toml >/dev/null
-            echo "KMA secret configured" >> "$GITHUB_STEP_SUMMARY"
+            echo "KMA source: KMA_API_KEY (source approval must still be verified)" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "::warning::KMA_API_KEY missing: domestic API will return 503 when cache is empty."
+            echo "::warning::No KMA API secret available: domestic API will return 503 when cache is empty."
           fi
           if [ -n "$AIRKOREA_API_KEY" ]; then
             printf '%s' "$AIRKOREA_API_KEY" | npx wrangler secret put AIRKOREA_API_KEY --config wrangler.toml >/dev/null
