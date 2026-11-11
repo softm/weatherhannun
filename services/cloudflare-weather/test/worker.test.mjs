@@ -80,3 +80,57 @@ test("missing official API key returns explicit 503 and never fabricates weather
 test("Cron gracefully handles no active locations", async () => {
   await handleScheduled({}, {DB: fakeDb().DB}, {});
 });
+
+
+function fakeKv(initial = null) {
+  const values = new Map();
+  if (initial !== null) values.set("weatherhannun:v2:kr_60_127", JSON.stringify(initial));
+  return {
+    values,
+    get: async key => values.get(key) || null,
+    put: async (key, value) => {values.set(key, value);}
+  };
+}
+test("KV-backed /weatherHealth is healthy without D1", async () => {
+  const r = await request("/weatherHealth", {CACHE: fakeKv()});
+  const body = await r.json();
+  assert.equal(r.status, 200);
+  assert.equal(body.database, "kv");
+  assert.equal(body.providers.kma, "missing_secret");
+});
+test("KV cache miss collects forecast and preserves common API contract", async () => {
+  const kv = fakeKv();
+  const r = await request("/weatherApi?lat=37.5665&lon=126.978&name=Seoul",
+    {CACHE: kv, KMA_API_KEY: "fake-test-key"}, {}, {collect: async () => payload});
+  const body = await r.json();
+  assert.equal(r.status, 200);
+  assert.equal(body.contractVersion, "weatherhannun.v2");
+  assert.equal(body.location.name, "Seoul");
+  assert.equal(body.cache.hit, false);
+  assert.ok(kv.values.has("weatherhannun:v2:kr_60_127"));
+});
+test("KV stale last-good data is returned while refreshing asynchronously", async () => {
+  const kv = fakeKv({payload, fetchedAtMs: Date.now() - 720000});
+  const jobs = [];
+  const r = await request("/weatherApi?lat=37.5665&lon=126.978",
+    {CACHE: kv, KMA_API_KEY: "fake-test-key"}, {waitUntil: job => jobs.push(job)},
+    {collect: async () => payload});
+  assert.equal(r.status, 200);
+  const body = await r.json();
+  assert.equal(body.stale, true);
+  assert.equal(body.cache.refreshQueued, true);
+  await Promise.all(jobs);
+  const updated = JSON.parse(kv.values.get("weatherhannun:v2:kr_60_127"));
+  assert.ok(updated.fetchedAtMs > Date.now() - 10000);
+});
+test("KV missing KMA key fails closed without made-up weather", async () => {
+  const r = await request("/weatherApi?lat=37.5665&lon=126.978",
+    {CACHE: fakeKv()}, {}, {collect: async () => {throw new Error("kma_key_missing");}});
+  assert.equal(r.status, 503);
+  assert.equal((await r.json()).error, "domestic_provider_not_configured");
+});
+test("KV cached responses obey existing CORS policy", async () => {
+  const r = await request("/weatherApi?lat=37.5665&lon=126.978",
+    {CACHE: fakeKv({payload, fetchedAtMs: Date.now()})}, {}, {}, {origin: "https://evil.example"});
+  assert.equal(r.status, 403);
+});
