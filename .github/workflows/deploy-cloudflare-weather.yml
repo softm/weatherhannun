@@ -1,16 +1,27 @@
-name: Deploy WeatherHannun Cloudflare API
-
+name: Deploy WeatherHannun Cloudflare API (D1)
 on:
-  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'services/cloudflare-weather/**'
       - '.github/workflows/deploy-cloudflare-weather.yml'
-
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deployment target'
+        required: true
+        type: choice
+        options: [staging, production]
+        default: staging
+      confirmation:
+        description: 'Production only: type DEPLOY_PRODUCTION'
+        required: false
+        type: string
 permissions:
   contents: read
-
+concurrency:
+  group: weatherhannun-cloudflare-${{ github.event.inputs.target || 'staging' }}
+  cancel-in-progress: false
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -24,45 +35,110 @@ jobs:
           node-version: '22'
       - name: Install Worker dependencies
         run: npm install --no-audit --no-fund
-      - name: Install shared provider dependencies
+      - name: Install shared weather providers
         working-directory: services/weather-api
         run: npm ci --no-audit --no-fund
-      - name: Execute API tests
-        run: npm test
-      - name: Check Cloudflare bundle
+      - name: Static syntax and unit tests
+        run: |
+          node --check src/index.mjs
+          node --check scripts/provision-d1.mjs
+          node --check scripts/smoke-remote.mjs
+          npm test
+      - name: Make disposable staging Wrangler config
         run: |
           cp wrangler.template.toml wrangler.toml
-          sed -i 's/__D1_DATABASE_ID__/00000000-0000-0000-0000-000000000000/g' wrangler.toml
-          npx wrangler deploy --dry-run
+          sed -i -e 's/__WORKER_NAME__/weatherhannun-api-staging/g' \
+            -e 's/__D1_DATABASE_NAME__/weatherhannun-staging/g' \
+            -e 's/__D1_DATABASE_ID__/00000000-0000-0000-0000-000000000000/g' \
+            -e 's/__RATE_NAMESPACE__/110401/g' \
+            -e 's/__APP_ENV__/staging/g' wrangler.toml
+      - name: Verify real Wrangler bundle
+        run: npx wrangler deploy --dry-run
+      - name: Run local D1 migrations
+        run: npx wrangler d1 migrations apply DB --local
+      - name: Local HTTP integration tests
+        run: node scripts/local-smoke.mjs
 
   deploy:
     needs: verify
-    if: ${{ vars.CLOUDFLARE_DEPLOY_ENABLED == 'true' }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.target == 'staging' || (github.event.inputs.target == 'production' && github.event.inputs.confirmation == 'DEPLOY_PRODUCTION') }}
     runs-on: ubuntu-latest
-    environment: cloudflare-weather
+    environment: ${{ github.event.inputs.target == 'production' && 'cloudflare-weather-production' || 'cloudflare-weather' }}
     defaults:
       run:
         working-directory: services/cloudflare-weather
+    env:
+      DEPLOY_STAGE: ${{ github.event.inputs.target == 'production' && 'production' || 'staging' }}
+      CONFIRM_PRODUCTION: ${{ github.event.inputs.confirmation }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+      AIRKOREA_API_KEY: ${{ secrets.AIRKOREA_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
-      - name: Install shared provider dependencies
-        working-directory: services/weather-api
-        run: npm ci --no-audit --no-fund
-      - name: Prepare Cloudflare configuration
-        env:
-          D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Verify deployment credentials
+        id: gate
+        shell: bash
         run: |
-          test -n "$D1_DATABASE_ID" && test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"
-          cp wrangler.template.toml wrangler.toml
-          sed -i "s/__D1_DATABASE_ID__/$D1_DATABASE_ID/g" wrangler.toml
-      - name: Deploy Cloudflare Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler deploy
+          missing=0
+          for key in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+            if [ -z "$(printenv "$key")" ]; then
+              echo "::warning::Missing GitHub Secret: $key (repository or environment)"
+              missing=1
+            fi
+          done
+          if [ "$DEPLOY_STAGE" = "production" ] && [ "$CONFIRM_PRODUCTION" != "DEPLOY_PRODUCTION" ]; then
+            echo "::error::Production deployment requires explicit confirmation"
+            exit 1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            if [ "$DEPLOY_STAGE" = "production" ]; then exit 1; fi
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Cloudflare deployment NOT attempted: missing credentials." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Install Wrangler and provider dependencies
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          npm install --no-audit --no-fund
+          npm ci --prefix ../weather-api --no-audit --no-fund
+      - name: Create or find D1 database and write Wrangler config
+        if: steps.gate.outputs.ready == 'true'
+        run: node scripts/provision-d1.mjs "$DEPLOY_STAGE"
+      - name: Apply versioned D1 remote migration
+        if: steps.gate.outputs.ready == 'true'
+        run: npx wrangler d1 migrations apply DB --remote
+      - name: Deploy Worker to Cloudflare
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -o pipefail
+          npx wrangler deploy | tee deploy.log
+          node -e 'const fs=require("fs"); const t=fs.readFileSync("deploy.log","utf8"); const urls=[...t.matchAll(/https:\/\/[a-z0-9.-]+\.workers\.dev/gi)].map(m=>m[0]); const n=process.env.DEPLOY_STAGE==="production"?"weatherhannun-api.":"weatherhannun-api-staging."; const u=urls.find(x=>x.includes(n)); if(!u){console.error("Could not extract deployed Worker URL");process.exit(2);} fs.writeFileSync("worker-url.txt",u);console.log("Deployed URL:",u)'
+      - name: Configure official data API secrets
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          if [ -n "$KMA_API_KEY" ]; then
+            printf '%s' "$KMA_API_KEY" | npx wrangler secret put KMA_API_KEY --config wrangler.toml >/dev/null
+            echo "KMA secret configured" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::KMA_API_KEY missing: domestic API will return 503 when cache is empty."
+          fi
+          if [ -n "$AIRKOREA_API_KEY" ]; then
+            printf '%s' "$AIRKOREA_API_KEY" | npx wrangler secret put AIRKOREA_API_KEY --config wrangler.toml >/dev/null
+          fi
+      - name: Run real deployed Worker HTTP checks
+        if: steps.gate.outputs.ready == 'true'
+        run: node scripts/smoke-remote.mjs "$(cat worker-url.txt)"
+      - name: Store actual deployment test report
+        if: always() && steps.gate.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-weather-${{ github.run_id }}
+          path: services/cloudflare-weather/weather-deployment-status.json
+          if-no-files-found: warn
+          retention-days: 14
+# Never changes existing web/Android endpoints or deletes Google Cloud services.
