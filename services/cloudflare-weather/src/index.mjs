@@ -77,6 +77,18 @@ export async function handleRequest(request, env, ctx, dependencies = {}) {
   if (!env.DB && !env.CACHE) return reply({error: "weather_database_not_configured"}, 503, origin, env);
   let entry;
   try {entry = parseLocation(url);} catch {return reply({error: "invalid_coordinates"}, 400, origin, env);}
+  // Rate-limit high-volume callers before any paid-provider / D1 operations.
+  // Cloudflare sets CF-Connecting-IP; never trust client-supplied query parameters as identity.
+  const clientIp = request.headers.get("CF-Connecting-IP");
+  if (clientIp && env.CLIENT_RATE_LIMITER) {
+    try {
+      const decision = await env.CLIENT_RATE_LIMITER.limit({key: clientIp});
+      if (!decision.success) return reply({error: "rate_limited"}, 429, origin, env);
+    } catch (error) {
+      console.error("rate_limit_unavailable", String(error?.message || error));
+      return reply({error: "rate_limit_unavailable"}, 503, origin, env);
+    }
+  }
   if (!env.DB) {
     return serveKvWeather({
       entry, env, ctx, origin, reply,
