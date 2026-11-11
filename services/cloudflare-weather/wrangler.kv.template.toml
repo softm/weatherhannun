@@ -1,0 +1,12 @@
+name = "weatherhannun-api"
+main = "src/index.mjs"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://softm.github.io"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "__KV_NAMESPACE_ID__"
