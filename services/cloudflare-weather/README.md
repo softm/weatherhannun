@@ -33,26 +33,25 @@ npx wrangler d1 execute weatherhannun --remote --file=./schema.sql
 
 무료 요금제 D1 계정 총 5GB, 개별 DB 500MB, 읽기 500만 행/일, 쓰기 10만 행/일 제한에 유의하세요.
 
-## 2. API 키 설정
-
-```bash
-npx wrangler secret put KMA_API_KEY
-npx wrangler secret put AIRKOREA_API_KEY
-```
-
-KMA_API_KEY는 기상청 단기·초단기 예보용 공공데이터 서비스키입니다. 기존 GitHub Pages 수집기의 KMA_API_HUB_KEY와 다른 키입니다.
-키가 없다면 국내 날씨 API는 작동하지 않습니다. 키를 소스 또는 GitHub Pages에 넣지 마세요.
-
-## 3. 테스트·배포
+## 2. 테스트 및 최초 Worker 배포
 
 ```bash
 npm test
 npx wrangler deploy --dry-run
 npx wrangler deploy
+```
+
+## 3. Cloudflare Worker Secrets 설정 및 실제 조회 확인
+
+```bash
+npx wrangler secret put KMA_API_KEY
+npx wrangler secret put AIRKOREA_API_KEY
 curl -i 'https://실제-워커-호스트/weatherHealth'
 curl -i 'https://실제-워커-호스트/weatherApi?lat=51.5074&lon=-0.1278&name=London'
 curl -i 'https://실제-워커-호스트/weatherApi?lat=37.5665&lon=126.978&name=Seoul'
 ```
+
+KMA_API_KEY는 기상청 단기·초단기 예보용 공공데이터 서비스키입니다. 기존 GitHub Pages 수집기의 KMA_API_HUB_KEY와 다른 키입니다. 키가 없으면 국내 조회는 503으로 차단됩니다. 키를 소스 또는 GitHub Pages에 넣지 마세요.
 
 실제 생성된 Worker URL이 확인되기 전에는 클라이언트의 기존 Firebase URL을 변경하지 않습니다.
 배포 후 Health, 해외/국내 실제 응답, 정상/지연 캐시, CORS와 Android WebView를 검증하세요.
