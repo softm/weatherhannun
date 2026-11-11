@@ -7,7 +7,8 @@
     "test": "node --test test/*.test.mjs",
     "verify": "wrangler deploy --dry-run",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "deploy:git": "node scripts/deploy-git.mjs"
   },
   "dependencies": {
     "proj4": "^2.19.10"
