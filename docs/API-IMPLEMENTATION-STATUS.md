@@ -1,3 +1,35 @@
+# 2026-11-11 Cloudflare Workers 이전 현황
+
+**이 섹션이 기존 2026-11-02 Firebase 동작 설명보다 최신입니다.**
+
+| 구분 | 실제 상태 |
+|---|---|
+| Cloudflare Worker 구현 | 완료 (`services/cloudflare-weather/src/index.mjs`) |
+| Wrangler + D1 구성 | 완료 (`wrangler.template.toml`, `scripts/provision-d1.mjs`) |
+| D1 버전 마이그레이션 | 완료 (`migrations/0001_initial.sql`) |
+| GitHub main 푸시 | 완료 |
+| GitHub Actions 테스트 | 통과 (Node tests + Wrangler bundle + 로컬 D1 마이그레이션 + HTTP smoke) |
+| 스테이징 D1 실제 생성 | **미완료** (Cloudflare Secrets 누락) |
+| 스테이징 Worker 실제 배포 | **미완료** |
+| 스테이징 날씨 실응답 | **미확인** |
+| 운영 Worker 실제 배포 | **미완료** |
+| 날씨한눈 웹/Android 호출 전환 | **미완료** |
+
+GitHub Actions 배포 게이트 로그에서 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`가 누락된 것으로 확인했다.
+이 때문에 배포와 원격 API 테스트는 건너뛰었으며, CI 성공만으로 배포 성공이라고 표시하지 않는다.
+
+- [이전 설계서](CLOUDFLARE-MIGRATION-DESIGN.md)
+- [API 명세서](CLOUDFLARE-API-SPEC.md)
+- [GitHub Actions 배포](../.github/workflows/deploy-cloudflare-weather.yml)
+- [Wrangler 배포 안내](../services/cloudflare-weather/README.md)
+
+**기존 동작 주의:** 웹 `weather-provider-core.js`, Android `WeatherForecastClient.kt` 모두 Google Cloud `weatherApi` 주소를 여전히 참조한다.
+2026-11-11 기존 주소의 외부 HTTP 검사에서는 `weatherApi`, `weatherHealth`가 503으로 응답했다.
+기상청·MET Norway 원천 공급자와 GitHub Pages 정적 스냅샷은 Google Cloud Functions와 별개의 경로다.
+TTS `weatherBriefingTts`는 아직 Google Cloud로 남아 있어 완전 분리로 표시하면 안 된다.
+
+---
+
 # API 구현·배포 상태 (2026-11-02)
 
 기준: [API-IMPLEMENTATION-PLAN.md](API-IMPLEMENTATION-PLAN.md)
