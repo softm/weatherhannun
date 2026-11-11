@@ -53,6 +53,30 @@ if(!key || key==="UNCONFIGURED") {
     note.push("KMA gateway request failed: "+String(err?.name||"network_error").slice(0,60));
   }
 }
+const alternative = normalizeServiceKey(process.env.DATA_GO_KR_SERVICE_KEY || "");
+if (alternative && alternative !== key) {
+  try {
+    const cycle = kmaBase("village",new Date());
+    const grid = dfsGrid(37.5665,126.978);
+    const url = new URL("https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst");
+    for(const [k,v] of Object.entries({serviceKey:alternative,pageNo:"1",numOfRows:"10",dataType:"JSON",
+      nx:grid.nx,ny:grid.ny,base_date:cycle.baseDate,base_time:cycle.baseTime})) {
+      url.searchParams.set(k,String(v));
+    }
+    const r = await fetch(url,{signal:AbortSignal.timeout(10000)});
+    const raw = await r.text();
+    const body = JSON.parse(raw);
+    const resultCode = String(body?.response?.header?.resultCode ?? "none").slice(0,12);
+    const rejected = /SERVICE_KEY_IS_NOT_REGISTERED_ERROR|SERVICE_ACCESS_DENIED_ERROR|PERMISSION_DENIED|LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR|BLACKLIST_IP_ACCESS_ERROR/.exec(raw)?.[0] || "none";
+    note.push("Alternative DATA_GO_KR_SERVICE_KEY on KMA: HTTP "+r.status+", resultCode="+resultCode+", rejection="+rejected);
+  } catch (e) {
+    note.push("Alternative DATA_GO_KR_SERVICE_KEY check failed: "+String(e?.name||"unknown").slice(0,50));
+  }
+} else if (alternative && alternative===key) {
+  note.push("Alternative DATA_GO_KR_SERVICE_KEY is same key as KMA_API_KEY");
+} else {
+  note.push("Alternative DATA_GO_KR_SERVICE_KEY not present in this CI environment");
+}
 const result=note.join("\n");
 console.log(result);
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,
