@@ -27,6 +27,19 @@ if(!key || key==="UNCONFIGURED") {
     const message=String(head?.resultMsg??"none").replace(/[\r\n\t]/g," ").slice(0,100);
     note.push("KMA getVilageFcst gateway: HTTP "+res.status+", resultCode="+code+
       ", resultMsg="+message+", contentType="+String(res.headers.get("content-type")||"none").slice(0,60));
+    if (!res.ok) {
+      const known = ["SERVICE_KEY_IS_NOT_REGISTERED_ERROR","SERVICE_ACCESS_DENIED_ERROR",
+        "PERMISSION_DENIED","LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
+        "BLACKLIST_IP_ACCESS_ERROR","DEADLINE_HAS_EXPIRED_ERROR",
+        "INVALID_REQUEST_PARAMETER_ERROR","SERVICE_KEY_IS_NULL"];
+      const matched = known.filter(token => raw.includes(token));
+      note.push("KMA rejected request category: " + (matched.join(",") || "unspecified_http_" + res.status));
+      if (parsed && typeof parsed === "object") {
+        // Only log field NAMES; never print an upstream JSON value that might echo serviceKey.
+        note.push("KMA error response top-level fields: " +
+          Object.keys(parsed).slice(0,8).filter(x=>/^[A-Za-z_]{1,32}$/.test(x)).join(","));
+      }
+    }
     if(!res.ok && !parsed) note.push("Upstream returned non-JSON error; body intentionally redacted.");
     if(res.ok && code==="00") {
       try {
