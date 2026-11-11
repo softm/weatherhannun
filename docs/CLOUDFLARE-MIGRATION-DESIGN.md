@@ -10,7 +10,8 @@ GitHub Pages는 그대로 유지하며, Cloudflare 신규 API가 실제로 응�
 
 | 사용처 | 현행 호출/원천 | 새 처리 | 전환 게이트 |
 |---|---|---|---|
-| 날씨한눈 웹 | `weather-provider-core.js`의 `weatherApi` | `/weatherApi` Worker | 국내·해외 실응답 검증 이후 |
+| 날씨한눈 웹 기본 예보 | `weather-provider-core.js`의 `weatherApi` | `/weatherApi` Worker | 국내·해외 실응답 검증 이후 |
+| 날씨한눈 목적지 비교 | `location-compare-core.js`의 별도 `weatherApi` URL | 동일 Worker | 기본 예보와 동일 시점 교체 |
 | Android 네이티브 알림·위젯 | `WeatherForecastClient.kt`의 `weatherApi` | 동일 Worker | 새 APK 빌드 및 앱 배포 필요 |
 | 서버 상태 | `weatherHealth` | `/weatherHealth` | D1 실제 조회 성공 |
 | 기상청 초단기실황·단기예보 | `apis.data.go.kr/1360000/VilageFcstInfoService_2.0` | Worker가 공식 공급자 그대로 사용 | `KMA_API_KEY` 실제 키 |
@@ -19,6 +20,25 @@ GitHub Pages는 그대로 유지하며, Cloudflare 신규 API가 실제로 응�
 | 기상청 특보·레이더·전국 대기질 스냅샷 | `scripts/sync-official-data.mjs` + GitHub Actions | 유지 | 기존 정적 배포 점검 |
 | 음성 브리핑 | `weatherBriefingTts` Cloud Function | 별도 프로젝트로 추후 이전 | TTS 공급자/유료 조건 확인 |
 | 로그인 | 공통 `suiteAuth` 등 | 이 프로젝트 범위 밖 | 독립 인증 이전 프로젝트 |
+
+## 그 외 외부 네트워크 경로 (단순 API URL 이전 대상 아님)
+
+코드 전체를 스캔하는 `scripts/audit-api-usage.mjs`가 생성한 GitHub Actions 감사 로그 기준이다.
+2026-11-11 검사에서 60개 후보 위치를 찾았으나, 단순 문자열·정보 출처 링크까지 포함하므로 모두 실제 호출이라고 단정하지 않는다.
+
+| 기능 | 참조 코드·네트워크 경로 | 처리 |
+|---|---|---|
+| 현재 지역 역지오코딩 | `reverse-geocode.js` → `nominatim.openstreetmap.org/reverse` | 외부 API 직접 호출 유지, Nominatim 사용 정책 별도 점검 |
+| 지도 타일 | `app.js` → `tile.openstreetmap.de` | 지도 기능 유지, 서비스 이용조건 별도 관리 |
+| 공통 로그인 UI | `index.html` → `softm.github.io/shared/platform/v1/boot.mjs` | 날씨 API와 분리, 공통 로그인 전환 프로젝트에 위임 |
+| 음성 HD 브리핑 | `index.html`, `briefing-cloud-tts.js` → Google Cloud `weatherBriefingTts` | 별도 이전 대상 (현재 중단될 수 있음) |
+| 공식 지상관측·특보·레이더 | `scripts/sync-official-data.mjs` → `apihub.kma.go.kr` | GitHub Actions 수집 유지 |
+| 전국 AirKorea 실측 스냅샷 | `scripts/sync-official-data.mjs` → `apis.data.go.kr` | GitHub Actions 수집 유지 |
+| 해외 공식 WWIS | Firebase 예정 함수 → `worldweather.wmo.int` | 상업 재사용 승인 전 비활성 |
+| Android 백그라운드 날씨 | `WeatherForecastClient.kt` `HttpURLConnection` → `weatherApi` | 운영 API 검증 뒤 앱 업데이트 |
+
+Android의 `WeatherAlertJobService`와 `ScreenWeatherRefreshCoordinator`는
+`WeatherForecastClient`를 통해 조회한다. WebView의 기본 페이지는 GitHub Pages를 계속 사용한다.
 
 ## 시스템 구조
 
