@@ -86,7 +86,7 @@ node scripts/smoke-remote.mjs 'https://실제배포된워커.실제계정.worker
 `productionCutoverReady=true`로 표시합니다.
 국내 키가 미설정되어 503이 반환되면 국내 기능은 아직 복구되지 않은 것입니다.
 
-검증 후 `weather-provider-core.js`의 `FORECAST_ENDPOINT`와
+검증 후 웹 `weather-provider-core.js`의 `FORECAST_ENDPOINT`, 목적지 비교 `location-compare-core.js`의 별도 `FORECAST_ENDPOINT`,
 Android 저장소 `WeatherForecastClient.kt`의 `COMMON_API`를 각각 변경해야 합니다.
 TTS 메타 태그는 별개의 Google Cloud API이므로 별도 마이그레이션 대상입니다.
 
