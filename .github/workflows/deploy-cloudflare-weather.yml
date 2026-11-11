@@ -44,7 +44,16 @@ jobs:
           node --check src/index.mjs
           node --check scripts/provision-d1.mjs
           node --check scripts/smoke-remote.mjs
+          node --check scripts/audit-api-usage.mjs
           npm test
+      - name: Inventory all weather app network call sites
+        run: node scripts/audit-api-usage.mjs
+      - name: Upload API inventory report
+        uses: actions/upload-artifact@v4
+        with:
+          name: weather-api-source-audit-${{ github.run_id }}
+          path: services/cloudflare-weather/api-inventory.json
+          retention-days: 14
       - name: Make disposable staging Wrangler config
         run: |
           cp wrangler.template.toml wrangler.toml
