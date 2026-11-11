@@ -20,11 +20,12 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: weatherhannun-cloudflare-${{ github.event.inputs.target || 'staging' }}
+  group: weatherhannun-cloudflare-v2-${{ github.event.inputs.target || 'staging' }}
   cancel-in-progress: false
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     defaults:
       run:
         working-directory: services/cloudflare-weather
@@ -63,6 +64,7 @@ jobs:
     needs: verify
     if: ${{ github.event_name == 'push' || github.event.inputs.target == 'staging' || (github.event.inputs.target == 'production' && github.event.inputs.confirmation == 'DEPLOY_PRODUCTION') }}
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     environment: ${{ github.event.inputs.target == 'production' && 'cloudflare-weather-production' || 'cloudflare-weather' }}
     defaults:
       run:
