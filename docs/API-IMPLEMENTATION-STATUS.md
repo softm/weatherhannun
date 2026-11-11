@@ -9,14 +9,20 @@
 | D1 버전 마이그레이션 | 완료 (`migrations/0001_initial.sql`) |
 | GitHub main 푸시 | 완료 |
 | GitHub Actions 테스트 | 통과 (Node tests + Wrangler bundle + 로컬 D1 마이그레이션 + HTTP smoke) |
-| 스테이징 D1 실제 생성 | **미완료** (Cloudflare Secrets 누락) |
-| 스테이징 Worker 실제 배포 | **미완료** |
-| 스테이징 날씨 실응답 | **미확인** |
+| 스테이징 D1 실제 생성 | **완료** (weatherhannun-staging) |
+| 스테이징 Worker 실제 배포 | **완료** (https://weatherhannun-api-staging.softm.workers.dev) |
+| 스테이징 날씨 실응답 | **통과** (Health 200, London MET Norway 200, Seoul 기상청 200, 좌표 검증 400) |
 | 운영 Worker 실제 배포 | **미완료** |
 | 날씨한눈 웹/Android 호출 전환 | **미완료** |
 
-GitHub Actions 배포 게이트 로그에서 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`가 누락된 것으로 확인했다.
-이 때문에 배포와 원격 API 테스트는 건너뛰었으며, CI 성공만으로 배포 성공이라고 표시하지 않는다.
+2026-11-11 22:23 KST GitHub Actions 실행 [#43028499448](https://github.com/softm/weatherhannun/actions/runs/43028499448)에서
+Cloudflare 스테이징 D1 마이그레이션·Worker 배포·실제 HTTP 검증까지 모두 성공했다.
+최종 실측은 Health 200, 서울 기상청 200 (`source.provider=kma`), 런던 MET Norway 200 (`source.provider=met-no`),
+잘못된 좌표 400, CORS 검증 통과이며 `stagingReady=true`, `productionCutoverReady=true`를 기록했다.
+기존 `KMA_API_KEY`는 공공데이터 API에서 `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` (HTTP 403)가 발생했으나
+같은 저장소에 등록된 승인된 `DATA_GO_KR_SERVICE_KEY`는 HTTP 200 / `resultCode=00`으로 검증되어
+Worker Secret `KMA_API_KEY`에 이 값을 전달하도록 CI를 수정했다.
+이는 스테이징 배포 및 검증의 성공이며 **운영 Worker 배포·날씨한눈 웹/Android 주소 전환은 아직 수행하지 않았다.**
 
 - [이전 설계서](CLOUDFLARE-MIGRATION-DESIGN.md)
 - [API 명세서](CLOUDFLARE-API-SPEC.md)
