@@ -140,6 +140,9 @@ jobs:
           if [ -n "$AIRKOREA_API_KEY" ]; then
             printf '%s' "$AIRKOREA_API_KEY" | npx wrangler secret put AIRKOREA_API_KEY --config wrangler.toml >/dev/null
           fi
+      - name: Diagnose direct KMA gateway without leaking API key
+        if: steps.gate.outputs.ready == 'true' && env.KMA_API_KEY != ''
+        run: node scripts/diagnose-kma.mjs
       - name: Run real deployed Worker HTTP checks
         if: steps.gate.outputs.ready == 'true'
         run: node scripts/smoke-remote.mjs "$(cat worker-url.txt)"
