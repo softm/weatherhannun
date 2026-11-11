@@ -1,5 +1,6 @@
 import {coordinates, dfsGrid, isSouthKorea, roundedLocationKey, validateContract} from "../../weather-api/core.mjs";
 import {collectKma, collectMetNorway, collectAirKorea} from "../../weather-api/providers.mjs";
+import {serveKvWeather} from "./kv-backend.mjs";
 
 const ttlMs = {KR: 600000, GLOBAL: 1800000};
 const allowed = (origin, env) => !origin || ["https://softm.github.io", "http://localhost:8080", "http://127.0.0.1:8080", ...String(env.ALLOWED_ORIGINS || "").split(",").map(x => x.trim())].includes(origin);
@@ -59,17 +60,30 @@ export async function handleRequest(request, env, ctx, dependencies = {}) {
       try {await env.DB.prepare("SELECT id FROM weather_cache LIMIT 1").first();}
       catch (e) {dbReady = false; console.error("d1_health_check_failed", String(e?.message || e));}
     }
+    let kvReady = !dbReady && Boolean(env.CACHE);
+    if (kvReady) {
+      try {await env.CACHE.get("__weatherhannun_probe");}
+      catch (e) {kvReady = false; console.error("kv_health_check_failed", String(e?.message || e));}
+    }
     return reply({
-    ok: dbReady, backend: "cloudflare-workers", database: dbReady ? "d1" : "unavailable",
+    ok: dbReady || kvReady, backend: "cloudflare-workers",
+    database: dbReady ? "d1" : kvReady ? "kv" : "unavailable",
     providers: {metNorway: "ready", kma: env.KMA_API_KEY && env.KMA_API_KEY !== "UNCONFIGURED" ? "configured" : "missing_secret",
       airKorea: env.AIRKOREA_API_KEY && env.AIRKOREA_API_KEY !== "UNCONFIGURED" ? "configured" : "missing_secret", wwis: "approval_required"},
     checkedAt: new Date().toISOString()
-  }, dbReady ? 200 : 503, origin, env);
+  }, dbReady || kvReady ? 200 : 503, origin, env);
   }
   if (!["/weatherApi", "/v1/weather"].includes(url.pathname)) return reply({error: "not_found"}, 404, origin, env);
-  if (!env.DB) return reply({error: "weather_database_not_configured"}, 503, origin, env);
+  if (!env.DB && !env.CACHE) return reply({error: "weather_database_not_configured"}, 503, origin, env);
   let entry;
   try {entry = parseLocation(url);} catch {return reply({error: "invalid_coordinates"}, 400, origin, env);}
+  if (!env.DB) {
+    return serveKvWeather({
+      entry, env, ctx, origin, reply,
+      collect: dependencies.collect || collect,
+      freshnessMs: ttlMs[entry.country]
+    });
+  }
   let record;
   try {
     record = await env.DB.prepare("SELECT c.payload,c.fetched_at_ms,l.last_active_at_ms FROM weather_cache c LEFT JOIN weather_locations l ON c.id=l.id WHERE c.id=?")
