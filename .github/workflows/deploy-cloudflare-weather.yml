@@ -24,6 +24,9 @@ jobs:
           node-version: '22'
       - name: Install Worker dependencies
         run: npm install --no-audit --no-fund
+      - name: Install shared provider dependencies
+        working-directory: services/weather-api
+        run: npm ci --no-audit --no-fund
       - name: Execute API tests
         run: npm test
       - name: Check Cloudflare bundle
@@ -46,6 +49,9 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-audit --no-fund
+      - name: Install shared provider dependencies
+        working-directory: services/weather-api
+        run: npm ci --no-audit --no-fund
       - name: Prepare Cloudflare configuration
         env:
           D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
