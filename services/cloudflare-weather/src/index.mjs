@@ -53,12 +53,19 @@ export async function handleRequest(request, env, ctx, dependencies = {}) {
     return new Response(null, {status: 204, headers});
   }
   if (request.method !== "GET") return reply({error: "method_not_allowed"}, 405, origin, env);
-  if (["/", "/health", "/weatherHealth"].includes(url.pathname)) return reply({
-    ok: !!env.DB, backend: "cloudflare-workers", database: env.DB ? "d1" : "missing",
+  if (["/", "/health", "/weatherHealth"].includes(url.pathname)) {
+    let dbReady = Boolean(env.DB);
+    if (dbReady) {
+      try {await env.DB.prepare("SELECT id FROM weather_cache LIMIT 1").first();}
+      catch (e) {dbReady = false; console.error("d1_health_check_failed", String(e?.message || e));}
+    }
+    return reply({
+    ok: dbReady, backend: "cloudflare-workers", database: dbReady ? "d1" : "unavailable",
     providers: {metNorway: "ready", kma: env.KMA_API_KEY && env.KMA_API_KEY !== "UNCONFIGURED" ? "configured" : "missing_secret",
       airKorea: env.AIRKOREA_API_KEY && env.AIRKOREA_API_KEY !== "UNCONFIGURED" ? "configured" : "missing_secret", wwis: "approval_required"},
     checkedAt: new Date().toISOString()
-  }, env.DB ? 200 : 503, origin, env);
+  }, dbReady ? 200 : 503, origin, env);
+  }
   if (!["/weatherApi", "/v1/weather"].includes(url.pathname)) return reply({error: "not_found"}, 404, origin, env);
   if (!env.DB) return reply({error: "weather_database_not_configured"}, 503, origin, env);
   let entry;
