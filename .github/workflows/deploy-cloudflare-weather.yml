@@ -84,6 +84,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+      DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
       AIRKOREA_API_KEY: ${{ secrets.AIRKOREA_API_KEY }}
     steps:
       - uses: actions/checkout@v4
