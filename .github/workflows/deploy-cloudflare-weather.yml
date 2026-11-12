@@ -11,8 +11,8 @@ on:
         description: 'Deployment target'
         required: true
         type: choice
-        options: [staging, production]
-        default: staging
+        options: [production]
+        default: production
       confirmation:
         description: 'Production only: type DEPLOY_PRODUCTION'
         required: false
@@ -20,7 +20,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: weatherhannun-cloudflare-v2-${{ github.event.inputs.target || 'staging' }}
+  group: weatherhannun-cloudflare-production
   cancel-in-progress: false
 jobs:
   verify:
@@ -71,16 +71,16 @@ jobs:
 
   deploy:
     needs: verify
-    if: ${{ github.event_name == 'push' || github.event.inputs.target == 'staging' || (github.event.inputs.target == 'production' && github.event.inputs.confirmation == 'DEPLOY_PRODUCTION') }}
+    if: ${{ github.event_name == 'push' || (github.event.inputs.target == 'production' && github.event.inputs.confirmation == 'DEPLOY_PRODUCTION') }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
-    environment: ${{ github.event.inputs.target == 'production' && 'cloudflare-weather-production' || 'cloudflare-weather' }}
+    environment: cloudflare-weather
     defaults:
       run:
         working-directory: services/cloudflare-weather
     env:
-      DEPLOY_STAGE: ${{ github.event.inputs.target == 'production' && 'production' || 'staging' }}
-      CONFIRM_PRODUCTION: ${{ github.event.inputs.confirmation }}
+      DEPLOY_STAGE: production
+      CONFIRM_PRODUCTION: DEPLOY_PRODUCTION
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
