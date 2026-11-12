@@ -678,7 +678,7 @@
     $("restoreLocation").addEventListener('click',function(){var saved=storeGet('weatherhannun_location');applyLocation(validLocation(saved)?saved:CITY_LIST[0],false);setView('today');});
     renderPresets();
     applyLocation(l,false);
-    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=42").catch(function(){});
+    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=43").catch(function(){});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
