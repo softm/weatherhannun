@@ -162,3 +162,24 @@ test('Cloudflare account avatar remains inside the header at desktop and mobile 
     await expect(account).toHaveAttribute('data-auth-state',/checking|guest|authenticated/);
   }
 });
+
+
+test('national map date and morning/afternoon tabs show KMA ISO +09:00 forecasts',async({page})=>{
+ await start(page);
+ await page.route('**/weatherApi?**',route=>{
+  const data=structuredClone(forecast);
+  data.hourly.time=data.hourly.time.slice(0,120).map(time=>time+':00+09:00');
+  return route.fulfill({json:canonical(data)});
+ });
+ await view(page,'map');
+ const city=page.locator('#nationalPins [data-national-city="1"] b');
+ await expect(city).not.toHaveText('--',{timeout:30000});
+ await expect(page.locator('[data-national-date="2026-11-07"]')).toBeDisabled({timeout:30000});
+ await page.locator('[data-national-date="2026-11-04"]').click();
+ await page.locator('[data-national-period="morning"]').click();
+ await expect(city).toHaveText('9.2°');
+ await page.locator('[data-national-period="afternoon"]').click();
+ await expect(city).toHaveText('16.8°');
+ await expect(page.locator('#nationalTime')).toContainText('오후 3시');
+ await expect(page.locator('[data-national-period="current"]')).toBeDisabled();
+});
