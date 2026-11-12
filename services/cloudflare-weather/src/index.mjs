@@ -44,6 +44,20 @@ async function save(env, entry, payload, at) {
       .bind(entry.key, entry.location.lat, entry.location.lon, entry.location.name, entry.location.stationName, entry.country, at, at)
   ]);
 }
+// Refresh stale cache without blocking users. A D1 conditional update provides a
+// two-minute per-location lease to avoid a burst of duplicate upstream requests.
+async function refreshStale(env, entry, now, dependencies = {}) {
+  const lease = await env.DB.prepare(
+    "UPDATE weather_locations SET last_synced_at_ms=? WHERE id=? AND last_synced_at_ms < ?"
+  ).bind(now, entry.key, now - 120000).run();
+  if (Number(lease?.meta?.changes || 0) !== 1) return;
+  try {
+    const payload = await (dependencies.collect || collect)(entry, env);
+    await save(env, entry, payload, Date.now());
+  } catch (e) {
+    console.warn("weather_stale_refresh_failed", entry.key, String(e?.message || e));
+  }
+}
 export async function handleRequest(request, env, ctx, dependencies = {}) {
   const origin = request.headers.get("Origin") || "";
   const url = new URL(request.url);
@@ -111,8 +125,11 @@ export async function handleRequest(request, env, ctx, dependencies = {}) {
       const stale = now - Number(record.fetched_at_ms) > ttlMs[entry.country];
       if (ctx?.waitUntil) ctx.waitUntil(markActive(env, entry, now, record.last_active_at_ms).catch(e =>
         console.warn("d1_location_registration_failed", String(e?.message || e))));
+      const refreshQueued = stale && Boolean(ctx?.waitUntil);
+      if (refreshQueued) ctx.waitUntil(refreshStale(env, entry, now, dependencies).catch(e =>
+        console.warn("weather_stale_refresh_unavailable", entry.key, String(e?.message || e))));
       return reply({...payload, location: {...payload.location, name: entry.location.name, lat: entry.location.lat, lon: entry.location.lon},
-        stale, cache: {hit: true, fallback: stale, refreshQueued: false}}, 200, origin, env,
+        stale, cache: {hit: true, fallback: stale, refreshQueued}}, 200, origin, env,
         "public, max-age=60, s-maxage=60");
     } catch (e) {console.warn("weather_cache_corrupt", String(e?.message || e));}
   }
