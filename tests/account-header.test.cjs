@@ -10,7 +10,8 @@ test("shared account UI mounts into the real weather header action slot", () => 
   const html = read("index.html");
   assert.match(html, /id="siteAccountSlot" class="top-actions topbar-actions"/);
   assert.match(html, /account-header\.js\?v=8/);
-  assert.match(html, /20261029-weather-header-1/);
+  assert.match(html, /cloudflare-weather-boot\.mjs\?site=weatherhannun&amp;v=20261112-cloudflare-account-1/);
+  assert.doesNotMatch(html, /shared\/platform\/v1\/boot\.mjs\?site=weatherhannun/);
 });
 
 // The common module owns the menu and its feedback. Weather only styles its
