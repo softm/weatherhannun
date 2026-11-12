@@ -1,0 +1,65 @@
+name: Deploy WeatherHannun Personal D1 Worker
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/cloudflare-personal/**'
+      - '.github/workflows/deploy-cloudflare-personal.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: weatherhannun-personal-deploy
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: services/cloudflare-personal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify syntax and security tests
+        run: |
+          node --check src/index.mjs
+          node --test test/*.test.mjs
+      - name: Verify Wrangler bundle
+        run: npx --yes wrangler@4 deploy --dry-run
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: cloudflare-weather
+    defaults:
+      run:
+        working-directory: services/cloudflare-personal
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require Cloudflare credentials
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::CLOUDFLARE_API_TOKEN missing"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::CLOUDFLARE_ACCOUNT_ID missing"; exit 1; }
+      - name: Check dedicated D1 schema
+        run: |
+          npx --yes wrangler@4 d1 execute weatherhannun-personal-db --remote --command "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('user_preferences','user_places') ORDER BY name;"
+      - name: Deploy isolated Worker (personal API remains fail-closed)
+        run: npx --yes wrangler@4 deploy
+      - name: Check deployed Worker health
+        run: |
+          node --input-type=module -e '
+            const url="https://weatherhannun-personal.softm.workers.dev/health";
+            const response=await fetch(url);
+            const data=await response.json();
+            console.log(JSON.stringify({status:response.status,ok:data.ok,database:data.database,personalizationApi:data.personalizationApi}));
+            if(!response.ok||data.database!=="personal-d1"||data.personalizationApi!=="pending_verified_auth")process.exit(1);
+          '
