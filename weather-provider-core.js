@@ -2,7 +2,7 @@
 (function(root,factory){"use strict";const api=factory();if(typeof module==="object"&&module.exports)module.exports=api;if(root)root.WeatherProviderCore=api;})(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
   const CONTRACT_VERSION="weatherhannun.v2";
-  const FORECAST_ENDPOINT="https://asia-northeast3-softm-hannun-api.cloudfunctions.net/weatherApi";
+  const FORECAST_ENDPOINT="https://weatherhannun-api.softm.workers.dev/weatherApi";
   const AIR_ENDPOINT=FORECAST_ENDPOINT;
   const OFFICIAL_SNAPSHOT_ENDPOINT="./data/official/latest.json";
   const PROVIDER=Object.freeze({id:"weatherhannun-common-api",name:"날씨한눈 공통 API",mode:"kma_primary_metno_global",forecastProduct:"국내 기상청·해외 MET Norway 예보",airProduct:"AirKorea 실측",licenseLabel:"공급자별 출처·관측·발표 시각 보존",commercialRightsVerified:true,observationAvailable:true,officialWarningsAvailable:true,radarAvailable:true});
