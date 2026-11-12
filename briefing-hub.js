@@ -23,15 +23,15 @@
   }
   function highlight(index){document.querySelectorAll(".brief-hub-sentence").forEach((x,i)=>x.classList.toggle("is-speaking",i===index));}
   function choose(id){selected=items.some(x=>x.id===id)?id:"summary";const item=items.find(x=>x.id===selected);if(!item)return;document.querySelectorAll("[data-brief-type]").forEach(x=>{const on=x.dataset.briefType===selected;x.classList.toggle("active",on);x.setAttribute("aria-pressed",String(on));});$("briefHubTitle").textContent=item.title;$("briefHubCaption").textContent=item.caption;paintText(item);$("briefHubEvidence").innerHTML=(item.evidence||[]).map(x=>`<span><small>${esc(x.label)}</small><b>${esc(x.value)}</b></span>`).join("");}
-  function setPlaying(active){const b=$("briefHubPlay");if(!b)return;b.classList.toggle("is-playing",active);b.querySelector(".brief-play-icon").textContent=active?"stop":"play_arrow";b.querySelector(".brief-play-label b").textContent=active?"재생 멈춤":"지금 듣기";b.querySelector(".brief-play-label small").textContent=active?"브리핑을 읽는 중":"HD 날씨 브리핑";}
-  function stop(message="재생을 멈췄습니다."){window.WeatherHannunCloudTTS?.stop?.();window.speechSynthesis?.cancel?.();playing=false;highlight(-1);setPlaying(false);if($("briefHubPlayStatus"))$("briefHubPlayStatus").textContent=message;}
+  function setPlaying(active){const b=$("briefHubPlay");if(!b)return;b.classList.toggle("is-playing",active);b.querySelector(".brief-play-icon").textContent=active?"stop":"play_arrow";b.querySelector(".brief-play-label b").textContent=active?"재생 멈춤":"지금 듣기";b.querySelector(".brief-play-label small").textContent=active?"브리핑을 읽는 중":"기기 음성 브리핑";}
+  function stop(message="재생을 멈췄습니다."){window.speechSynthesis?.cancel?.();playing=false;highlight(-1);setPlaying(false);if($("briefHubPlayStatus"))$("briefHubPlayStatus").textContent=message;}
   function devicePlay(item){
-    if(!("speechSynthesis" in window))return stop("이 기기에서는 음성 재생을 지원하지 않습니다.");const parts=sentenceNodes(item.text),utterance=new SpeechSynthesisUtterance(item.text);utterance.lang="ko-KR";utterance.rate=.96;utterance.onboundary=e=>{let count=0,index=0;parts.forEach((p,i)=>{if(count<=e.charIndex)index=i;count+=p.length;});highlight(index);};utterance.onend=()=>stop("브리핑 재생 완료");utterance.onerror=()=>stop("음성을 재생하지 못했습니다.");window.speechSynthesis.speak(utterance);
+    if(!("speechSynthesis" in window))return stop("이 기기에서는 음성 재생을 지원하지 않습니다.");const parts=sentenceNodes(item.text),utterance=new SpeechSynthesisUtterance(item.text);utterance.lang="ko-KR";utterance.rate=.96;utterance.onboundary=e=>{let count=0,index=0;parts.forEach((p,i)=>{if(count<=e.charIndex)index=i;count+=p.length;});highlight(index);};utterance.onend=()=>stop("브리핑 재생 완료");utterance.onerror=()=>stop("음성을 재생하지 못했습니다.");try{const korean=window.speechSynthesis.getVoices?.().find(v=>/^ko([-_]|$)/i.test(v.lang));if(korean)utterance.voice=korean;window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);$("briefHubPlayStatus").textContent="기기 음성으로 재생 중";}catch(error){stop("기기 음성 재생에 실패했습니다. 음성 언어 설정을 확인해 주세요.");}
   }
-  async function play(itemOverride){
-    const item=itemOverride?.text?itemOverride:items.find(x=>x.id===selected);if(!item)return;if(playing)return stop();playing=true;setPlaying(true);
-    const cloud=window.WeatherHannunCloudTTS;if(!cloud?.configured?.())return devicePlay(item);
-    try{await cloud.play(item.text,{onSentence:highlight,onStatus:message=>$("briefHubPlayStatus").textContent=message});stop("HD 브리핑 재생 완료");}catch(error){if(error?.name==="AbortError")return;$("briefHubPlayStatus").textContent="HD 음성 연결 실패 · 기기 음성으로 전환";devicePlay(item);}
+  function play(itemOverride){
+    const item=itemOverride?.text?itemOverride:items.find(x=>x.id===selected);if(!item)return;
+    if(playing)return stop();
+    playing=true;setPlaying(true);devicePlay(item);
   }
   function render(data){payload=data;items=window.WeatherHannunBriefingHubCore?.build(data)||[];const list=$("briefHubTypes");if(!list)return;list.innerHTML=items.map(x=>`<button type="button" data-brief-type="${x.id}" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">${x.icon}</span><span><b>${esc(x.title)}</b><small>${esc(x.caption)}</small></span></button>`).join("");choose(selected);}
   async function notify(item,tap){
