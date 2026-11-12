@@ -19,21 +19,27 @@
   container.append(button,info);holder.after(container);
   button.addEventListener('click',async()=>{
    if(busy)return;
-   const client=account();
-   if(!client?.currentUser||typeof client.requestPersonal!=='function'){
+   const context=account();
+   if(!context?.currentUser){
     info.textContent='공통 계정으로 먼저 로그인해 주세요.';return;
    }
    if(!confirm('이 기기의 저장 지역과 계정의 저장 지역을 병합합니다. GPS 현재 위치는 업로드하지 않습니다. 계속할까요?'))return;
    busy=true;button.disabled=true;info.textContent='동기화 중…';
    try{
+    const client=await context.ready();
+    if(typeof client?.requestPersonal!=='function')throw Error('계정 개인화 연동을 불러오지 못했습니다.');
     const remote=await client.requestPersonal('/api/personal/places');
-    const local=safePlaces().filter(p=>p&&p.source!=='gps'&&p.id&&/^[A-Za-z0-9_-]{1,80}$/.test(p.id)&&Number.isFinite(p.lat)&&Number.isFinite(p.lon));
+    const saved=safePlaces();
+    const local=(Array.isArray(saved)?saved:[]).filter(p=>p&&p.source!=='gps'&&Number.isFinite(p.lat)&&p.lat>=-90&&p.lat<=90&&Number.isFinite(p.lon)&&p.lon>=-180&&p.lon<=180).slice(0,10);
     const existing=new Map((remote.places||[]).map(p=>[p.id,p]));
     for(const [i,p] of local.entries()){
-     if(existing.has(p.id))continue; // server wins on same ID; never overwrite
-     const place={id:p.id,label:String(p.name||p.address||'저장 지역').slice(0,80),latitude:p.lat,longitude:p.lon,sortOrder:i,isDefault:false};
+     // Local IDs contain colons and decimals, which are invalid remote ID characters.
+     // Convert their normalized coordinates to a stable, URL-safe remote ID.
+     const id='loc_'+p.lat.toFixed(3).replace('.', '_')+'_'+p.lon.toFixed(3).replace('.', '_');
+     if(existing.has(id))continue; // server wins on same ID; never overwrite
+     const place={id,label:String(p.name||p.address||'저장 지역').slice(0,80),latitude:p.lat,longitude:p.lon,sortOrder:i,isDefault:false};
      await client.requestPersonal('/api/personal/places','PUT',{place});
-     existing.set(p.id,place);
+     existing.set(id,place);
     }
     const merged=await client.requestPersonal('/api/personal/places');
     // Keep the local list unchanged until a deliberate restore is implemented.
