@@ -23,7 +23,7 @@ async function collect(entry, env) {
   const payload = entry.country === "KR"
     ? await collectKma(entry.location, env.KMA_API_KEY, options)
     : await collectMetNorway(entry.location, options);
-  if (entry.country === "KR" && env.AIRKOREA_API_KEY && entry.location.stationName) {
+  if (entry.country === "KR" && env.AIRKOREA_API_KEY && env.AIRKOREA_API_KEY !== "UNCONFIGURED") {
     try {payload.airQuality = await collectAirKorea(entry.location, env.AIRKOREA_API_KEY, options);}
     catch (e) {console.warn("airkorea_unavailable", String(e?.message || e));}
   }
