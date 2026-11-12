@@ -10,7 +10,7 @@ test("shared account UI mounts into the real weather header action slot", () => 
   const html = read("index.html");
   assert.match(html, /id="siteAccountSlot" class="top-actions topbar-actions"[^>]*min-width:44px/);
   assert.match(html, /account-header\.js\?v=9/);
-  assert.match(html, /cloudflare-weather-boot\.mjs\?site=weatherhannun&amp;v=20261113-cloudflare-account-3/);
+  assert.match(html, /cloudflare-weather-boot\.mjs\?site=weatherhannun&amp;v=20261113-weather-native-1/);
   assert.doesNotMatch(html, /shared\/platform\/v1\/boot\.mjs\?site=weatherhannun/);
 });
 
