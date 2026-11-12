@@ -1,5 +1,27 @@
 # 날씨한눈 공통 계정·사이트별 보관소
 
+2026-11-12 · **날씨한눈 웹의 로그인은 Cloudflare 공통 계정으로 전환**했습니다.
+
+## 현재 기본 로그인
+
+- 서버: [Cloudflare 공통 계정](https://softm-hannun-account.softm.workers.dev/account) (`softm-hannun-account`, D1)
+- 연결: 날씨한눈 헤더의 로그인·회원가입 → Cloudflare OAuth 팝업 → 사이트 인증 코드 교환
+- 날씨한눈 페이지의 기본 계정 초기화에서는 Firebase Auth/Firestore SDK를 불러오지 않습니다.
+- 기존 기기에 저장된 위치·즐겨찾기·설정(LocalStorage)은 변경하지 않습니다.
+- **기존 Firebase의 암호화 백업은 Cloudflare D1로 자동 이전되지 않았으며 삭제하지 않았습니다.**
+- 새 Cloudflare 계정에는 아직 날씨한눈 원격 보관소 저장·복원을 연결하지 않았습니다. 서로 다른 UID에 암호문을 잘못 쓰지 않기 위한 조치입니다.
+
+## 기존 Firebase 보관소가 필요한 경우
+
+날씨한눈 계정 메뉴의 **이전 보관소 확인 (Firebase)**을 선택하거나
+`https://softm.github.io/weatherhannun/?legacyAccount=1`을 열면 기존 보관소 화면을 명시적으로 사용할 수 있습니다.
+해당 모드에서만 이전 Firebase SDK가 로드되므로 기존 로그인·암호를 통해 자료를 확인할 수 있습니다.
+복원이 실제 기기 저장 데이터를 변경할 수 있으므로 보관소 확인·복원 전에 기존 데이터를 따로 백업하는 것이 안전합니다.
+
+아래 내용은 **선택형 기존 Firebase 보관소 모드**에만 해당합니다.
+
+---
+
 2026-10-28. 공통 SDK 원본은 [softm.github.io](https://github.com/softm/softm.github.io/tree/main/shared/platform/v1), 운영 계정 허브는 https://softm.github.io/account/ 입니다.
 
 저장 범위: **저장한 지역·선택 위치·활동 설정·맞춤 설정**, 이 사이트의 개인 메모. 인증 토큰·광고 저장소·공공데이터 캐시는 포함하지 않습니다.
