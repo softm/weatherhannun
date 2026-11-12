@@ -31,7 +31,11 @@ export async function handleRequest(request,env,dependencies={}){
  if(!path.startsWith('/api/personal/'))return json({error:'not_found'},404,origin);
  if(!env.PERSONAL_DB)return json({error:'database_unavailable'},503,origin);
  let uid;
- try{uid=await identity(request,origin,dependencies.fetch||fetch);}
+ try{
+  const accountFetch=dependencies.fetch||env.ACCOUNT?.fetch?.bind(env.ACCOUNT);
+  if(!accountFetch)return json({error:'identity_service_unavailable'},503,origin);
+  uid=await identity(request,origin,accountFetch);
+ }
  catch{return json({error:'identity_service_unavailable'},503,origin);}
  if(!uid)return json({error:'unauthorized'},401,origin);
  const db=env.PERSONAL_DB;
