@@ -17,9 +17,9 @@ test("shared account UI mounts into the real weather header action slot", () => 
 // The common module owns the menu and its feedback. Weather only styles its
 // host; it must never hide it, proxy authentication buttons or move it again.
 function fixture({readyState="complete",present=true,ui="icon-menu-v2"}={}) {
-  const styles=new Map(),classes=new Set(),slotClasses=new Set(["top-actions","topbar-actions"]),events={};
+  const styles=new Map(),slotStyles=new Map(),classes=new Set(),slotClasses=new Set(["top-actions","topbar-actions"]),events={};
   const host={dataset:{accountUi:ui},style:{setProperty:(name,value)=>styles.set(name,value)},classList:{add:name=>classes.add(name)}};
-  const slot={classList:{remove:name=>slotClasses.delete(name)}};
+  const slot={classList:{remove:name=>slotClasses.delete(name)},style:{setProperty:(name,value)=>slotStyles.set(name,value)}};
   const state={present};
   const document={readyState,
     querySelector(selector){assert.equal(selector,'softm-site-account[data-site="weatherhannun"]');return state.present?host:null;},
@@ -28,7 +28,7 @@ function fixture({readyState="complete",present=true,ui="icon-menu-v2"}={}) {
   };
   const window={addEventListener(type,fn){events[type]=fn;}};
   vm.runInNewContext(read("account-header.js"),{document,window});
-  return {styles,classes,slotClasses,events,state};
+  return {styles,slotStyles,classes,slotClasses,events,state};
 }
 
 test("account integration keeps the shared icon visible without a duplicate menu", () => {
@@ -39,6 +39,8 @@ test("account integration keeps the shared icon visible without a duplicate menu
   assert.equal(f.classes.has("weather-account-host"),true);
   assert.equal(f.slotClasses.has("topbar-actions"),false);
   assert.equal(f.slotClasses.has("top-actions"),true);
+  assert.equal(f.slotStyles.get("min-width"),"44px");
+  assert.equal(f.slotStyles.get("margin-left"),"auto");
   const source=read("account-header.js");
   assert.doesNotMatch(source,/weatherAccountToggle|weatherAccountButton|createElement|innerHTML|\.append\(/);
   assert.doesNotMatch(source,/setProperty\(['"]display['"],\s*['"]none['"]/);
