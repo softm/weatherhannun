@@ -71,8 +71,11 @@ test('visible narrator, 10/30-second modes, saved region and temporary map selec
  await start(page);await expect(page.locator('.rain-decision-card')).toBeHidden();const short=await page.locator('.stitch-caster-briefing').textContent();
  await page.locator('[data-brief-mode="detail"]').click();await expect(page.locator('[data-brief-mode="detail"]')).toHaveAttribute('aria-pressed','true');
  expect((await page.locator('.stitch-caster-briefing').textContent()).length).toBeGreaterThan(short.length);
- await page.evaluate(()=>{window.WeatherHannunCloudTTS={configured:()=>true,stop(){},play:async text=>{window.testSpoken=text;}};});
+ // Stub the browser's device speech engine (not the discontinued Google Cloud TTS).
+ await page.evaluate(()=>{window.speechSynthesis.cancel=()=>{};window.speechSynthesis.speak=utterance=>{window.testSpoken=utterance.text;};});
+ const cloudSpeechRequests=[];page.on('request',request=>{if(request.url().includes('weatherBriefingTts'))cloudSpeechRequests.push(request.url());});
  await page.locator('[data-stitch-brief-play]').click();expect(await page.evaluate(()=>window.testSpoken)).toContain('서울');
+ expect(cloudSpeechRequests).toEqual([]);
  await page.locator('[data-location-save-current]').click();
  const saved=await page.evaluate(()=>localStorage.getItem('weatherhannun_location'));
  await view(page,'map');await page.locator('[data-national-city="1"]').click();
