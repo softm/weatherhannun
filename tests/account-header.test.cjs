@@ -9,7 +9,7 @@ const read = file => fs.readFileSync(file, "utf8");
 test("shared account UI mounts into the real weather header action slot", () => {
   const html = read("index.html");
   assert.match(html, /id="siteAccountSlot" class="top-actions topbar-actions"/);
-  assert.match(html, /account-header\.js\?v=8/);
+  assert.match(html, /account-header\.js\?v=9/);
   assert.match(html, /cloudflare-weather-boot\.mjs\?site=weatherhannun&amp;v=20261112-cloudflare-account-1/);
   assert.doesNotMatch(html, /shared\/platform\/v1\/boot\.mjs\?site=weatherhannun/);
 });
@@ -66,5 +66,5 @@ test("DOMContentLoaded alignment is safe for missing or older hosts", () => {
 test("offline shell includes the account header integration", () => {
   const worker=read("sw.js");
   assert.match(worker,/weatherhannun-shell-v103-device-tts/);
-  assert.match(worker,/account-header\.js\?v=8/);
+  assert.match(worker,/account-header\.js\?v=9/);
 });
