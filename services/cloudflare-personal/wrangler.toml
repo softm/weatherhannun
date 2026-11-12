@@ -6,9 +6,8 @@ workers_dev = true
 [vars]
 ALLOWED_ORIGINS = "https://softm.github.io"
 
-# Set the actual UUID after provisioning the dedicated D1 database.
 [[d1_databases]]
 binding = "PERSONAL_DB"
 database_name = "weatherhannun-personal-db"
-database_id = "__PERSONAL_D1_DATABASE_ID__"
+database_id = "505f9500-8071-4680-8f8b-a3888f1d870f"
 migrations_dir = "migrations"
