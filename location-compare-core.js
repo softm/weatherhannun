@@ -4,7 +4,7 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.WeatherHannunLocationCompare = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
-  var FORECAST_ENDPOINT = "https://asia-northeast3-softm-hannun-api.cloudfunctions.net/weatherApi";
+  var FORECAST_ENDPOINT = "https://weatherhannun-api.softm.workers.dev/weatherApi";
 
   function finite(value) {
     return typeof value === "number" && Number.isFinite(value);
