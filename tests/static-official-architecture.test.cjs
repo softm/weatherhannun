@@ -5,10 +5,10 @@ const path = require("node:path");
 
 const read = file => fs.readFileSync(path.join(__dirname, "..", file), "utf8");
 
-test("first-screen forecast uses the common Firebase API and keeps the official snapshot enhancement", () => {
+test("first-screen forecast uses the common Cloudflare API and keeps the official snapshot enhancement", () => {
   const app = read("app.js");
   const provider = read("weather-provider-core.js");
-  assert.match(provider, /cloudfunctions\.net\/weatherApi/);
+  assert.match(provider, /weatherhannun-api\.softm\.workers\.dev\/weatherApi/);
   assert.match(app, /buildForecastUrl/);
   assert.doesNotMatch(app, /buildLegacyForecastUrl/);
   assert.match(app, /staticOfficial:true/);
