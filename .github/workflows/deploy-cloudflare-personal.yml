@@ -66,5 +66,5 @@ jobs:
             const response=await fetch(url);
             const data=await response.json();
             console.log(JSON.stringify({status:response.status,ok:data.ok,database:data.database,personalizationApi:data.personalizationApi}));
-            if(!response.ok||data.database!=="personal-d1"||data.personalizationApi!=="pending_verified_auth")process.exit(1);
+            if(!response.ok||data.database!=="personal-d1"||data.personalizationApi!=="authenticated")process.exit(1);
           '
