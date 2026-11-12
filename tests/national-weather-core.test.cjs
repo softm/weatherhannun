@@ -38,3 +38,33 @@ test('임시 조회 예보는 Android 알림과 위젯·화면날씨에 저장�
  assert.equal(context.updateSnapshot({loc:{name:'서울',temporary:true}}),false);
  assert.equal(context.latestWeather.loc.name,'원래 위치');
 });
+
+test('Cloudflare KMA ISO +09:00 응답에서 날짜별 오전 9시·오후 3시 기온을 찾는다',()=>{
+ const p={current:{temperature_2m:11},hourly:{
+   time:['2026-11-14T09:00:00+09:00','2026-11-14T15:00:00+09:00','2026-11-15T09:00:00+09:00'],
+   temperature_2m:[6,13,7],weather_code:[1,3,2],is_day:[1,1,1]
+ }};
+ assert.equal(core.sample(p,'2026-11-14','morning','2026-11-12').temperature_2m,6);
+ assert.equal(core.sample(p,'2026-11-14','afternoon','2026-11-12').temperature_2m,13);
+ assert.equal(core.sample(p,'2026-11-15','morning','2026-11-12').temperature_2m,7);
+ assert.equal(core.sample(p,'2026-11-16','morning','2026-11-12'),null);
+ assert.deepEqual(core.forecastDates([p,null]),['2026-11-14','2026-11-15']);
+});
+test('3시간 간격 예보는 가까운 시각만 사용하며 날짜·시간대는 섞지 않는다',()=>{
+ const p={hourly:{time:[
+   '2026-11-15T10:00:00+09:00','2026-11-15T16:00:00+09:00',
+   '2026-11-16T00:00:00+09:00'
+ ],temperature_2m:[8,14,4],weather_code:[0,2,3],is_day:[1,1,0]}};
+ assert.equal(core.sample(p,'2026-11-15','morning','2026-11-12').temperature_2m,8);
+ assert.equal(core.sample(p,'2026-11-15','afternoon','2026-11-12').temperature_2m,14);
+ assert.equal(core.sample(p,'2026-11-16','morning','2026-11-12'),null);
+ assert.equal(core.kstClock('2026-11-14T00:00:00Z').date,'2026-11-14');
+ assert.equal(core.kstClock('2026-11-14T00:00:00Z').minute,540);
+});
+test('전국 지도는 미발표 날짜를 비활성화하고 API 갱신 중 지역별 조회 진행을 표시한다',()=>{
+ const source=fs.readFileSync(require.resolve('../app.js'),'utf8');
+ assert.match(source,/core\.forecastDates\(nationalPayloads\)/);
+ assert.match(source,/disabled title="기상청 단기예보가 아직 발표되지 않았습니다/);
+ assert.match(source,/전국 예보 조회 중…/);
+ assert.match(source,/Math\.min\(5,cities\.length\)/);
+});
