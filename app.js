@@ -504,23 +504,72 @@
     var core=window.WeatherNationalCore;if(!core)return;
     nationalDays=core.dates();
     if(!nationalDays.includes(nationalDate))nationalDate=nationalDays[0];
-    $("nationalDates").innerHTML=nationalDays.map(function(day,i){var d=localDate(day);return '<button type="button" data-national-date="'+day+'" aria-pressed="'+(day===nationalDate)+'"><span>'+new Intl.DateTimeFormat('ko-KR',{weekday:'short',timeZone:'Asia/Seoul'}).format(d)+'</span><small>'+(i===0?'오늘':day.slice(5).replace('-','.'))+'</small></button>';}).join('');
-    document.querySelectorAll('[data-national-period]').forEach(function(b){b.disabled=b.dataset.nationalPeriod==='current'&&nationalDate!==nationalDays[0];b.setAttribute('aria-pressed',String(b.dataset.nationalPeriod===nationalPeriod));});
-    var missing=0;
-    $("nationalPins").innerHTML=core.cities.map(function(city,i){var v=core.sample(nationalPayloads?.[i],nationalDate,nationalPeriod,nationalDays[0]);var valid=v&&finite(v.temperature_2m);if(!valid)missing++;var sym=weatherSymbol(valid?v.weather_code:undefined,v?.is_day);return '<button type="button" class="national-city" data-national-city="'+i+'" style="left:'+city.x+'%;top:'+city.y+'%" aria-label="'+safe(city.name+' '+(valid?num(v.temperature_2m,1)+'도 '+sym.name:'자료 없음')+' 상세 날씨 임시 조회')+'"><span class="national-icon" aria-hidden="true">'+sym.icon+'</span><span>'+safe(city.name)+'</span><b>'+(valid?num(v.temperature_2m,1)+'°':'--')+'</b></button>';}).join('');
-    $("nationalTime").textContent=nationalDate+' · '+(nationalPeriod==='current'?'현재 시각':nationalPeriod==='morning'?'오전 9시':'오후 3시')+' 모델 예보'+(missing?' · '+missing+'곳 자료 없음':'')+(nationalFetched?' · 조회 '+new Date(nationalFetched).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Seoul'}):'')+(nationalFailed?' · 갱신 실패, 이전 자료':'');
+    // KMA's short-term API does not promise seven days. Keep the seven-day
+    // selector visible, but disable dates that have not been published.
+    var issued=nationalFetched?core.forecastDates(nationalPayloads):[];
+    if(issued.length&&nationalDate!==nationalDays[0]&&!issued.includes(nationalDate)){
+      nationalDate=issued.filter(function(day){return nationalDays.includes(day);}).at(-1)||nationalDays[0];
+      if(nationalPeriod==="current")nationalPeriod="morning";
+    }
+    $("nationalDates").innerHTML=nationalDays.map(function(day,i){
+      var d=localDate(day),unavailable=issued.length>0&&i>0&&!issued.includes(day);
+      return '<button type="button" data-national-date="'+day+'" aria-pressed="'+(day===nationalDate)+'"'+(unavailable?' disabled title="기상청 단기예보가 아직 발표되지 않았습니다."':'')+'><span>'+new Intl.DateTimeFormat('ko-KR',{weekday:'short',timeZone:'Asia/Seoul'}).format(d)+'</span><small>'+(i===0?'오늘':day.slice(5).replace('-','.'))+'</small></button>';
+    }).join('');
+    document.querySelectorAll('[data-national-period]').forEach(function(b){
+      b.disabled=b.dataset.nationalPeriod==='current'&&nationalDate!==nationalDays[0];
+      b.setAttribute('aria-pressed',String(b.dataset.nationalPeriod===nationalPeriod));
+    });
+    var missing=0,available=0;
+    $("nationalPins").innerHTML=core.cities.map(function(city,i){
+      var v=core.sample(nationalPayloads?.[i],nationalDate,nationalPeriod,nationalDays[0]);
+      var valid=v&&finite(v.temperature_2m);
+      if(valid)available++;else missing++;
+      var sym=weatherSymbol(valid?v.weather_code:undefined,v?.is_day);
+      return '<button type="button" class="national-city" data-national-city="'+i+'" style="left:'+city.x+'%;top:'+city.y+'%" aria-label="'+safe(city.name+' '+(valid?num(v.temperature_2m,1)+'도 '+sym.name:'선택 시각 예보 없음')+' 상세 날씨 임시 조회')+'"><span class="national-icon" aria-hidden="true">'+sym.icon+'</span><span>'+safe(city.name)+'</span><b>'+(valid?num(v.temperature_2m,1)+'°':'--')+'</b></button>';
+    }).join('');
+    var label=nationalDate+' · '+(nationalPeriod==='current'?'현재 시각':nationalPeriod==='morning'?'오전 9시':'오후 3시')+' 모델 예보';
+    if(nationalFetched&&!available&&!nationalBusy){
+      var clock=new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+      var target=nationalPeriod==='morning'?'09:00':nationalPeriod==='afternoon'?'15:00':null;
+      label+=nationalDate===nationalDays[0]&&target&&clock>target?' · 지난 시각 예보는 제공되지 않습니다':' · 해당 시각 예보가 발표되지 않았습니다';
+    }else if(missing)label+=' · '+missing+'곳 자료 없음';
+    if(nationalFetched)label+=' · 조회 '+new Date(nationalFetched).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Seoul'});
+    if(nationalFailed)label+=' · 일부 지역 갱신 실패';
+    $("nationalTime").textContent=label;
   }
   async function loadNationalWeather(force){
     if(!window.WeatherNationalCore||nationalBusy)return;
-    if(nationalPayloads&&!force&&Date.now()-nationalFetched<15*60000){renderNationalWeather();return;}
-    nationalBusy=true;$("nationalReload").disabled=true;renderNationalWeather();$("nationalTime").textContent='전국 예보를 불러오는 중…';
+    if(nationalPayloads&&!nationalFailed&&!force&&Date.now()-nationalFetched<15*60000){renderNationalWeather();return;}
+    nationalBusy=true;$("nationalReload").disabled=true;
+    var cities=window.WeatherNationalCore.cities;
+    var previous=nationalPayloads?.slice()||Array(cities.length).fill(null);
+    var next=previous.slice(),cursor=0,done=0,succeeded=0,failed=0;
+    nationalPayloads=next;
+    renderNationalWeather();$("nationalTime").textContent='전국 예보를 불러오는 중…';
     try{
-      var cities=window.WeatherNationalCore.cities;
-      var results=await Promise.allSettled(cities.map(function(city){return fetchUnifiedWeather(city);}));
-      if(results.every(function(result){return result.status!=="fulfilled";}))throw new Error('전국 예보 응답을 확인할 수 없습니다.');
-      nationalPayloads=results.map(function(result){return result.status==="fulfilled"?result.value.weather:null;});nationalFetched=Date.now();nationalFailed=false;renderNationalWeather();
-    }catch(e){nationalFailed=true;$("nationalTime").textContent='전국 예보 연결 실패'+(nationalPayloads?' · 이전 조회 자료 표시':' · 다시 시도해 주세요');}
-    finally{nationalBusy=false;$("nationalReload").disabled=false;}
+      // Bound upstream concurrency and render completed cities immediately.
+      await Promise.all(Array.from({length:Math.min(5,cities.length)},async function(){
+        while(true){
+          var i=cursor++;if(i>=cities.length)return;
+          try{
+            var response=await fetchUnifiedWeather(cities[i],13000);
+            if(!Array.isArray(response.weather?.hourly?.time)||!response.weather.hourly.time.length)throw new Error('예보 시간 없음');
+            next[i]=response.weather;succeeded++;
+          }catch(error){failed++;}
+          done++;renderNationalWeather();
+          $("nationalTime").textContent='전국 예보 조회 중… '+done+'/'+cities.length+'곳';
+        }
+      }));
+      if(!succeeded&&!next.some(Boolean))throw new Error('전국 예보 응답을 확인할 수 없습니다.');
+      nationalPayloads=next;nationalFetched=Date.now();nationalFailed=failed>0;
+    }catch(error){
+      nationalFailed=true;
+      $("nationalTime").textContent='전국 예보 연결 실패'+(next.some(Boolean)?' · 이전 조회 자료 표시':' · 다시 시도해 주세요');
+      return;
+    }finally{
+      nationalBusy=false;$("nationalReload").disabled=false;
+    }
+    renderNationalWeather();
   }
   function searchDialogOpen(){
     $("locationDialog").showModal();
