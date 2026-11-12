@@ -28,7 +28,10 @@ jobs:
           node --check src/index.mjs
           node --test test/*.test.mjs
       - name: Verify Wrangler bundle
-        run: npx --yes wrangler@4 deploy --dry-run
+        run: |
+          set -o pipefail
+          npx --yes wrangler@4 deploy | tee deploy.log
+          node --input-type=module -e 'import fs from "node:fs"; const t=fs.readFileSync("deploy.log","utf8"); const urls=[...t.matchAll(/https:\/\/[a-z0-9.-]+\.workers\.dev/gi)].map(m=>m[0]); if(!urls.length)process.exit(2); fs.writeFileSync("worker-url.txt",urls[urls.length-1]); console.log("Worker URL:",urls[urls.length-1]);' --dry-run
   deploy:
     needs: verify
     runs-on: ubuntu-latest
@@ -57,7 +60,9 @@ jobs:
       - name: Check deployed Worker health
         run: |
           node --input-type=module -e '
-            const url="https://weatherhannun-personal.softm.workers.dev/health";
+            const fs=await import("node:fs");
+            const url=fs.readFileSync("worker-url.txt","utf8").trim()+"/health";
+            console.log("Checking",url);
             const response=await fetch(url);
             const data=await response.json();
             console.log(JSON.stringify({status:response.status,ok:data.ok,database:data.database,personalizationApi:data.personalizationApi}));
