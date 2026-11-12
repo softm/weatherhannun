@@ -301,6 +301,18 @@
   window.WeatherLocationManager={
     requestCurrentPosition,
     getSavedPlaces:()=>places.map(place=>({...place})),
+    // Explicit cloud restore only. Never deletes or silently replaces existing local places.
+    mergeCloudPlaces:incoming=>{
+      const before=places.length;
+      const merged=core.collection([...places,...(Array.isArray(incoming)?incoming:[])]);
+      const added=merged.length-before;
+      if(added&&store(STORAGE,merged)){
+        places=merged;render();notifyPlaces();
+        return {ok:true,added,total:merged.length};
+      }
+      if(added)return {ok:false,added:0,total:before};
+      return {ok:true,added:0,total:before};
+    },
     getActiveLocation:()=>active?{...active}:null
   };
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
