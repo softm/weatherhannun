@@ -71,6 +71,67 @@ test("stale cache still renders last-good weather marked stale", async () => {
   assert.equal(json.location.name, "Gwangmyeong");
   assert.equal(json.cache.hit, true);
 });
+test("stale D1 cache refreshes in background and keeps response fast", async () => {
+  const record = {payload: JSON.stringify(payload), fetched_at_ms: Date.now() - 720000,
+    last_active_at_ms: Date.now()};
+  const saved = [];
+  let collected = 0;
+  const db = {
+    prepare(sql) {
+      return {
+        bind(...params) {
+          return {
+            first: async () => record,
+            run: async () => ({meta: {changes: sql.startsWith("UPDATE weather_locations") ? 1 : 0}}),
+            all: async () => ({results: []})
+          };
+        },
+        first: async () => record
+      };
+    },
+    batch: async commands => {saved.push(commands.length); return [{success:true}];}
+  };
+  const jobs = [];
+  const res = await request("/weatherApi?lat=37.5665&lon=126.978",
+    {DB: db, KMA_API_KEY: "test-key"},
+    {waitUntil: job => jobs.push(job)},
+    {collect: async () => {collected++; return payload;}});
+  const body = await res.json();
+  assert.equal(res.status, 200);
+  assert.equal(body.stale, true);
+  assert.equal(body.cache.refreshQueued, true);
+  assert.equal(jobs.length, 2); // last-active registration and stale refresh
+  await Promise.all(jobs);
+  assert.equal(collected, 1);
+  assert.deepEqual(saved, [2]);
+});
+test("stale D1 cache refresh is throttled by the location lease", async () => {
+  const record = {payload: JSON.stringify(payload), fetched_at_ms: Date.now() - 720000,
+    last_active_at_ms: Date.now()};
+  let collected = 0;
+  const db = {
+    prepare(sql) {
+      return {
+        bind() {
+          return {
+            first: async () => record,
+            run: async () => ({meta: {changes: 0}}),
+            all: async () => ({results: []})
+          };
+        },
+        first: async () => record
+      };
+    },
+    batch: async () => {throw Error("should not write");}
+  };
+  const jobs = [];
+  const res = await request("/weatherApi?lat=37.5665&lon=126.978",
+    {DB: db}, {waitUntil: job => jobs.push(job)},
+    {collect: async () => {collected++; return payload;}});
+  assert.equal((await res.json()).cache.refreshQueued, true);
+  await Promise.all(jobs);
+  assert.equal(collected, 0);
+});
 test("missing official API key returns explicit 503 and never fabricates weather", async () => {
   const r = await request("/weatherApi?lat=37.5665&lon=126.978", {DB: fakeDb().DB}, {},
     {collect: async () => {throw new Error("kma_key_missing");}});
