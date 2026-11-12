@@ -57,7 +57,13 @@
     utterance=next;setActiveSentence(0);
     const button=$("briefingPlay");if(button){button.classList.add("is-playing");button.setAttribute("aria-pressed","true");button.querySelector(".material-symbols-outlined").textContent="stop";button.querySelector("span:last-child").textContent="재생 멈춤";}
     const status=$("briefingPlayStatus");if(status)status.textContent="브리핑을 재생합니다.";
-    window.speechSynthesis.speak(next);
+    try {
+      const korean=window.speechSynthesis.getVoices?.().find(voice=>/^ko([-_]|$)/i.test(voice.lang));
+      if(korean)next.voice=korean;
+      window.speechSynthesis.speak(next);
+    } catch(error) {
+      stopBriefing("기기 음성 재생에 실패했습니다. 음성 언어 설정을 확인해 주세요.");
+    }
   }
   function evidenceText(e){return '<div class="brief-evidence-pair"><dt>'+esc(e.label)+'</dt><dd>'+esc(e.value)+'</dd></div>';}
   function showMode(next){
