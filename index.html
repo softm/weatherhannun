@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f0f6fc">
-  <meta name="weatherhannun-tts-endpoint" content="https://asia-northeast3-softm-hannun-api.cloudfunctions.net/weatherBriefingTts/v1/briefing/speech">
   <meta name="description" content="오늘 무엇을 하기 좋은 날씨일까? 날씨한눈 — 시간별 날씨, 농작업·산책·빨래·세차 적합 시간, 대기질과 전국 비교.">
   <meta property="og:title" content="날씨한눈 — 예보를 행동으로">
   <meta property="og:description" content="날씨를 확인하고, 가장 좋은 시간을 고르세요.">
@@ -48,7 +47,6 @@
   <script defer src="./briefing-core.js?v=33"></script>
   <script defer src="./startup-briefing-core.js?v=46"></script>
   <script defer src="./briefing-highlights.js?v=20"></script>
-  <script defer src="./briefing-cloud-tts.js?v=1"></script>
   <script defer src="./briefing-ui.js?v=22"></script>
   <script defer src="./briefing-hub-core.js?v=1"></script>
   <script defer src="./briefing-hub.js?v=2"></script>
@@ -193,7 +191,7 @@
       <section id="view-briefing" class="screen content-bound" aria-label="맞춤 날씨 브리핑">
         <header class="brief-hub-lead"><div><span class="section-overline">PERSONAL WEATHER AUDIO</span><h2>브리핑 · 알림</h2><p>필요한 날씨만 골라 듣고, 원하는 시각에 받아보세요.</p></div><span class="brief-schedule-status" id="briefScheduleStatus">예약 브리핑 꺼짐</span></header>
         <div class="brief-hub-grid">
-          <article class="brief-hub-player stitch-card" aria-live="polite"><div class="brief-player-head"><div><span class="section-overline">NOW READY</span><h3 id="briefHubTitle">한눈 요약</h3><p id="briefHubCaption">지금 가장 중요한 변화</p></div><button type="button" id="briefHubPlay" class="brief-hub-play" aria-label="선택한 날씨 브리핑 지금 듣기"><span class="brief-play-icon material-symbols-outlined" aria-hidden="true">play_arrow</span><span class="brief-play-label"><b>지금 듣기</b><small>HD 날씨 브리핑</small></span><span class="brief-sound-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button></div><div id="briefHubText" class="brief-hub-copy">최신 예보를 연결하고 있습니다.</div><div class="brief-hub-meta"><span id="briefHubPlayStatus" class="brief-hub-status"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span> HD 음성 준비 · 실패 시 기기 음성</span><span>읽는 문장을 자동으로 강조합니다</span></div><div id="briefHubEvidence" class="brief-hub-evidence"></div></article>
+          <article class="brief-hub-player stitch-card" aria-live="polite"><div class="brief-player-head"><div><span class="section-overline">NOW READY</span><h3 id="briefHubTitle">한눈 요약</h3><p id="briefHubCaption">지금 가장 중요한 변화</p></div><button type="button" id="briefHubPlay" class="brief-hub-play" aria-label="선택한 날씨 브리핑 지금 듣기"><span class="brief-play-icon material-symbols-outlined" aria-hidden="true">play_arrow</span><span class="brief-play-label"><b>지금 듣기</b><small>기기 음성 브리핑</small></span><span class="brief-sound-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button></div><div id="briefHubText" class="brief-hub-copy">최신 예보를 연결하고 있습니다.</div><div class="brief-hub-meta"><span id="briefHubPlayStatus" class="brief-hub-status"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span> HD 음성 준비 · 실패 시 기기 음성</span><span>읽는 문장을 자동으로 강조합니다</span></div><div id="briefHubEvidence" class="brief-hub-evidence"></div></article>
           <aside class="brief-type-panel"><div class="brief-type-heading"><span>무엇을 들을까요?</span><small>종류 선택 → 듣기</small></div><nav id="briefHubTypes" class="brief-hub-types" aria-label="브리핑 종류"><p class="muted-text">예보를 불러오고 있습니다.</p></nav></aside>
         </div>
         <section id="briefingSettings" class="briefing-settings stitch-card" aria-labelledby="briefingSettingsTitle">
