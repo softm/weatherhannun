@@ -21,7 +21,7 @@
   // not exact string equality against an ISO timestamp without an offset.
   function kstClock(value){
     if(typeof value!=='string')return null;
-    const match=value.match(/^(\\d{4}-\\d{2}-\\d{2})T(\\d{2}):(\\d{2})(?::\\d{2}(?:\\.\\d+)?)?(Z|[+-]\\d{2}:\\d{2})?$/);
+    const match=value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$/);
     if(!match)return null;
     if(match[4]&&match[4]!=='+09:00'){
       const date=new Date(value);
