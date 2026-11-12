@@ -8,9 +8,9 @@ const read = file => fs.readFileSync(file, "utf8");
 
 test("shared account UI mounts into the real weather header action slot", () => {
   const html = read("index.html");
-  assert.match(html, /id="siteAccountSlot" class="top-actions topbar-actions"/);
+  assert.match(html, /id="siteAccountSlot" class="top-actions topbar-actions"[^>]*min-width:44px/);
   assert.match(html, /account-header\.js\?v=9/);
-  assert.match(html, /cloudflare-weather-boot\.mjs\?site=weatherhannun&amp;v=20261112-cloudflare-account-1/);
+  assert.match(html, /cloudflare-weather-boot\.mjs\?site=weatherhannun&amp;v=20261112-cloudflare-account-2/);
   assert.doesNotMatch(html, /shared\/platform\/v1\/boot\.mjs\?site=weatherhannun/);
 });
 
