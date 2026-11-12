@@ -141,3 +141,24 @@ test('briefing includes alerts and persists all notification styles',async({page
   await page.screenshot({path:info.outputPath(`briefing-alerts-${width}.png`),fullPage:true});
  }
 });
+
+test('Cloudflare account avatar remains inside the header at desktop and mobile widths',async({page})=>{
+  for(const width of [390,1280]){
+    await page.setViewportSize({width,height:900});
+    await start(page);
+    const account=page.locator('softm-site-account[data-site="weatherhannun"]');
+    await expect(account).toBeVisible({timeout:15000});
+    const slot=page.locator('#siteAccountSlot');
+    const header=page.locator('.topbar');
+    await expect(slot).toContainText('');
+    const box=await account.boundingBox(),parent=await slot.boundingBox(),bar=await header.boundingBox();
+    expect(box).not.toBeNull();
+    expect(parent).not.toBeNull();
+    expect(bar).not.toBeNull();
+    expect(box.x).toBeGreaterThanOrEqual(parent.x-2);
+    expect(box.x+box.width).toBeLessThanOrEqual(parent.x+parent.width+2);
+    expect(box.y).toBeGreaterThanOrEqual(bar.y-2);
+    expect(box.y+box.height).toBeLessThanOrEqual(bar.y+bar.height+2);
+    await expect(account).toHaveAttribute('data-auth-state',/checking|guest|authenticated/);
+  }
+});
