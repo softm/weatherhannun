@@ -8,7 +8,17 @@
     var host = document.querySelector(selector);
     if (!host || host.dataset.accountUi !== 'icon-menu-v2') return;
     var slot = document.getElementById('siteAccountSlot');
-    if (slot) slot.classList.remove('topbar-actions');
+    // Keep the reserved slot in the header's flex row. Its width must be
+    // nonzero before the shared menu mounts so it never falls back to <body>.
+    if (slot) {
+      slot.classList.remove('topbar-actions');
+      slot.style.setProperty('margin-left', 'auto');
+      slot.style.setProperty('min-width', '44px');
+      slot.style.setProperty('min-height', '44px');
+      slot.style.setProperty('flex', '0 0 auto');
+      slot.style.setProperty('align-items', 'center');
+      slot.style.setProperty('justify-content', 'center');
+    }
     host.classList.add('weather-account-host');
     host.style.setProperty('display', 'inline-flex');
     host.style.setProperty('margin', '0');
