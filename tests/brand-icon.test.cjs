@@ -17,7 +17,7 @@ test("web favicon and header retain the v18 brand while the shell includes v20 h
   assert.match(theme, /url\("\.\/icon\.svg\?v=18"\)/);
   assert.match(manifest, /icon\.svg\?v=18/);
   assert.match(manifest, /weatherhannun-512\.png\?v=18/);
-  assert.match(worker, /weatherhannun-shell-v102-notification-precipitation/);
+  assert.match(worker, /weatherhannun-shell-v103-device-tts/);
   assert.match(worker, /alert-rules-core\.js\?v=33/);
   assert.match(worker, /briefing-highlights\.js\?v=20/);
   assert.match(worker, /briefing-highlights\.css\?v=20/);
