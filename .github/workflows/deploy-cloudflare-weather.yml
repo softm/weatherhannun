@@ -129,6 +129,10 @@ jobs:
           set -o pipefail
           npx wrangler deploy | tee deploy.log
           node -e 'const fs=require("fs"); const t=fs.readFileSync("deploy.log","utf8"); const urls=[...t.matchAll(/https:\/\/[a-z0-9.-]+\.workers\.dev/gi)].map(m=>m[0]); const n=process.env.DEPLOY_STAGE==="production"?"weatherhannun-api.":"weatherhannun-api-staging."; const u=urls.find(x=>x.includes(n)); if(!u){console.error("Could not extract deployed Worker URL");process.exit(2);} fs.writeFileSync("worker-url.txt",u);console.log("Deployed URL:",u)'
+      - name: Validate existing public-data key against AirKorea
+        id: airkorea_probe
+        if: steps.gate.outputs.ready == 'true'
+        run: node scripts/probe-airkorea.mjs
       - name: Configure official data API secrets
         if: steps.gate.outputs.ready == 'true'
         run: |
@@ -145,6 +149,12 @@ jobs:
           fi
           if [ -n "$AIRKOREA_API_KEY" ]; then
             printf '%s' "$AIRKOREA_API_KEY" | npx wrangler secret put AIRKOREA_API_KEY --config wrangler.toml >/dev/null
+            echo "AirKorea: explicitly configured key" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ steps.airkorea_probe.outputs.airkorea_approved }}" = "true" ]; then
+            printf '%s' "$DATA_GO_KR_SERVICE_KEY" | npx wrangler secret put AIRKOREA_API_KEY --config wrangler.toml >/dev/null
+            echo "AirKorea: validated existing public-data key" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::AirKorea key not verified; no secret configured."
           fi
       - name: Diagnose direct KMA gateway without leaking API key
         if: steps.gate.outputs.ready == 'true' && env.KMA_API_KEY != ''
