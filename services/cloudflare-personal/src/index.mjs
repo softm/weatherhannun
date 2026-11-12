@@ -30,6 +30,8 @@ export async function handleRequest(request,env,dependencies={}){
  }
  if(!path.startsWith('/api/personal/'))return json({error:'not_found'},404,origin);
  if(!env.PERSONAL_DB)return json({error:'database_unavailable'},503,origin);
+ const bearer=request.headers.get('Authorization')||'';
+ if(!/^Bearer [A-Za-z0-9_-]{43}$/.test(bearer))return json({error:'unauthorized'},401,origin);
  let uid;
  try{
   const accountFetch=dependencies.fetch||env.ACCOUNT?.fetch?.bind(env.ACCOUNT);
