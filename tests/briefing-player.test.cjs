@@ -42,17 +42,20 @@ test("홈 브리핑 카드에서 전용 브리핑 룸으로 이동한다",()=>{
   assert.match(html,/class="briefing-room-link" data-view="briefing"/);
 });
 
-test("Google HD 음성은 서버 중계로 호출하고 실패하면 기기 음성으로 전환한다",()=>{
+test("브리핑 음성은 기기 합성을 기본으로 사용하고 Google TTS를 요청하지 않는다",()=>{
   const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
-  const cloud=fs.readFileSync(path.join(root,"briefing-cloud-tts.js"),"utf8");
   const today=fs.readFileSync(path.join(root,"stitch-today.js"),"utf8");
+  const hub=fs.readFileSync(path.join(root,"briefing-hub.js"),"utf8");
+  const compact=fs.readFileSync(path.join(root,"briefing-ui.js"),"utf8");
   const worker=fs.readFileSync(path.join(root,"sw.js"),"utf8");
-  assert.match(html,/weatherhannun-tts-endpoint/);
-  assert.match(html,/cloudfunctions\.net\/weatherBriefingTts\/v1\/briefing\/speech/);
-  assert.match(html,/briefing-cloud-tts\.js\?v=1/);
-  assert.match(cloud,/method:"POST"/);
-  assert.doesNotMatch(cloud,/API[_-]?KEY|AIza/i);
-  assert.match(today,/WeatherHannunCloudTTS/);
-  assert.match(today,/playDeviceSpeech/);
-  assert.match(worker,/briefing-cloud-tts\.js\?v=1/);
+  assert.doesNotMatch(html,/weatherhannun-tts-endpoint|briefing-cloud-tts\\.js|cloudfunctions\\.net\\/weatherBriefingTts/);
+  assert.doesNotMatch(today,/WeatherHannunCloudTTS|cloud\\.play/);
+  assert.doesNotMatch(hub,/WeatherHannunCloudTTS|cloud\\.play/);
+  assert.doesNotMatch(worker,/briefing-cloud-tts\\.js/);
+  assert.match(today,/speechSynthesis\\.speak\\(utterance\\)/);
+  assert.match(hub,/speechSynthesis\\.speak\\(utterance\\)/);
+  assert.match(compact,/speechSynthesis\\.speak\\(next\\)/);
+  assert.match(html,/기기 음성 브리핑/);
+  assert.match(today,/playStitchSpeech/);
+  assert.match(hub,/devicePlay\\(item\\)/);
 });
