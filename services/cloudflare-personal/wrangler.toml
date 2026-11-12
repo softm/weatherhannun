@@ -1,0 +1,14 @@
+name = "weatherhannun-personal"
+main = "src/index.mjs"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://softm.github.io"
+
+# Set the actual UUID after provisioning the dedicated D1 database.
+[[d1_databases]]
+binding = "PERSONAL_DB"
+database_name = "weatherhannun-personal-db"
+database_id = "__PERSONAL_D1_DATABASE_ID__"
+migrations_dir = "migrations"
