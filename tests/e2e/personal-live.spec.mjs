@@ -86,6 +86,9 @@ test('production D1 and common account APIs reject unauthenticated or foreign-or
   expect(missing.status()).toBe(401);
   const foreign=await request.get(PERSONAL+'/api/personal/places',{headers:{Origin:'https://not-softm.example'}});
   expect(foreign.status()).toBe(403);
+  const forged=await request.get(PERSONAL+'/api/personal/places',
+    {headers:{Origin:'https://softm.github.io',Authorization:'Bearer '+TOKEN}});
+  expect(forged.status()).toBe(401);
   const unauthorized=await request.get(ACCOUNT+'/api/apps/weatherhannun/session',{headers:{Origin:'https://softm.github.io'}});
   expect(unauthorized.status()).toBe(401);
 });
@@ -109,6 +112,43 @@ test('simulated native Android browser login completes same-UID session without 
   },callback.request);
   await expect.poll(()=>page.evaluate(()=>window.SoftmAccounts.get('weatherhannun').currentUser?.uid)).toBe('native-test-user');
   await expect(page.locator('softm-site-account[data-site="weatherhannun"]')).toHaveAttribute('data-auth-state','authenticated');
+});
+
+test('desktop popup exchanges a one-time code and logout resets the shared account menu (mock OAuth)',async({page,context})=>{
+  await context.route('**/connect?**',route=>{
+    if(!route.request().url().startsWith(ACCOUNT+'/connect?'))return route.continue();
+    return route.fulfill({status:200,contentType:'text/html',body:
+      '<!doctype html><meta charset="utf-8"><script>'+
+      'const requestId=new URLSearchParams(location.search).get("request");'+
+      'window.opener.postMessage({type:"softm:authorization",requestId,code:"C".repeat(43)}, "https://softm.github.io");'+
+      '</script>'});
+  });
+  await page.addInitScript(()=>{
+    const prev=window.fetch.bind(window);
+    window.fetch=(url,init)=>{
+      const u=String(url);
+      if(u.includes('/api/connect/exchange'))return Promise.resolve(new Response(JSON.stringify({
+        accessToken:'T'.repeat(43),uid:'desktop-test-user',
+        expiresIn:3600,displayName:'PC 테스트',providers:['google']
+      }),{status:200,headers:{'Content-Type':'application/json'}}));
+      if(u.includes('/api/apps/weatherhannun/logout'))return Promise.resolve(
+        new Response(JSON.stringify({ok:true}),{status:200,headers:{'Content-Type':'application/json'}}));
+      return prev(url,init);
+    };
+  });
+  await load(page);
+  await page.locator('softm-site-account[data-site="weatherhannun"] #profile').click();
+  const popupPromise=page.waitForEvent('popup',{timeout:15000});
+  await page.locator('softm-account-popover[data-site="weatherhannun"] #login').click();
+  await popupPromise;
+  await expect.poll(()=>page.evaluate(()=>window.SoftmAccounts.get('weatherhannun').currentUser?.uid),
+    {timeout:15000}).toBe('desktop-test-user');
+  await expect(page.locator('softm-site-account[data-site="weatherhannun"]')).toHaveAttribute('data-auth-state','authenticated');
+  await page.locator('softm-site-account[data-site="weatherhannun"] #profile').click();
+  await expect(page.locator('softm-account-popover[data-site="weatherhannun"] #logout')).toBeVisible();
+  await page.locator('softm-account-popover[data-site="weatherhannun"] #logout').click();
+  await expect.poll(()=>page.evaluate(()=>window.SoftmAccounts.get('weatherhannun').currentUser)).toBe(null);
+  await expect(page.locator('softm-site-account[data-site="weatherhannun"]')).toHaveAttribute('data-auth-state','guest');
 });
 
 test('two devices manually upload and restore places; local regions stay intact and GPS is not uploaded',async({browser})=>{
