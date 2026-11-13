@@ -1,0 +1,37 @@
+name: Playwright live login and personal D1 verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/e2e/personal-live.spec.mjs'
+      - '.github/workflows/playwright-personal-live.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install Playwright Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run live site and isolated mocked-account browser tests
+        env:
+          CI: 'true'
+          WEATHERHANNUN_TEST_URL: https://softm.github.io/weatherhannun/
+        run: npx playwright test tests/e2e/personal-live.spec.mjs --reporter=line
+      - name: Retain failure screenshots and traces for one day
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: personal-live-playwright-results
+          path: test-results/
+          retention-days: 1
+          if-no-files-found: ignore
