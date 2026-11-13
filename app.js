@@ -2,6 +2,8 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var PROVIDER = window.WeatherProviderCore;
+  var MAX_SAVED_FORECAST_AGE_MS = 60 * 60 * 1000;
+  var MAX_FUTURE_CLOCK_SKEW_MS = 10 * 60 * 1000;
   var CITY_LIST = [
     { name: "서산", lat: 36.7845, lon: 126.4503 },
     { name: "서울", lat: 37.5665, lon: 126.978 },
@@ -82,14 +84,24 @@
   function airUrl(loc) {
     return PROVIDER?PROVIDER.buildAirUrl(loc):"";
   }
+  function freshForecastTimestamp(value, now) {
+    var at=Date.parse(value||"");
+    if(!Number.isFinite(at))return false;
+    var age=(now||Date.now())-at;
+    return age>=-MAX_FUTURE_CLOCK_SKEW_MS&&age<=MAX_SAVED_FORECAST_AGE_MS;
+  }
   async function fetchUnifiedWeather(loc, timeoutMs) {
     if(!PROVIDER||!PROVIDER.buildForecastUrl)throw new Error("예보 공급자 설정을 불러오지 못했습니다.");
     var canonical=await getJson(PROVIDER.buildForecastUrl(loc),timeoutMs);
+    var fetchedAt=canonical.source?.fetchedAt||null;
+    if(canonical.stale===true||canonical.cache?.fallback===true||!freshForecastTimestamp(fetchedAt)) {
+      throw new Error("최신 예보가 아직 준비되지 않았습니다.");
+    }
     return {
       weather:PROVIDER.toLegacyForecast(canonical),
       air:PROVIDER.toLegacyAir(canonical),
-      fallback:canonical.stale===true||canonical.cache?.fallback===true,
-      fetchedAt:canonical.source?.fetchedAt||null,
+      fallback:false,
+      fetchedAt:fetchedAt,
       staticOfficial:true
     };
   }
@@ -132,6 +144,8 @@
   }
   function usableWeatherCache(cache,loc) {
     if(!cache||!cache.loc||!PROVIDER||!PROVIDER.inspectForecastPayload(cache.weather).valid)return false;
+    if(!freshForecastTimestamp(cache.at))return false;
+    if(cache.weather?._weatherhannun?.stale===true||cache.weather?._weatherhannun?.cache?.fallback===true)return false;
     if(cache.loc.lat===loc.lat&&cache.loc.lon===loc.lon)return true;
     // GPS 좌표는 측정할 때마다 조금씩 달라질 수 있다. 같은 GPS 지역의 근거리 캐시는 즉시 재사용한다.
     return cache.loc.source==="gps"&&loc.source==="gps"&&locationDistanceKm(cache.loc,loc)<=5;
