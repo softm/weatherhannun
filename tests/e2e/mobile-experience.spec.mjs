@@ -183,3 +183,46 @@ test('national map date and morning/afternoon tabs show KMA ISO +09:00 forecasts
  await expect(page.locator('#nationalTime')).toContainText('오후 3시');
  await expect(page.locator('[data-national-period="current"]')).toBeDisabled();
 });
+
+
+test('expired local forecast is hidden when common API is unavailable',async({page})=>{
+ const now=new Date(forecast.current.time+'+09:00');
+ await page.clock.setFixedTime(now);
+ const savedAt=new Date(now.getTime()-2*60*60*1000).toISOString();
+ await page.addInitScript(({saved,weather})=>{
+  localStorage.setItem('weatherhannun_geo_intro_v1','done');
+  localStorage.setItem('weatherhannun_location',JSON.stringify({name:'서울',lat:37.5665,lon:126.978,source:'manual'}));
+  localStorage.setItem('weatherhannun_last',JSON.stringify({loc:{name:'서울',lat:37.5665,lon:126.978,source:'manual'},at:saved,weather,air:null}));
+ },{saved:savedAt,weather:forecast});
+ await page.route('**/weatherApi?**',route=>route.fulfill({status:503,json:{error:'weather_provider_unavailable'}}));
+ await page.goto('/');
+ await expect(page.locator('#updatedBadge')).toHaveText('데이터 연결 오류',{timeout:15000});
+ await expect(page.locator('#currentTemp')).toHaveText('--');
+ await expect(page.locator('#dataFooterStatus')).toHaveText('예보 연결 실패');
+});
+
+test('stale server cache cannot appear as live current weather',async({page})=>{
+ const now=new Date(forecast.current.time+'+09:00');
+ await page.clock.setFixedTime(now);
+ await page.addInitScript(()=>{
+  localStorage.setItem('weatherhannun_geo_intro_v1','done');
+  localStorage.setItem('weatherhannun_location',JSON.stringify({name:'서울',lat:37.5665,lon:126.978,source:'manual'}));
+ });
+ await page.route('**/weatherApi?**',route=>{
+  const response=canonical(structuredClone(forecast));
+  response.stale=true;
+  response.cache={hit:true,fallback:true};
+  return route.fulfill({json:response});
+ });
+ await page.goto('/');
+ await expect(page.locator('#updatedBadge')).toHaveText('데이터 연결 오류',{timeout:15000});
+ await expect(page.locator('#currentTemp')).toHaveText('--');
+ await expect(page.locator('#dataFooterStatus')).toHaveText('예보 연결 실패');
+});
+
+test('fresh provider forecast is still shown and keeps real fetch timestamp',async({page})=>{
+ await start(page);
+ await expect(page.locator('#currentTemp')).not.toHaveText('--');
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('weatherhannun_last')));
+ expect(saved.at).toBe(new Date(forecast.current.time+'+09:00').toISOString());
+});
