@@ -202,7 +202,8 @@
   }
   function requestCurrentPosition(explicit=true){
     if(busy||!canUse())return Promise.resolve(false);
-    const progressId=window.WeatherActionProgress?.begin("현재 위치를 확인하는 중…");
+    // 자동 확인은 저장 지역 화면을 그대로 유지한 채 뒤에서 수행한다.
+    const progressId=explicit?window.WeatherActionProgress?.begin("현재 위치를 확인하는 중…"):null;
     setBusy(true);
     // Calling getCurrentPosition directly in this click handler preserves user activation.
     return new Promise(resolve=>{
@@ -229,7 +230,7 @@
         status(description);
         if(explicit&&$("weatherLocationWelcome")?.open) $("welcomeHelp").textContent=description;
         resolve(false);
-      },{enableHighAccuracy:false,timeout:12000,maximumAge:180000});
+      },{enableHighAccuracy:false,timeout:explicit?8000:4500,maximumAge:explicit?300000:900000});
     });
   }
   async function initialPermissionFlow(){

@@ -20,10 +20,14 @@ const configured = value => Boolean(value && value !== "UNCONFIGURED");
 
 async function collect(location, {kmaKey = "", airKey = "", requestMode = false} = {}) {
   const korean = isSouthKorea(location);
-  const requestOptions = requestMode ? {attempts: 1, timeoutMs: 7_000} : {};
-  const payload = korean ? await collectKma(location, kmaKey, requestOptions) : await collectMetNorway(location, requestOptions);
+  // data.go.kr occasionally needs more than seven seconds even when all three
+  // KMA products are requested in parallel. Interactive requests get a little
+  // more time but never retry in the foreground; scheduled sync handles retries.
+  const forecastOptions = requestMode ? {attempts: 1, timeoutMs: 11_000} : {};
+  const airOptions = requestMode ? {attempts: 1, timeoutMs: 6_000} : {};
+  const payload = korean ? await collectKma(location, kmaKey, forecastOptions) : await collectMetNorway(location, forecastOptions);
   if (korean && configured(airKey)) {
-    try { payload.airQuality = await collectAirKorea(location, airKey, requestOptions); }
+    try { payload.airQuality = await collectAirKorea(location, airKey, airOptions); }
     catch (error) { logger.warn("AirKorea partial failure", {code: error.message, location: locationDocumentId(location)}); }
   }
   const result = validateContract(payload); if (!result.valid) throw new Error(`invalid_contract:${result.missing.join(",")}`); return payload;
