@@ -314,6 +314,7 @@
       if(added)return {ok:false,added:0,total:before};
       return {ok:true,added:0,total:before};
     },
+    selectSavedPlace:id=>{if(!places.some(p=>p.id===id))return false;chooseSaved(id);return true;},
     getActiveLocation:()=>active?{...active}:null
   };
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
