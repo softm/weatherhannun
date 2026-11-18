@@ -66,5 +66,22 @@ test('전국 지도는 미발표 날짜를 비활성화하고 API 갱신 중 지
  assert.match(source,/core\.forecastDates\(nationalPayloads\)/);
  assert.match(source,/disabled title="기상청 단기예보가 아직 발표되지 않았습니다/);
  assert.match(source,/전국 예보 조회 중…/);
- assert.match(source,/Math\.min\(5,cities\.length\)/);
+ assert.match(source,/fetchFreshNationalWeather\(cities\[i\]\)/);
+ assert.match(source,/waits=\[0,3000,6000\]/);
+ assert.match(source,/Math\.min\(3,cities\.length\)/);
+});
+test('전국 지도는 stale 갱신 응답을 기다린 뒤 최신 예보를 자동 재조회한다',async()=>{
+ const source=fs.readFileSync(require.resolve('../app.js'),'utf8');
+ const begin=source.indexOf('  async function fetchFreshNationalWeather(');
+ const end=source.indexOf('  async function getJson(',begin);
+ let attempts=0;
+ const waits=[],context={setTimeout(fn,ms){waits.push(ms);fn();},fetchUnifiedWeather:async function(){
+   attempts++;if(attempts<3)throw new Error('최신 예보가 아직 준비되지 않았습니다.');
+   return {weather:{current:{temperature_2m:7}}};
+ }};
+ vm.createContext(context);vm.runInContext(source.slice(begin,end),context);
+ const result=await context.fetchFreshNationalWeather({name:'서울'});
+ assert.equal(attempts,3);
+ assert.deepEqual(waits,[3000,6000]);
+ assert.equal(result.weather.current.temperature_2m,7);
 });

@@ -59,3 +59,44 @@ test("official warnings are matched to the selected region only while the snapsh
   assert.equal(stale.warningFeedReady, false);
   assert.deepEqual(stale.localWarnings, []);
 });
+
+test("a fresh dedicated warning timestamp does not depend on a delayed full snapshot", () => {
+  const source = feed();
+  source.generatedAt = "2026-10-27T20:00:00Z";
+  source.warningGeneratedAt = "2026-10-28T01:10:00Z";
+  source.kma.warnings = [{ upperRegionName: "충청남도", regionName: "서산시", warningCode: "W", level: "2", command: "1" }];
+  const result = core.resolve(source, { name: "서산", address: "충청남도 서산시", lat: 36.78, lon: 126.45 }, "2026-10-28T01:20:00Z");
+  assert.equal(result.warningFeedReady, true);
+  assert.equal(result.localWarnings.length, 1);
+});
+
+test("official warning insight keeps source level, action, and narrow region matching", () => {
+  const source = feed();
+  source.kma.warnings = [
+    { upperRegionName: "인천광역시", regionName: "인천(옹진)", regionCode: "L101", warningCode: "W", level: "2", command: "1", announcedAt: "2026-10-28T09:00:00+09:00", effectiveAt: "2026-10-28T10:00:00+09:00" },
+    { upperRegionName: "충청남도", regionName: "서산시", regionCode: "L102", warningCode: "S", level: "3", command: "3" }
+  ];
+  const elsewhere = core.resolve(source, { name: "구월동", address: "인천광역시 남동구 구월동", lat: 37.45, lon: 126.7 }, "2026-10-28T01:20:00Z");
+  assert.deepEqual(elsewhere.localWarnings, []);
+  const local = core.resolve(source, { name: "백령면", address: "인천광역시 옹진군 백령면", lat: 37.96, lon: 124.63 }, "2026-10-28T01:20:00Z");
+  assert.equal(local.warnings.length, 1, "해제 명령은 현재 특보에서 제외");
+  assert.equal(local.localWarnings.length, 1);
+  const insight = core.warningInsight(local.localWarnings[0]);
+  assert.equal(insight.title, "강풍주의보");
+  assert.match(insight.action, /날릴 물건/);
+  assert.equal(insight.area, "인천광역시 · 인천(옹진)");
+  assert.equal(core.warningStatus(insight, "2026-10-28T00:30:00Z"), "발효 예정");
+  assert.equal(core.warningStatus(insight, "2026-10-28T01:30:00Z"), "발효 중");
+  assert.equal(core.warningStatus({ ...insight, level: "예비특보" }, "2026-10-28T00:30:00Z"), "발표");
+});
+
+test("compound island warning areas match each named island without matching all of Incheon", () => {
+  const source = feed();
+  source.kma.warnings = [
+    { upperRegionName: "인천광역시", regionName: "서해5도(백령도.대청도)", regionCode: "L201", warningCode: "W", level: "2", command: "1" }
+  ];
+  const baengnyeong = core.resolve(source, { name: "백령면", address: "인천광역시 옹진군 백령면", lat: 37.96, lon: 124.63 }, "2026-10-28T01:20:00Z");
+  const mainland = core.resolve(source, { name: "구월동", address: "인천광역시 남동구 구월동", lat: 37.45, lon: 126.7 }, "2026-10-28T01:20:00Z");
+  assert.equal(baengnyeong.localWarnings.length, 1);
+  assert.deepEqual(mainland.localWarnings, []);
+});

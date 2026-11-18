@@ -82,6 +82,7 @@ test("alert settings explain timing and preview the native notification summary"
     'id="notificationPreviewTitle"',
     'id="notificationPreviewBody"',
     'id="notificationPreviewSchedule"',
+    'id="watchOfficialWarnings"',
     'id="morningTime"',
     'id="eveningTime"',
     "오늘만 끄기",
@@ -96,5 +97,7 @@ test("alert settings explain timing and preview the native notification summary"
   assert.match(insights, /resumeNotifications/);
   assert.match(insights, /12시간 비 최고/);
   assert.match(insights, /우산 챙겨요/);
+  assert.match(insights, /officialWarnings/);
+  assert.match(insights, /기상청 공식 특보/);
   assert.match(insights, /addEventListener\("change",renderNotificationPreview\)/);
 });

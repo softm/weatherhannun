@@ -16,16 +16,18 @@ test("map separates official warnings, radar observations and radar forecasts",(
  assert.match(html,/공식 특보·레이더는 원문에서 확인/);
 });
 
-test("official data is resolved from a key-free licensed snapshot and cached offline",()=>{
+test("official data merges a fresh warning API with the licensed full snapshot and caches the safe result",()=>{
  const ui=fs.readFileSync("official-data-ui.js","utf8");
  const worker=fs.readFileSync("sw.js","utf8");
  assert.match(ui,/WeatherHannunOfficialData/);
  assert.match(ui,/data\/official\/latest\.json/);
+ assert.match(ui,/weatherhannun-api\.softm\.workers\.dev\/officialWarnings/);
+ assert.match(ui,/Promise\.allSettled/);
  assert.match(ui,/setInterval\(loadFeed,15\*60\*1000\)/);
  assert.match(ui,/visibilitychange/);
  assert.match(ui,/resolved\.latestAvailable/);
  assert.match(ui,/weatherhannun:official-data/);
- for(const asset of ["official-data-core.js?v=40","official-data.css?v=40","official-data-ui.js?v=43","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
+ for(const asset of ["official-data-core.js?v=41","official-data.css?v=40","official-data-ui.js?v=44","data/official/latest.json"])assert.ok(worker.includes(asset),asset);
 });
 
 test("today glance promotes measured PM10 and PM2.5 with source, time and action advice",()=>{

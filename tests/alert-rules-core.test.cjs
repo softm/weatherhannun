@@ -6,12 +6,13 @@ function row(hour, values = {}) {
   return { time: `2026-10-26T${String(hour).padStart(2, "0")}:00`, rain: 10, mm: 0, temp: 15, gust: 10, code: 0, isDay: 1, ...values };
 }
 
-test("new users start with all five weather conditions selected", () => {
+test("new users start with model conditions and official warnings selected", () => {
   const prefs = rules.defaults();
   assert.deepEqual(
     [prefs.rain, prefs.dry, prefs.clear, prefs.frost, prefs.wind],
     [true, true, true, true, true]
   );
+  assert.equal(prefs.officialWarnings, true);
 });
 
 test("an explicitly disabled saved condition stays disabled", () => {
@@ -27,6 +28,13 @@ test("legacy alert preferences do not silently enable daily summaries", () => {
   assert.equal(prefs.configured, true);
   assert.equal(prefs.morning, false);
   assert.equal(prefs.evening, false);
+  assert.equal(prefs.officialWarnings, false);
+});
+
+test("v2 users are not silently opted into official warnings while v3 preserves the choice", () => {
+  assert.equal(rules.normalizePreferences({ version: 2, officialWarnings: true }).officialWarnings, false);
+  assert.equal(rules.normalizePreferences({ version: 3, officialWarnings: false }).officialWarnings, false);
+  assert.equal(rules.normalizePreferences({ version: 3, officialWarnings: true }).officialWarnings, true);
 });
 
 test("rain threshold is configurable while the existing 1mm rule remains", () => {
