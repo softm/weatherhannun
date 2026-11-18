@@ -1,6 +1,7 @@
 import {coordinates, dfsGrid, isSouthKorea, roundedLocationKey, validateContract} from "../../weather-api/core.mjs";
 import {collectKma, collectMetNorway, collectAirKorea} from "../../weather-api/providers.mjs";
 import {serveKvWeather} from "./kv-backend.mjs";
+import {getOfficialWarnings, officialWarningsConfigured, refreshOfficialWarnings} from "./official-warnings.mjs";
 
 const ttlMs = {KR: 600000, GLOBAL: 1800000};
 const allowed = (origin, env) => !origin || ["https://softm.github.io", "http://localhost:8080", "http://127.0.0.1:8080", ...String(env.ALLOWED_ORIGINS || "").split(",").map(x => x.trim())].includes(origin);
@@ -8,6 +9,17 @@ function reply(value, status, origin, env, cacheControl = "no-store") {
   const headers = {"Content-Type": "application/json; charset=utf-8", "Cache-Control": cacheControl, "Vary": "Origin", "X-Content-Type-Options": "nosniff"};
   if (origin && allowed(origin, env)) headers["Access-Control-Allow-Origin"] = origin;
   return new Response(JSON.stringify(value), {status, headers});
+}
+async function rateLimitResponse(request, env, origin) {
+  const clientIp = request.headers.get("CF-Connecting-IP");
+  if (!clientIp || !env.CLIENT_RATE_LIMITER) return null;
+  try {
+    const decision = await env.CLIENT_RATE_LIMITER.limit({key: clientIp});
+    return decision.success ? null : reply({error: "rate_limited"}, 429, origin, env);
+  } catch (error) {
+    console.error("rate_limit_unavailable", String(error?.message || error));
+    return reply({error: "rate_limit_unavailable"}, 503, origin, env);
+  }
 }
 export function parseLocation(url) {
   const location = {...coordinates(Object.fromEntries(url.searchParams)),
@@ -83,9 +95,22 @@ export async function handleRequest(request, env, ctx, dependencies = {}) {
     ok: dbReady || kvReady, backend: "cloudflare-workers",
     database: dbReady ? "d1" : kvReady ? "kv" : "unavailable",
     providers: {metNorway: "ready", kma: env.KMA_API_KEY && env.KMA_API_KEY !== "UNCONFIGURED" ? "configured" : "missing_secret",
+      kmaWarnings: officialWarningsConfigured(env) ? "configured" : "missing_secret",
       airKorea: env.AIRKOREA_API_KEY && env.AIRKOREA_API_KEY !== "UNCONFIGURED" ? "configured" : "missing_secret", wwis: "approval_required"},
     checkedAt: new Date().toISOString()
   }, dbReady || kvReady ? 200 : 503, origin, env);
+  }
+  if (url.pathname === "/officialWarnings") {
+    const limited = await rateLimitResponse(request, env, origin);
+    if (limited) return limited;
+    if (!env.DB) return reply({error: "official_warning_database_not_configured"}, 503, origin, env);
+    try {
+      return reply(await getOfficialWarnings(env, dependencies.official || {}), 200, origin, env, "no-store");
+    } catch (error) {
+      const missing = String(error?.message || error) === "kma_api_hub_key_missing";
+      if (!missing) console.error("official_warning_unavailable", String(error?.message || error));
+      return reply({error: missing ? "official_warning_provider_not_configured" : "official_warning_unavailable"}, missing ? 503 : 502, origin, env);
+    }
   }
   if (!["/weatherApi", "/v1/weather"].includes(url.pathname)) return reply({error: "not_found"}, 404, origin, env);
   if (!env.DB && !env.CACHE) return reply({error: "weather_database_not_configured"}, 503, origin, env);
@@ -93,16 +118,8 @@ export async function handleRequest(request, env, ctx, dependencies = {}) {
   try {entry = parseLocation(url);} catch {return reply({error: "invalid_coordinates"}, 400, origin, env);}
   // Rate-limit high-volume callers before any paid-provider / D1 operations.
   // Cloudflare sets CF-Connecting-IP; never trust client-supplied query parameters as identity.
-  const clientIp = request.headers.get("CF-Connecting-IP");
-  if (clientIp && env.CLIENT_RATE_LIMITER) {
-    try {
-      const decision = await env.CLIENT_RATE_LIMITER.limit({key: clientIp});
-      if (!decision.success) return reply({error: "rate_limited"}, 429, origin, env);
-    } catch (error) {
-      console.error("rate_limit_unavailable", String(error?.message || error));
-      return reply({error: "rate_limit_unavailable"}, 503, origin, env);
-    }
-  }
+  const limited = await rateLimitResponse(request, env, origin);
+  if (limited) return limited;
   if (!env.DB) {
     return serveKvWeather({
       entry, env, ctx, origin, reply,
@@ -146,6 +163,10 @@ export async function handleRequest(request, env, ctx, dependencies = {}) {
 }
 export async function handleScheduled(_controller, env, _ctx, dependencies = {}) {
   if (!env.DB) return;
+  if (officialWarningsConfigured(env)) {
+    try { await refreshOfficialWarnings(env, dependencies.official || {}); }
+    catch (error) { console.warn("official_warning_sync_failed", String(error?.message || error)); }
+  }
   const rows = await env.DB.prepare("SELECT id,lat,lon,name,station_name,country FROM weather_locations WHERE last_active_at_ms >= ? AND (country = 'GLOBAL' OR ? = 1) ORDER BY last_synced_at_ms ASC LIMIT 3")
     .bind(Date.now() - 7200000, env.KMA_API_KEY && env.KMA_API_KEY !== "UNCONFIGURED" ? 1 : 0).all();
   for (const row of rows.results || []) {
