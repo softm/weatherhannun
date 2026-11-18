@@ -55,7 +55,7 @@
 | 503 | `weather_database_unavailable` | D1 읽기 오류 |
 | 503 | `rate_limit_unavailable` | Rate Limiting 서비스 오류 |
 
-**캐시:** 국내 10분 / 해외 30분. 만료된 캐시는 `stale:true`를 포함해 반환하고 Cron 갱신 결과를 후속 조회에 적용한다.
+**캐시:** 국내 10분 / 해외 30분. 만료된 캐시는 `stale:true`를 포함해 마지막 정상값으로 반환하고 Cron 갱신 결과를 후속 조회에 적용한다. 신선한 응답만 브라우저에 최대 60초 캐시하며, `stale:true` 응답은 `Cache-Control: no-store`로 내려 WebView 재조회가 같은 오래된 JSON을 반복하지 않게 한다.
 클라이언트는 `source.fetchedAt`·`source.issuedAt`를 구별하며, 캐시의 갱신 시각을 기상청 공식 발표 시각으로 표시하지 않는다.
 
 **CORS:** `https://softm.github.io`, 개발 localhost(8080) 및 명시적 허용 출처. OPTIONS 프리플라이트 지원.

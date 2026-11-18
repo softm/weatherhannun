@@ -46,7 +46,7 @@ Android의 `WeatherAlertJobService`와 `ScreenWeatherRefreshCoordinator`는
 2. Worker는 대한민국 좌표를 기상청 격자 `kr_nx_ny`, 해외 좌표를 반올림 격자로 정규화한다.
 3. Cloudflare D1은 `weather_cache` 최신 응답과 `weather_locations` 갱신 대상 지역만 보관한다.
 4. 새 좌표는 외부 원천 API를 읽고 D1에 저장한다. 이미 저장된 결과는 국내 10분 / 해외 30분 기준으로 재사용한다.
-5. 마지막 정상값은 공급자 실패 시 `stale=true`로 노출한다. 10분 간격 Cron이 활성 지역을 최대 3개씩 갱신한다. 이 분할 방식은 대규모 수집 완료를 보장하지 않으며 활성 지역 수가 많을 경우 확장해야 한다.
+5. 마지막 정상값은 공급자 실패 시 `stale=true`로 노출하고 브라우저 캐시는 금지한다. 10분 간격 Cron은 최근 2시간 활성 지역을 오래된 순서로 최대 18개 선택해 동시성 3으로 갱신한다. 전국지도 17개 대표 격자를 한 주기에 처리하되, 활성 지역이 더 많으면 다음 주기에 순환한다.
 6. 기상특보·레이더 스냅샷은 기존 GitHub Pages의 `data/official/latest.json`을 계속 이용한다.
 
 ## 무료 요금/보안 대책
