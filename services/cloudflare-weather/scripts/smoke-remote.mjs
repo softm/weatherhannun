@@ -12,12 +12,23 @@ const paths = [
  ["global-met-norway","/weatherApi?lat=51.5074&lon=-0.1278&name=London"],
  ["domestic-kma","/weatherApi?lat=37.5665&lon=126.978&name=Seoul"]
 ];
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function probe(path, attempts = 1) {
+  let last;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const response = await fetch(origin+path,{headers:{Origin:"https://softm.github.io"},signal:AbortSignal.timeout(15000)});
+    const body = await response.json().catch(()=>({}));
+    last = {response, body};
+    if (![404, 502, 503].includes(response.status) || attempt === attempts - 1) return last;
+    await delay(3000);
+  }
+  return last;
+}
 const results = [];
 let healthOk=false, globalOk=false, domesticOk=false, officialWarningsOk=false;
 for(const [name,path] of paths){
  try {
-  const r=await fetch(origin+path,{headers:{Origin:"https://softm.github.io"},signal:AbortSignal.timeout(15000)});
-  const body=await r.json().catch(()=>({}));
+  const checked=await probe(path,name==="official-warnings"?6:1),r=checked.response,body=checked.body;
   const cors=r.headers.get("access-control-allow-origin")==="https://softm.github.io";
   let ok=false, note="";
   if(name==="health"){ok=r.status===200 && body.ok===true && body.database==="d1";healthOk=ok;}
