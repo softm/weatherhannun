@@ -45,7 +45,7 @@ export async function serveKvWeather({entry, env, ctx, origin, reply, collect, f
     }
     return reply(display(cached.payload, entry, stale, {
       hit: true, fallback: stale, refreshQueued: stale && Boolean(ctx?.waitUntil)
-    }), 200, origin, env, "public, max-age=60, s-maxage=60");
+    }), 200, origin, env, stale ? "no-store" : "public, max-age=60, s-maxage=60");
   }
   try {
     const payload = await collect(entry, env);

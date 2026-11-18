@@ -4,6 +4,8 @@ import {serveKvWeather} from "./kv-backend.mjs";
 import {getOfficialWarnings, officialWarningsConfigured, refreshOfficialWarnings} from "./official-warnings.mjs";
 
 const ttlMs = {KR: 600000, GLOBAL: 1800000};
+const scheduledRefreshLimit = 18;
+const scheduledRefreshConcurrency = 3;
 const allowed = (origin, env) => !origin || ["https://softm.github.io", "http://localhost:8080", "http://127.0.0.1:8080", ...String(env.ALLOWED_ORIGINS || "").split(",").map(x => x.trim())].includes(origin);
 function reply(value, status, origin, env, cacheControl = "no-store") {
   const headers = {"Content-Type": "application/json; charset=utf-8", "Cache-Control": cacheControl, "Vary": "Origin", "X-Content-Type-Options": "nosniff"};
@@ -147,7 +149,7 @@ export async function handleRequest(request, env, ctx, dependencies = {}) {
         console.warn("weather_stale_refresh_unavailable", entry.key, String(e?.message || e))));
       return reply({...payload, location: {...payload.location, name: entry.location.name, lat: entry.location.lat, lon: entry.location.lon},
         stale, cache: {hit: true, fallback: stale, refreshQueued}}, 200, origin, env,
-        "public, max-age=60, s-maxage=60");
+        stale ? "no-store" : "public, max-age=60, s-maxage=60");
     } catch (e) {console.warn("weather_cache_corrupt", String(e?.message || e));}
   }
   try {
@@ -167,16 +169,23 @@ export async function handleScheduled(_controller, env, _ctx, dependencies = {})
     try { await refreshOfficialWarnings(env, dependencies.official || {}); }
     catch (error) { console.warn("official_warning_sync_failed", String(error?.message || error)); }
   }
-  const rows = await env.DB.prepare("SELECT id,lat,lon,name,station_name,country FROM weather_locations WHERE last_active_at_ms >= ? AND (country = 'GLOBAL' OR ? = 1) ORDER BY last_synced_at_ms ASC LIMIT 3")
-    .bind(Date.now() - 7200000, env.KMA_API_KEY && env.KMA_API_KEY !== "UNCONFIGURED" ? 1 : 0).all();
-  for (const row of rows.results || []) {
-    const entry = {key: row.id, country: row.country,
-      location: {lat: row.lat, lon: row.lon, name: row.name, stationName: row.station_name}};
-    try {
-      const payload = await (dependencies.collect || collect)(entry, env);
-      await save(env, entry, payload, Date.now());
-    } catch (e) {console.warn("weather_sync_failed", entry.key, String(e?.message || e));}
-  }
+  const rows = await env.DB.prepare("SELECT id,lat,lon,name,station_name,country FROM weather_locations WHERE last_active_at_ms >= ? AND (country = 'GLOBAL' OR ? = 1) ORDER BY last_synced_at_ms ASC LIMIT ?")
+    .bind(Date.now() - 7200000, env.KMA_API_KEY && env.KMA_API_KEY !== "UNCONFIGURED" ? 1 : 0,
+      scheduledRefreshLimit).all();
+  const active = rows.results || [];
+  let cursor = 0;
+  await Promise.all(Array.from({length: Math.min(scheduledRefreshConcurrency, active.length)}, async () => {
+    while (true) {
+      const row = active[cursor++];
+      if (!row) return;
+      const entry = {key: row.id, country: row.country,
+        location: {lat: row.lat, lon: row.lon, name: row.name, stationName: row.station_name}};
+      try {
+        const payload = await (dependencies.collect || collect)(entry, env);
+        await save(env, entry, payload, Date.now());
+      } catch (e) {console.warn("weather_sync_failed", entry.key, String(e?.message || e));}
+    }
+  }));
 }
 export default {
   fetch: (request, env, ctx) => handleRequest(request, env, ctx),
