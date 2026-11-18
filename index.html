@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./forecast-insights.css?v=26">
+  <link rel="stylesheet" href="./forecast-insights.css?v=27">
   <link rel="stylesheet" href="./briefing-ui.css?v=23">
   <link rel="stylesheet" href="./briefing-hub.css?v=3">
   <link rel="stylesheet" href="./stitch-theme.css?v=18">
@@ -52,11 +52,11 @@
   <script defer src="./briefing-hub-core.js?v=1"></script>
   <script defer src="./briefing-hub.js?v=2"></script>
   <script defer src="./weather-icons.js?v=17"></script>
-  <script defer src="./alert-rules-core.js?v=33"></script>
-  <script defer src="./forecast-insights.js?v=40"></script>
+  <script defer src="./alert-rules-core.js?v=34"></script>
+  <script defer src="./forecast-insights.js?v=41"></script>
   <script defer src="./stitch-layout.js?v=18"></script>
   <script defer src="./daily-delta-core.js?v=27"></script>
-  <script defer src="./official-data-core.js?v=40"></script>
+  <script defer src="./official-data-core.js?v=41"></script>
   <script defer src="./weather-provider-core.js?v=43"></script>
   <script defer src="./monetization-core.js?v=32"></script>
   <script defer src="./monetization-settings.js?v=34"></script>
@@ -75,8 +75,8 @@
   <script defer src="./national-weather-core.js?v=2"></script>
   <script defer src="./hourly-explorer-core.js?v=2"></script>
   <script defer src="./hourly-explorer.js?v=3"></script>
-  <script defer src="./app.js?v=54"></script>
-  <script defer src="./official-data-ui.js?v=43"></script>
+  <script defer src="./app.js?v=55"></script>
+  <script defer src="./official-data-ui.js?v=44"></script>
   <script defer src="./official-warning-details.js?v=1"></script>
   <script defer src="./location-core.js?v=18"></script>
   <script defer src="./reverse-geocode.js"></script>
@@ -220,7 +220,7 @@
           </fieldset>
           <p class="watch-note" id="notificationModeNote">Android 앱 업데이트 후 적용됩니다. 웹에서는 일반 브라우저 알림으로 표시합니다.</p>
           <article class="notification-preview" aria-labelledby="notificationPreviewHeading">
-            <div class="notification-preview-heading"><div><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span><span><b id="notificationPreviewHeading">Android 알림 미리보기</b><small>실제 모양은 기기와 시스템 테마에 따라 달라집니다.</small></span></div><span class="notification-preview-live">예보 요약</span></div>
+            <div class="notification-preview-heading"><div><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span><span><b id="notificationPreviewHeading">Android 알림 미리보기</b><small>실제 모양은 기기와 시스템 테마에 따라 달라집니다.</small></span></div><span id="notificationPreviewLive" class="notification-preview-live">예보 요약</span></div>
             <div class="notification-preview-surface" aria-live="polite">
               <span class="notification-preview-brand" aria-hidden="true"><img src="./assets/brand/weatherhannun-192.png?v=18" alt=""></span>
               <span id="notificationPreviewWeatherIcon" class="notification-preview-weather weather-icon-host" aria-hidden="true"></span>
@@ -236,6 +236,7 @@
             <label><span><input id="watchClear" type="checkbox" checked>☀ 맑은 시간</span><span class="watch-value"><select id="clearHours" aria-label="맑은 시간 지속 기준"><option value="2">2시간</option><option value="3">3시간</option><option value="4">4시간</option><option value="6">6시간</option></select> 이상 지속</span></label>
             <label><span><input id="watchFrost" type="checkbox" checked>❄ 저온·서리</span><span class="watch-value">48시간 내 2°C 이하</span></label>
             <label><span><input id="watchWind" type="checkbox" checked>🌬 돌풍</span><span class="watch-value">24시간 내 35km/h 이상</span></label>
+            <label class="official-warning-option"><span><input id="watchOfficialWarnings" type="checkbox" checked>⚠ 기상청 공식 특보</span><span class="watch-value">발표·변경·연장 즉시</span></label>
           </div>
           <div class="watch-subheading"><span><span class="material-symbols-outlined" aria-hidden="true">schedule</span><b>정기 요약 받을 시각</b></span><small>선택 시각부터 시스템이 실행 가능한 첫 시점에 하루 한 번 보냅니다.</small></div>
           <div class="watch-schedule-grid" aria-label="정기 날씨 요약">
@@ -243,7 +244,7 @@
             <label><span><input id="eveningSummary" type="checkbox">🌙 내일 계획 요약</span><span class="watch-time-field"><small>발송 시작</small><input id="eveningTime" type="time" value="19:00" aria-label="내일 계획 요약 알림 시작 시각"></span></label>
             <label class="quiet-hours"><span><input id="quietHours" type="checkbox">🔕 방해금지</span><span><input id="quietStart" type="time" value="22:00" aria-label="방해금지 시작">–<input id="quietEnd" type="time" value="06:00" aria-label="방해금지 종료"></span></label>
           </div>
-          <p class="watch-note">‘비 가능성 낮음’은 별도 확률을 만들지 않고, 향후 6시간의 각 시간별 강수확률이 선택 기준 이하인지 확인합니다. 맑음은 낮 시간의 하늘 상태·강수확률·예상 강수량을 함께 봅니다.</p>
+          <p class="watch-note">‘비 가능성 낮음’은 별도 확률을 만들지 않고, 향후 6시간의 각 시간별 강수확률이 선택 기준 이하인지 확인합니다. 기상청 공식 특보는 모델 조건과 구분해 별도 고우선순위 채널로 알리며, 앱 방해금지보다 우선하고 휴대폰의 방해금지·채널 설정을 따릅니다.</p>
           <div class="watch-action"><button type="button" id="saveWatch">알림 조건 저장</button><button type="button" class="alt" id="allowNotify">알림 권한 요청</button></div>
           <div id="alertList" aria-live="polite"></div><p id="savedAlertStatus" class="watch-note">조건 저장 후 백그라운드 알림 시작</p><p id="foregroundNotice" class="watch-note">절전 중 알림 지연 가능</p>
         </section>

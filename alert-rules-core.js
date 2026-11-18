@@ -5,7 +5,7 @@
   if (root) root.WeatherAlertRules = api;
 })(typeof window !== "undefined" ? window : globalThis, function () {
   const DEFAULTS = Object.freeze({
-    version: 2,
+    version: 3,
     configured: false,
     notificationMode: "standard",
     rain: true,
@@ -16,6 +16,7 @@
     clearHours: 3,
     frost: true,
     wind: true,
+    officialWarnings: true,
     morning: true,
     morningTime: "07:00",
     evening: true,
@@ -45,6 +46,9 @@
     out.clearHours = number(saved.clearHours, 3, 2, 8);
     out.frost = boolean(saved.frost, out.frost);
     out.wind = boolean(saved.wind, out.wind);
+    // v2 users chose model conditions only. Do not silently add a new
+    // high-priority official-warning channel until they save the v3 setting.
+    out.officialWarnings = Number(saved.version) >= 3 ? boolean(saved.officialWarnings, true) : false;
     // Legacy users opted into event rules only; do not silently add daily alerts.
     out.morning = legacy ? false : boolean(saved.morning, true);
     out.morningTime = time(saved.morningTime, "07:00");

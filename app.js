@@ -105,6 +105,15 @@
       staticOfficial:true
     };
   }
+  async function fetchFreshNationalWeather(city) {
+    var waits=[0,3000,6000],lastError;
+    for(var attempt=0;attempt<waits.length;attempt++){
+      if(waits[attempt])await new Promise(function(resolve){setTimeout(resolve,waits[attempt]);});
+      try{return await fetchUnifiedWeather(city,20000);}
+      catch(error){lastError=error;}
+    }
+    throw lastError||new Error("최신 전국 예보를 확인하지 못했습니다.");
+  }
   async function getJson(url, timeoutMs) {
     if(!url)throw new Error("데이터 공급자 설정을 불러오지 못했습니다.");
     var ctrl=new AbortController();
@@ -561,12 +570,13 @@
     nationalPayloads=next;
     renderNationalWeather();$("nationalTime").textContent='전국 예보를 불러오는 중…';
     try{
-      // Bound upstream concurrency and render completed cities immediately.
-      await Promise.all(Array.from({length:Math.min(5,cities.length)},async function(){
+      // A stale cache response starts a Worker background refresh. Retry it instead
+      // of leaving the city blank, while keeping provider concurrency bounded.
+      await Promise.all(Array.from({length:Math.min(3,cities.length)},async function(){
         while(true){
           var i=cursor++;if(i>=cities.length)return;
           try{
-            var response=await fetchUnifiedWeather(cities[i],13000);
+            var response=await fetchFreshNationalWeather(cities[i]);
             if(!Array.isArray(response.weather?.hourly?.time)||!response.weather.hourly.time.length)throw new Error('예보 시간 없음');
             next[i]=response.weather;succeeded++;
           }catch(error){failed++;}

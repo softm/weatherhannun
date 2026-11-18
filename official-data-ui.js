@@ -3,6 +3,7 @@
   var core = window.WeatherHannunOfficialData;
   if (!core) return;
   var STORAGE_KEY = "weatherhannun_official_snapshot_v1";
+  var WARNING_URL = "https://weatherhannun-api.softm.workers.dev/officialWarnings";
   var feed = null, weather = null, resolved = null, lastLoadedAt = 0;
   function storedFeed() {
     try {
@@ -31,7 +32,10 @@
     var local = resolved && Array.isArray(resolved.localWarnings) ? resolved.localWarnings : [];
     var all = resolved && Array.isArray(resolved.warnings) ? resolved.warnings : [];
     if (!resolved || !resolved.warningFeedReady) return { state: "unavailable", text: "공식 특보 연동 확인 중 · 기상청 원문 확인" };
-    if (local.length) return { state: "local", text: place + " 적용 특보 " + local.length + "건 · 원문 확인" };
+    if (local.length) {
+      var insight = core.warningInsight(local[0]);
+      return { state: "local", text: insight ? place + " · " + insight.title + " " + core.warningStatus(insight, new Date().toISOString()) + " · " + insight.action : place + " 적용 특보 " + local.length + "건 · 원문 확인" };
+    }
     if (all.length) return { state: "elsewhere", text: place + " 적용 특보 없음 · 전국 다른 지역 " + all.length + "건" };
     return { state: "clear", text: "현재 스냅샷 기준 " + place + " 적용 특보 없음" };
   }
@@ -89,10 +93,23 @@
     renderHome(); renderPanel();
   }
   function loadFeed() {
-    return fetch("./data/official/latest.json?refresh="+Date.now(), { cache: "no-store" }).then(function (response) {
+    function json(url) { return fetch(url, { cache: "no-store" }).then(function (response) {
       if (!response.ok) throw new Error("official snapshot " + response.status);
       return response.json();
-    }).then(function (json) { feed = json; rememberFeed(json); lastLoadedAt=Date.now(); renderPanel(); resolve(); }).catch(function () { if(!feed)feed = { schemaVersion: 1, status: "unavailable" }; renderPanel(); resolve(); });
+    }); }
+    return Promise.allSettled([
+      json("./data/official/latest.json?refresh="+Date.now()),
+      json(WARNING_URL+"?refresh="+Date.now())
+    ]).then(function (results) {
+      var base=results[0].status==="fulfilled"?results[0].value:feed;
+      var warnings=results[1].status==="fulfilled"?results[1].value:null;
+      if(warnings&&warnings.schemaVersion===1&&warnings.status==="ready"&&Array.isArray(warnings.kma&&warnings.kma.warnings)){
+        if(!base||base.schemaVersion!==1)base={schemaVersion:1,status:"ready",generatedAt:warnings.generatedAt,rights:warnings.rights||[],kma:{observations:{current:[],previous:[]},radar:{status:"unavailable"}},airKorea:{measurements:[]}};
+        base=Object.assign({},base,{status:"ready",warningGeneratedAt:warnings.generatedAt,kma:Object.assign({},base.kma||{},{warnings:warnings.kma.warnings})});
+      }
+      if(!base)throw new Error("official snapshots unavailable");
+      feed=base;rememberFeed(base);lastLoadedAt=Date.now();renderPanel();resolve();
+    }).catch(function () { if(!feed)feed = { schemaVersion: 1, status: "unavailable" }; renderPanel(); resolve(); });
   }
   function init() {
     feed = storedFeed();

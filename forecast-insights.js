@@ -1,7 +1,7 @@
 "use strict";
 /* Seven-day weather windows, farm guidance and opt-in foreground alerts.
- * This layer only consumes already fetched forecast output. It does not claim
- * real-time observation, certified field conditions or official warnings.
+ * This layer consumes fetched model output plus separately labelled official
+ * warning snapshots; it does not present model values as official evidence.
  */
 (function () {
   const el = id => document.getElementById(id);
@@ -15,6 +15,7 @@
   const TRACK_KEY="weatherhannun_alert_v1";
   const rules=window.WeatherAlertRules;
   let data=null;
+  let officialData=null;
   let period="24";
   let rangeStart="";
   let rangeEnd="";
@@ -175,6 +176,28 @@
     if(!rules)return [];
     return rules.pick(rows(),prefs).map(alert=>Object.assign(alert,noticeCopy(alert)));
   }
+  function officialNotices(){
+    if(!prefs.officialWarnings||!officialData?.warningFeedReady)return [];
+    const core=window.WeatherHannunOfficialData;
+    return (officialData.localWarnings||[]).map(row=>core?.warningInsight?.(row)).filter(Boolean);
+  }
+  function officialTime(value,label){
+    if(!value)return label+" 시각 확인";
+    const parsed=new Date(value);
+    if(Number.isNaN(parsed.getTime()))return label+" 시각 확인";
+    return parsed.toLocaleString("ko-KR",{timeZone:"Asia/Seoul",month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})+" "+label;
+  }
+  function officialState(alert){
+    const shared=window.WeatherHannunOfficialData?.warningStatus?.(alert,new Date().toISOString());
+    if(shared)return shared;
+    if(alert?.level==="예비특보")return "발표";
+    const effective=Date.parse(alert?.effectiveAt||"");
+    return Number.isFinite(effective)&&effective>Date.now()?"발효 예정":"발효 중";
+  }
+  function officialEffectiveTime(alert){
+    const effective=Date.parse(alert?.effectiveAt||"");
+    return officialTime(alert?.effectiveAt,Number.isFinite(effective)&&effective>Date.now()?"발효 예정":"발효");
+  }
   function nativeBridge(){
     return window.WeatherHannunAndroid&&typeof window.WeatherHannunAndroid.saveAlertConfiguration==="function"?window.WeatherHannunAndroid:null;
   }
@@ -185,15 +208,15 @@
     if(data?.loc?.temporary)return false;
     const bridge=nativeBridge();
     if(!bridge||!latestLocation||!finite(Number(latestLocation.lat))||!finite(Number(latestLocation.lon)))return false;
-    const payload={version:2,configured:!!prefs.configured,notificationMode:prefs.notificationMode,location:{name:String(latestLocation.name||"선택 지역").slice(0,75),lat:Number(latestLocation.lat),lon:Number(latestLocation.lon)},rules:{rain:!!prefs.rain,rainThreshold:prefs.rainThreshold,dry:!!prefs.dry,dryThreshold:prefs.dryThreshold,clear:!!prefs.clear,clearHours:prefs.clearHours,frost:!!prefs.frost,wind:!!prefs.wind},schedules:{morning:!!prefs.morning,morningTime:prefs.morningTime,evening:!!prefs.evening,eveningTime:prefs.eveningTime},quietHours:{enabled:!!prefs.quiet,start:prefs.quietStart,end:prefs.quietEnd}};
+    const payload={version:3,configured:!!prefs.configured,notificationMode:prefs.notificationMode,location:{name:String(latestLocation.name||"선택 지역").slice(0,75),address:String(latestLocation.address||"").slice(0,180),lat:Number(latestLocation.lat),lon:Number(latestLocation.lon)},rules:{rain:!!prefs.rain,rainThreshold:prefs.rainThreshold,dry:!!prefs.dry,dryThreshold:prefs.dryThreshold,clear:!!prefs.clear,clearHours:prefs.clearHours,frost:!!prefs.frost,wind:!!prefs.wind,officialWarnings:!!prefs.officialWarnings},schedules:{morning:!!prefs.morning,morningTime:prefs.morningTime,evening:!!prefs.evening,eveningTime:prefs.eveningTime},quietHours:{enabled:!!prefs.quiet,start:prefs.quietStart,end:prefs.quietEnd}};
     try{bridge.saveAlertConfiguration(JSON.stringify(payload));return true;}catch(_){return false;}
   }
   function renderAlerts(){
     renderNotificationPreview();
     renderNotificationControlSummary();
     const root=el("alertList");if(!root||!data)return;
-    const notices=pickNotices();
-    root.innerHTML=notices.length?notices.map(a=>'<div class="notice-result"><b>'+safe(a.title)+'</b><span>'+safe(a.body)+'</span></div>').join(""):'<p class="muted-text">설정한 기준에서 가까운 경보 조건이 없거나 조건을 선택하지 않았습니다.</p>';
+    const notices=pickNotices(),official=officialNotices();
+    root.innerHTML=official.concat(notices).length?official.map(a=>'<div class="notice-result official"><b>'+safe(a.title)+' · 공식 특보</b><span>'+safe(a.area+' · '+officialState(a)+' · '+officialEffectiveTime(a)+' · '+a.action)+'</span></div>').join("")+notices.map(a=>'<div class="notice-result"><b>'+safe(a.title)+'</b><span>'+safe(a.body)+'</span></div>').join(""):'<p class="muted-text">설정한 기준에서 가까운 경보 조건이 없거나 조건을 선택하지 않았습니다.</p>';
     if(el("foregroundNotice")){
       if(nativeBridge())el("foregroundNotice").textContent="Android 앱이 약 15분 주기로 확인합니다. 절전 상태에서는 알림이 늦어질 수 있습니다.";
       else el("foregroundNotice").textContent=("Notification" in window&&Notification.permission==="granted")?"브라우저 알림 사용 허용됨 · 앱 열림 상태에서만 점검":"웹에서는 앱이 열린 상태에서만 조건을 확인합니다.";
@@ -224,7 +247,7 @@
       badge.dataset.state=permission==="granted"?"granted":permission==="denied"?"denied":"prompt";
       badge.textContent=permission==="granted"?"알림 허용됨":permission==="denied"?"알림 차단됨":permission==="unsupported"?"알림 미지원":"권한 필요";
     }
-    const ruleIds=["watchRain","watchDry","watchClear","watchFrost","watchWind"],ruleCount=ruleIds.filter(id=>checkedControl(id,!!prefs[id.replace(/^watch/,"").toLowerCase()])).length;
+    const ruleIds=["watchRain","watchDry","watchClear","watchFrost","watchWind","watchOfficialWarnings"],ruleCount=ruleIds.filter(id=>checkedControl(id,id==="watchOfficialWarnings"?!!prefs.officialWarnings:!!prefs[id.replace(/^watch/,"").toLowerCase()])).length;
     const mode=document.querySelector("[name=notificationMode]:checked")?.value||prefs.notificationMode||"standard";
     const modeName=mode==="hub"?"상시 날씨":mode==="headsup"?"헤드업":"일반 알림";
     const schedules=[];
@@ -238,7 +261,7 @@
     if(resume)resume.hidden=!paused;
   }
   function renderNotificationPreview(){
-    const title=el("notificationPreviewTitle"),temperature=el("notificationPreviewTemperature"),condition=el("notificationPreviewCondition"),body=el("notificationPreviewBody"),schedule=el("notificationPreviewSchedule"),icon=el("notificationPreviewWeatherIcon");
+    const title=el("notificationPreviewTitle"),temperature=el("notificationPreviewTemperature"),condition=el("notificationPreviewCondition"),body=el("notificationPreviewBody"),schedule=el("notificationPreviewSchedule"),icon=el("notificationPreviewWeatherIcon"),live=el("notificationPreviewLive");
     if(!title||!body||!schedule)return;
     const current=data?.weather?.current||{};
     const allRows=rows();
@@ -257,6 +280,17 @@
     const completeRainEvidence=next.length===12&&next.every(row=>finite(row.rain)&&finite(row.mm));
     const location=String(latestLocation?.name||data?.loc?.name||"선택 지역");
     title.textContent=location;
+    const official=officialNotices()[0];
+    if(official){
+      if(temperature)temperature.textContent="⚠";
+      if(condition)condition.textContent=official.title+" "+officialState(official);
+      body.textContent=official.area+" · "+officialEffectiveTime(official)+" · "+official.action;
+      schedule.textContent="기상청 공식 특보 · "+officialTime(official.announcedAt,"발표");
+      if(live)live.textContent="공식 특보";
+      if(icon)icon.innerHTML='<span class="material-symbols-outlined" aria-hidden="true">warning</span>';
+      renderNotificationControlSummary();return;
+    }
+    if(live)live.textContent="예보 요약";
     if(temperature)temperature.textContent=finite(temp)?number(temp)+"°":"--°";
     if(condition)condition.textContent=weatherName(code)||"날씨 요약";
     const summary=[];
@@ -275,7 +309,7 @@
     renderNotificationControlSummary();
   }
   function saveAlertPreferences(){
-    prefs=rules.normalizePreferences({version:2,configured:true,notificationMode:document.querySelector("[name=notificationMode]:checked")?.value,rain:el("watchRain").checked,rainThreshold:Number(el("rainThreshold").value),dry:el("watchDry").checked,dryThreshold:Number(el("dryThreshold").value),clear:el("watchClear").checked,clearHours:Number(el("clearHours").value),frost:el("watchFrost").checked,wind:el("watchWind").checked,morning:el("morningSummary").checked,morningTime:el("morningTime").value,evening:el("eveningSummary").checked,eveningTime:el("eveningTime").value,quiet:el("quietHours").checked,quietStart:el("quietStart").value,quietEnd:el("quietEnd").value});
+    prefs=rules.normalizePreferences({version:3,configured:true,notificationMode:document.querySelector("[name=notificationMode]:checked")?.value,rain:el("watchRain").checked,rainThreshold:Number(el("rainThreshold").value),dry:el("watchDry").checked,dryThreshold:Number(el("dryThreshold").value),clear:el("watchClear").checked,clearHours:Number(el("clearHours").value),frost:el("watchFrost").checked,wind:el("watchWind").checked,officialWarnings:el("watchOfficialWarnings").checked,morning:el("morningSummary").checked,morningTime:el("morningTime").value,evening:el("eveningSummary").checked,eveningTime:el("eveningTime").value,quiet:el("quietHours").checked,quietStart:el("quietStart").value,quietEnd:el("quietEnd").value});
     try{localStorage.setItem(TRACK_KEY,JSON.stringify(prefs));}catch(_){}
     renderAlerts();
     const synced=syncWithAndroid();
@@ -293,6 +327,14 @@
         if(sessionStorage.getItem(key)===signature)return;
         new Notification("날씨한눈 · "+a.title,{body:a.body,icon:"./icon.svg",tag:"weatherhannun-"+a.id});
         sessionStorage.setItem(key,signature);
+      }catch(_){}
+    });
+    officialNotices().forEach(a=>{
+      const key="weatherhannun_official_"+a.key;
+      try{
+        if(sessionStorage.getItem(key))return;
+        new Notification("날씨한눈 · "+a.title+" "+officialState(a),{body:a.area+" · "+a.action,icon:"./icon.svg",tag:"weatherhannun-official-"+a.key});
+        sessionStorage.setItem(key,"shown");
       }catch(_){}
     });
   }
@@ -357,9 +399,9 @@
       }catch(e){el("savedAlertStatus").textContent="브라우저 알림 권한을 확인할 수 없습니다.";}
       renderAlerts();notifyIfAllowed();
     });
-    [["watchRain","rain"],["watchDry","dry"],["watchClear","clear"],["watchFrost","frost"],["watchWind","wind"],["morningSummary","morning"],["eveningSummary","evening"],["quietHours","quiet"]].forEach(([id,key])=>{if(el(id))el(id).checked=!!prefs[key];});
+    [["watchRain","rain"],["watchDry","dry"],["watchClear","clear"],["watchFrost","frost"],["watchWind","wind"],["watchOfficialWarnings","officialWarnings"],["morningSummary","morning"],["eveningSummary","evening"],["quietHours","quiet"]].forEach(([id,key])=>{if(el(id))el(id).checked=!!prefs[key];});
     [["rainThreshold","rainThreshold"],["dryThreshold","dryThreshold"],["clearHours","clearHours"],["morningTime","morningTime"],["eveningTime","eveningTime"],["quietStart","quietStart"],["quietEnd","quietEnd"]].forEach(([id,key])=>{if(el(id))el(id).value=String(prefs[key]);});
-    ["watchRain","watchDry","watchClear","watchFrost","watchWind","rainThreshold","dryThreshold","clearHours","morningSummary","morningTime","eveningSummary","eveningTime","quietHours","quietStart","quietEnd"].forEach(id=>{const control=el(id);if(control){control.addEventListener("change",renderNotificationPreview);control.addEventListener("input",renderNotificationPreview);}});
+    ["watchRain","watchDry","watchClear","watchFrost","watchWind","watchOfficialWarnings","rainThreshold","dryThreshold","clearHours","morningSummary","morningTime","eveningSummary","eveningTime","quietHours","quietStart","quietEnd"].forEach(id=>{const control=el(id);if(control){control.addEventListener("change",renderNotificationPreview);control.addEventListener("input",renderNotificationPreview);}});
     if(nativeBridge()){allow.textContent="Android 알림 권한 허용";renderAlerts();}
     updateButtons();
     renderNotificationPreview();
@@ -374,6 +416,9 @@
     if(end){end.min=hours[0].date;end.max=hours[hours.length-1].date;if(!end.value||end.value<end.min||end.value>end.max)end.value=hours[Math.min(47,hours.length-1)].date;}
     rangeStart=start?.value||hours[0].date;rangeEnd=end?.value||hours[hours.length-1].date;
     rainSummary();farm();renderAlerts();syncWithAndroid();notifyIfAllowed();
+  });
+  window.addEventListener("weatherhannun:official-data",function(event){
+    officialData=event.detail;renderAlerts();notifyIfAllowed();
   });
   window.WeatherHannunAlerts={syncWithAndroid,onAndroidPermissionChanged(granted){const save=el("savedAlertStatus");if(save)save.textContent=granted?"Android 알림 권한을 허용했습니다.":"알림 권한이 허용되지 않았습니다. Android 설정에서 다시 허용할 수 있습니다.";renderAlerts();}};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind);else bind();
