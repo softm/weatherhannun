@@ -84,6 +84,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+      KMA_API_HUB_KEY: ${{ secrets.KMA_API_HUB_KEY }}
       DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
       AIRKOREA_API_KEY: ${{ secrets.AIRKOREA_API_KEY }}
     steps:
@@ -96,7 +97,7 @@ jobs:
         shell: bash
         run: |
           missing=0
-          for key in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+          for key in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID KMA_API_HUB_KEY; do
             if [ -z "$(printenv "$key")" ]; then
               echo "::warning::Missing GitHub Secret: $key (repository or environment)"
               missing=1
@@ -156,6 +157,8 @@ jobs:
           else
             echo "::warning::AirKorea key not verified; no secret configured."
           fi
+          printf '%s' "$KMA_API_HUB_KEY" | npx wrangler secret put KMA_API_HUB_KEY --config wrangler.toml >/dev/null
+          echo "KMA warnings: API Hub key configured for 10-minute snapshots" >> "$GITHUB_STEP_SUMMARY"
       - name: Diagnose direct KMA gateway without leaking API key
         if: steps.gate.outputs.ready == 'true' && env.KMA_API_KEY != ''
         run: node scripts/diagnose-kma.mjs
