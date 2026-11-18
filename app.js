@@ -90,36 +90,35 @@
     var age=(now||Date.now())-at;
     return age>=-MAX_FUTURE_CLOCK_SKEW_MS&&age<=MAX_SAVED_FORECAST_AGE_MS;
   }
-  async function fetchUnifiedWeather(loc, timeoutMs) {
+  async function fetchUnifiedWeather(loc, timeoutMs, options) {
     if(!PROVIDER||!PROVIDER.buildForecastUrl)throw new Error("예보 공급자 설정을 불러오지 못했습니다.");
     var canonical=await getJson(PROVIDER.buildForecastUrl(loc),timeoutMs);
     var fetchedAt=canonical.source?.fetchedAt||null;
-    if(canonical.stale===true||canonical.cache?.fallback===true||!freshForecastTimestamp(fetchedAt)) {
+    var stale=canonical.stale===true||canonical.cache?.fallback===true;
+    if(!freshForecastTimestamp(fetchedAt)||(stale&&!options?.allowStale)) {
       throw new Error("최신 예보가 아직 준비되지 않았습니다.");
     }
     return {
       weather:PROVIDER.toLegacyForecast(canonical),
       air:PROVIDER.toLegacyAir(canonical),
-      fallback:false,
+      fallback:stale,
       fetchedAt:fetchedAt,
       staticOfficial:true
     };
   }
   async function fetchFreshNationalWeather(city) {
-    var waits=[0,3000,6000],lastError;
-    for(var attempt=0;attempt<waits.length;attempt++){
-      if(waits[attempt])await new Promise(function(resolve){setTimeout(resolve,waits[attempt]);});
-      try{return await fetchUnifiedWeather(city,20000);}
-      catch(error){lastError=error;}
-    }
-    throw lastError||new Error("최신 전국 예보를 확인하지 못했습니다.");
+    // A stale response is still the last provider-validated forecast. Render it
+    // immediately while the Worker refreshes D1, then the board retries once.
+    return fetchUnifiedWeather(city,20000,{allowStale:true});
   }
   async function getJson(url, timeoutMs) {
     if(!url)throw new Error("데이터 공급자 설정을 불러오지 못했습니다.");
     var ctrl=new AbortController();
     var timeout=setTimeout(function(){ctrl.abort();},Math.max(3000,Number(timeoutMs)||13000));
     try {
-      var res=await fetch(url,{signal:ctrl.signal});
+      // The Worker owns forecast freshness. Never let a browser/WebView HTTP
+      // cache replay a stale JSON response during a retry.
+      var res=await fetch(url,{signal:ctrl.signal,cache:"no-store"});
       if (!res.ok) throw new Error("서버 응답 "+res.status);
       var data=await res.json();
       if(data.error) throw new Error(data.reason||"제공 데이터 오류");
@@ -510,19 +509,20 @@
     text("mapUpdated","주요 도시 예보 조회 중");
     $("cityGrid").innerHTML='<div class="empty-state">전국 주요 도시의 현재 날씨를 가져오고 있습니다…</div>';
     try{
-      var results=await Promise.allSettled(CITY_LIST.map(function(city){return fetchUnifiedWeather(city);}));
+      var results=await Promise.allSettled(CITY_LIST.map(function(city){return fetchUnifiedWeather(city,undefined,{allowStale:true});}));
       STATE.cityData=CITY_LIST.map(function(city,i){
         var v=results[i].status==="fulfilled"?results[i].value.weather.current:null;
         return {name:city.name,lat:city.lat,lon:city.lon,temp:v?.temperature_2m,apparent:v?.apparent_temperature,precipitation:v?.precipitation,wind:v?.wind_speed_10m,gust:v?.wind_gusts_10m,code:v?.weather_code,isDay:v?.is_day};
       });
-      text("mapUpdated","도시별 모델 예보 · "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"})+" 갱신");
+      var refreshing=results.some(function(result){return result.status==="fulfilled"&&result.value.fallback;});
+      text("mapUpdated","도시별 모델 예보 · "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Seoul"})+(refreshing?" · 일부 갱신 중":" 갱신"));
       renderNationalOverview();renderCities();updateMapMarkers();
     }finally{
       STATE.mapBusy=false;
       window.WeatherActionProgress?.end(progressId);
     }
   }
-  var nationalPayloads=null,nationalFetched=0,nationalFailed=false,nationalBusy=false,nationalDate=null,nationalPeriod="current",nationalDays=[];
+  var nationalPayloads=null,nationalFetched=0,nationalFailed=false,nationalRefreshPending=0,nationalRetryTimer=0,nationalBusy=false,nationalDate=null,nationalPeriod="current",nationalDays=[];
   function renderNationalWeather(){
     var core=window.WeatherNationalCore;if(!core)return;
     nationalDays=core.dates();
@@ -557,35 +557,37 @@
       label+=nationalDate===nationalDays[0]&&target&&clock>target?' · 지난 시각 예보는 제공되지 않습니다':' · 해당 시각 예보가 발표되지 않았습니다';
     }else if(missing)label+=' · '+missing+'곳 자료 없음';
     if(nationalFetched)label+=' · 조회 '+new Date(nationalFetched).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Seoul'});
+    if(nationalRefreshPending)label+=' · '+nationalRefreshPending+'곳 갱신 중';
     if(nationalFailed)label+=' · 일부 지역 갱신 실패';
     $("nationalTime").textContent=label;
   }
-  async function loadNationalWeather(force){
+  async function loadNationalWeather(force,automaticRetry){
     if(!window.WeatherNationalCore||nationalBusy)return;
-    if(nationalPayloads&&!nationalFailed&&!force&&Date.now()-nationalFetched<15*60000){renderNationalWeather();return;}
+    if(!automaticRetry&&nationalRetryTimer){clearTimeout(nationalRetryTimer);nationalRetryTimer=0;}
+    if(nationalPayloads&&!nationalFailed&&!nationalRefreshPending&&!force&&Date.now()-nationalFetched<15*60000){renderNationalWeather();return;}
     nationalBusy=true;$("nationalReload").disabled=true;
     var cities=window.WeatherNationalCore.cities;
     var previous=nationalPayloads?.slice()||Array(cities.length).fill(null);
-    var next=previous.slice(),cursor=0,done=0,succeeded=0,failed=0;
+    var next=previous.slice(),cursor=0,done=0,succeeded=0,failed=0,pending=0;
     nationalPayloads=next;
     renderNationalWeather();$("nationalTime").textContent='전국 예보를 불러오는 중…';
     try{
-      // A stale cache response starts a Worker background refresh. Retry it instead
-      // of leaving the city blank, while keeping provider concurrency bounded.
+      // Stale last-good values remain visible while the Worker refreshes them.
+      // Provider concurrency stays bounded so the nationwide board cannot burst.
       await Promise.all(Array.from({length:Math.min(3,cities.length)},async function(){
         while(true){
           var i=cursor++;if(i>=cities.length)return;
           try{
             var response=await fetchFreshNationalWeather(cities[i]);
             if(!Array.isArray(response.weather?.hourly?.time)||!response.weather.hourly.time.length)throw new Error('예보 시간 없음');
-            next[i]=response.weather;succeeded++;
+            next[i]=response.weather;succeeded++;if(response.fallback)pending++;
           }catch(error){failed++;}
           done++;renderNationalWeather();
           $("nationalTime").textContent='전국 예보 조회 중… '+done+'/'+cities.length+'곳';
         }
       }));
       if(!succeeded&&!next.some(Boolean))throw new Error('전국 예보 응답을 확인할 수 없습니다.');
-      nationalPayloads=next;nationalFetched=Date.now();nationalFailed=failed>0;
+      nationalPayloads=next;nationalFetched=Date.now();nationalFailed=failed>0;nationalRefreshPending=pending;
     }catch(error){
       nationalFailed=true;
       $("nationalTime").textContent='전국 예보 연결 실패'+(next.some(Boolean)?' · 이전 조회 자료 표시':' · 다시 시도해 주세요');
@@ -594,6 +596,9 @@
       nationalBusy=false;$("nationalReload").disabled=false;
     }
     renderNationalWeather();
+    if(nationalRefreshPending&&!automaticRetry){
+      nationalRetryTimer=setTimeout(function(){nationalRetryTimer=0;loadNationalWeather(true,true);},15000);
+    }
   }
   function searchDialogOpen(){
     $("locationDialog").showModal();
@@ -702,7 +707,7 @@
     $("restoreLocation").addEventListener('click',function(){var saved=storeGet('weatherhannun_location');applyLocation(validLocation(saved)?saved:CITY_LIST[0],false);setView('today');});
     renderPresets();
     applyLocation(l,false);
-    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=43").catch(function(){});
+    if("serviceWorker" in navigator && location.protocol==="https:")navigator.serviceWorker.register("./sw.js?v=44").catch(function(){});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();

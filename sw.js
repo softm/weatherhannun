@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v106-official-warning-insight";
+const CACHE="weatherhannun-shell-v107-national-cache-refresh";
 const BASE=self.registration.scope;
 const SHELL=[
   "./hourly-explorer-core.js?v=2","./hourly-explorer.js?v=3","./mobile-experience.css?v=5",
@@ -23,7 +23,7 @@ const SHELL=[
   "./data/korea-regions-202602.json","./region-search-core.js?v=16","./region-search-ui.js?v=19",
   "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=24",
   "./location-manager.css?v=24","./briefing-core.js?v=33","./briefing-highlights.js?v=20","./briefing-ui.js?v=22",
-  "./briefing-ui.css?v=23","./briefing-hub.css?v=3","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=55","./alert-rules-core.js?v=34",
+  "./briefing-ui.css?v=23","./briefing-hub.css?v=3","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=56","./alert-rules-core.js?v=34",
   "./forecast-insights.js?v=41","./forecast-insights.css?v=27","./manifest.webmanifest?v=18",
   "./dialog-inspired-theme.css?v=1","./icon.svg?v=18","./data-status.html","./official-rights.html"
 ].map(x=>new URL(x,BASE).href);
