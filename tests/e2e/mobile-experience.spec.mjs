@@ -184,6 +184,20 @@ test('national map date and morning/afternoon tabs show KMA ISO +09:00 forecasts
  await expect(page.locator('[data-national-period="current"]')).toBeDisabled();
 });
 
+test('national map keeps last-good stale values visible while refresh is pending',async({page})=>{
+ await start(page);
+ await page.unroute('**/weatherApi?**');
+ await page.route('**/weatherApi?**',route=>{
+  const response=canonical(structuredClone(forecast));
+  response.stale=true;
+  response.cache={hit:true,fallback:true,refreshQueued:true};
+  return route.fulfill({headers:{'Cache-Control':'no-store'},json:response});
+ });
+ await view(page,'map');
+ await expect(page.locator('#nationalTime')).toContainText('17곳 갱신 중',{timeout:30000});
+ expect(await page.locator('#nationalPins [data-national-city] b').allTextContents()).not.toContain('--');
+});
+
 
 test('expired local forecast is hidden when common API is unavailable',async({page})=>{
  const now=new Date(forecast.current.time+'+09:00');
