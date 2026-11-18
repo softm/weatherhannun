@@ -24,6 +24,9 @@ try{
  if(!ready)throw Error("D1 local health check failed: "+log.slice(-1000));
  const invalid=await probe("/weatherApi?lat=nope&lon=127");
  if(invalid.status!==400||invalid.body.error!=="invalid_coordinates")throw Error("Coordinates contract failed");
+ const official=await probe("/officialWarnings");
+ if(official.status!==503||official.body.error!=="official_warning_provider_not_configured")
+  throw Error("Official warning missing-key safety check failed: "+JSON.stringify(official));
  const domestic=await probe("/weatherApi?lat=37.5665&lon=126.978");
  if(domestic.status!==503||domestic.body.error!=="domestic_provider_not_configured")
   throw Error("Domestic missing-key safety check failed: "+JSON.stringify(domestic));

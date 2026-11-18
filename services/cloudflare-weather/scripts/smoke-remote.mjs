@@ -8,11 +8,12 @@ if (!/^https:\/\/[a-z0-9.-]+\.workers\.dev$/i.test(origin)) {
 const paths = [
  ["health","/weatherHealth"],
  ["invalid-coordinates","/weatherApi?lat=bad&lon=127"],
+ ["official-warnings","/officialWarnings"],
  ["global-met-norway","/weatherApi?lat=51.5074&lon=-0.1278&name=London"],
  ["domestic-kma","/weatherApi?lat=37.5665&lon=126.978&name=Seoul"]
 ];
 const results = [];
-let healthOk=false, globalOk=false, domesticOk=false;
+let healthOk=false, globalOk=false, domesticOk=false, officialWarningsOk=false;
 for(const [name,path] of paths){
  try {
   const r=await fetch(origin+path,{headers:{Origin:"https://softm.github.io"},signal:AbortSignal.timeout(15000)});
@@ -21,6 +22,13 @@ for(const [name,path] of paths){
   let ok=false, note="";
   if(name==="health"){ok=r.status===200 && body.ok===true && body.database==="d1";healthOk=ok;}
   if(name==="invalid-coordinates")ok=r.status===400 && body.error==="invalid_coordinates";
+  if(name==="official-warnings"){
+    const generated=Date.parse(body.generatedAt);
+    officialWarningsOk=r.status===200 && body.schemaVersion===1 && body.status==="ready"
+      && Array.isArray(body.kma?.warnings) && Number.isFinite(generated) && Date.now()-generated<=30*60*1000;
+    ok=officialWarningsOk;
+    note=officialWarningsOk?"fresh KMA API Hub snapshot":"official warning snapshot unavailable or stale";
+  }
   if(name==="global-met-norway"){
     ok=r.status===200 && body.contractVersion==="weatherhannun.v2"
       && body.source?.provider==="met-no" && body.hourly?.length>0;
@@ -38,8 +46,8 @@ for(const [name,path] of paths){
 const status={
   baseUrl:origin, checkedAt:new Date().toISOString(),results,
   stagingReady:healthOk&&globalOk&&results.every(x=>x.ok),
-  productionCutoverReady:healthOk&&globalOk&&domesticOk&&results.every(x=>x.ok),
-  domesticLive:domesticOk
+  productionCutoverReady:healthOk&&globalOk&&domesticOk&&officialWarningsOk&&results.every(x=>x.ok),
+  domesticLive:domesticOk, officialWarningsLive:officialWarningsOk
 };
 writeFileSync("weather-deployment-status.json",JSON.stringify(status,null,2)+"\n");
 console.log(JSON.stringify(status,null,2));
