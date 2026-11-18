@@ -107,6 +107,7 @@ test("cache miss fetches provider and writes to D1", async () => {
     {collect: async () => payload});
   assert.equal(r.status, 200);
   assert.equal((await r.json()).contractVersion, "weatherhannun.v2");
+  assert.equal(r.headers.get("Cache-Control"), "public, max-age=60, s-maxage=60");
   assert.equal(db.writes[0].batchSize, 2);
 });
 test("stale cache still renders last-good weather marked stale", async () => {
@@ -118,6 +119,7 @@ test("stale cache still renders last-good weather marked stale", async () => {
   assert.equal(json.stale, true);
   assert.equal(json.location.name, "Gwangmyeong");
   assert.equal(json.cache.hit, true);
+  assert.equal(r.headers.get("Cache-Control"), "no-store");
 });
 test("stale D1 cache refreshes in background and keeps response fast", async () => {
   const record = {payload: JSON.stringify(payload), fetched_at_ms: Date.now() - 720000,
@@ -196,6 +198,34 @@ test("Cron refreshes official warnings even when no forecast locations are activ
   assert.equal(db.writes.length, 1);
   assert.match(db.writes[0].sql, /INSERT INTO weather_cache/);
 });
+test("Cron refreshes up to 18 active locations with concurrency capped at three", async () => {
+  const rows = Array.from({length: 18}, (_, index) => ({
+    id: `global_${index}`, lat: 35 + index / 100, lon: 127 + index / 100,
+    name: `city-${index}`, station_name: "", country: "GLOBAL"
+  }));
+  let selectParams = null, inFlight = 0, maxInFlight = 0, saves = 0;
+  const db = {
+    prepare(sql) {
+      return {bind(...params) {
+        if (sql.startsWith("SELECT id,lat")) {
+          selectParams = params;
+          return {all: async () => ({results: rows})};
+        }
+        return {sql, params};
+      }};
+    },
+    batch: async () => {saves++; return [{success: true}];}
+  };
+  await handleScheduled({}, {DB: db}, {}, {collect: async () => {
+    inFlight++;maxInFlight=Math.max(maxInFlight,inFlight);
+    await Promise.resolve();
+    inFlight--;
+    return payload;
+  }});
+  assert.equal(selectParams[2], 18);
+  assert.equal(saves, 18);
+  assert.equal(maxInFlight, 3);
+});
 
 
 function fakeKv(initial = null) {
@@ -235,6 +265,7 @@ test("KV stale last-good data is returned while refreshing asynchronously", asyn
   const body = await r.json();
   assert.equal(body.stale, true);
   assert.equal(body.cache.refreshQueued, true);
+  assert.equal(r.headers.get("Cache-Control"), "no-store");
   await Promise.all(jobs);
   const updated = JSON.parse(kv.values.get("weatherhannun:v2:kr_60_127"));
   assert.ok(updated.fetchedAtMs > Date.now() - 10000);
