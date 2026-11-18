@@ -24,6 +24,7 @@ GitHub 저장소 [Settings → Secrets and variables → Actions](https://github
 | `CLOUDFLARE_API_TOKEN` | 필수. Cloudflare Workers 생성·배포와 D1 목록·생성·수정 권한 |
 | `CLOUDFLARE_ACCOUNT_ID` | 필수. 대상 Cloudflare 계정 ID |
 | `KMA_API_KEY` | 국내 예보 실응답에 필수. 기상청 공공데이터포털 단기·초단기 서비스키 |
+| `KMA_API_HUB_KEY` | 공식 특보에 필수. 기상청 API허브 특보현황 조회 인증키 |
 | `AIRKOREA_API_KEY` | 선택. stationName 요청의 AirKorea 실측 |
 
 Google Cloud의 Secret Manager에 키가 있었다고 해도 GitHub Actions에는 자동 전달되지 않습니다.
@@ -37,7 +38,7 @@ Cloudflare 계정에 기존 사용 가능 API Token이 없다면 계정에서 �
 3. Secrets가 있으면 `weatherhannun-staging` D1 생성 또는 기존 UUID 재사용.
 4. `wrangler d1 migrations apply DB --remote` 실행.
 5. `weatherhannun-api-staging` Worker 배포 후 키를 Worker Secrets에 저장.
-6. 배포 출력으로 실제 workers.dev URL을 확인하고 Health·런던·서울·CORS를 실측.
+6. 배포 출력으로 실제 workers.dev URL을 확인하고 Health·런던·서울·공식 특보·CORS를 실측.
 7. 검증 JSON을 GitHub Actions artifact로 저장. 실패·키 미설정은 구분해 기록.
 
 Secrets 누락 시 GitHub Actions의 테스트 단계는 성공해도 **실제 Cloudflare 배포는 생략**됩니다.
@@ -56,6 +57,7 @@ npx wrangler d1 migrations apply DB --remote
 npx wrangler deploy
 # 인증키가 있다면 명령 실행 후 별도 입력:
 npx wrangler secret put KMA_API_KEY --config wrangler.toml
+npx wrangler secret put KMA_API_HUB_KEY --config wrangler.toml
 npx wrangler secret put AIRKOREA_API_KEY --config wrangler.toml
 ```
 
@@ -82,7 +84,7 @@ node scripts/smoke-remote.mjs 'https://실제배포된워커.실제계정.worker
 ```
 
 이 스크립트는 `weather-deployment-status.json`을 출력합니다.
-해외 MET Norway 200, 국내 KMA 200, DB Health 200 등 모든 조건이 충족된 뒤에만
+해외 MET Norway 200, 국내 KMA 200, 30분 이내 공식 특보 스냅샷, DB Health 200 등 모든 조건이 충족된 뒤에만
 `productionCutoverReady=true`로 표시합니다.
 국내 키가 미설정되어 503이 반환되면 국내 기능은 아직 복구되지 않은 것입니다.
 
@@ -97,6 +99,7 @@ Rate Limiting Binding은 IP 기준 분당 240회로 설정(Cloudflare 위치별 
 엄격한 글로벌 한도는 아닙니다. D1 무료 사용량, 기상청 원천 API 호출량,
 캐시 적중률과 지연시간을 별도로 측정하세요.
 국내 키 미설정 시 서버가 임의 수치를 생성하지 않고 503으로 실패하도록 구성되어 있습니다.
+`/officialWarnings`는 10분 cron과 요청 시 재검증을 함께 사용하며, 30분을 넘긴 저장값은 현재 특보로 반환하지 않습니다.
 
 ## 6. KV 기반 이전 시도와 구분
 
