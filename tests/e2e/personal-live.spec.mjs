@@ -36,8 +36,9 @@ async function enterPlaces(page){
   const manage=page.locator('[data-location-manage]').first();
   await expect(manage).toBeVisible({timeout:20000});
   await manage.click();
-  await expect(page.locator('#weatherPersonalSync')).toBeVisible();
-  await expect(page.locator('#weatherPersonalRestore')).toBeVisible();
+  await expect(page.locator('#locationDialog')).toBeVisible();
+  await expect(page.locator('#weatherPersonalSync')).toHaveCount(0);
+  await expect(page.locator('#weatherPersonalRestore')).toHaveCount(0);
 }
 async function emulateCloud(context,rows){
   await context.route('**/api/personal/places',async route=>{
@@ -151,7 +152,7 @@ test('desktop popup exchanges a one-time code and logout resets the shared accou
   await expect(page.locator('softm-site-account[data-site="weatherhannun"]')).toHaveAttribute('data-auth-state','guest');
 });
 
-test('two devices manually upload and restore places; local regions stay intact and GPS is not uploaded',async({browser})=>{
+test('two signed-in devices automatically merge places; local regions stay intact and GPS is not uploaded',async({browser})=>{
   const cloud=new Map();
   const pc=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
   const android=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
@@ -164,27 +165,15 @@ test('two devices manually upload and restore places; local regions stay intact 
       {name:'GPS 현재위치',lat:37.5,lon:127.1,source:'gps'}
     ]});
     await enterPlaces(first);
-    first.once('dialog',dialog=>dialog.accept());
-    await first.locator('#weatherPersonalSync').click();
-    await expect(first.locator('#weatherPersonalSyncStatus')).toContainText('1개 추가 완료',{timeout:15000});
-    expect(cloud.size).toBe(1);
+    await expect.poll(()=>cloud.size,{timeout:15000}).toBe(1);
     expect([...cloud.values()][0]).toMatchObject({label:'서울',isDefault:false});
 
     const second=await android.newPage();
     await load(second,{signedIn:true,places:[{name:'부산',lat:35.1796,lon:129.0756,source:'manual'}]});
     await enterPlaces(second);
-    second.once('dialog',dialog=>dialog.accept());
-    await second.locator('#weatherPersonalRestore').click();
-    await expect(second.locator('#weatherPersonalSyncStatus')).toContainText('1개 추가',{timeout:15000});
-    let saved=await second.evaluate(()=>JSON.parse(localStorage.getItem('weatherhannun_places_v2')));
+    await expect.poll(()=>cloud.size,{timeout:15000}).toBe(2);
+    const saved=await second.evaluate(()=>JSON.parse(localStorage.getItem('weatherhannun_places_v2')));
     expect(saved.map(p=>p.name)).toEqual(expect.arrayContaining(['부산','서울']));
-    expect(saved).toHaveLength(2);
-    expect(cloud.size).toBe(1);
-
-    second.once('dialog',dialog=>dialog.accept());
-    await second.locator('#weatherPersonalRestore').click();
-    await expect(second.locator('#weatherPersonalSyncStatus')).toContainText('0개 추가',{timeout:15000});
-    saved=await second.evaluate(()=>JSON.parse(localStorage.getItem('weatherhannun_places_v2')));
     expect(saved).toHaveLength(2);
   }finally{
     await pc.close();
