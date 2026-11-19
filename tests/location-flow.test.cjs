@@ -8,7 +8,12 @@ const path=require("node:path");
 const core=require("../location-core.js");
 const source=fs.readFileSync(path.join(__dirname,"../location-manager.js"),"utf8");
 const SEOSAN={name:"서산",lat:36.7845,lon:126.4503};
-function boot({permission="prompt",initial={},pos={latitude:37.50122,longitude:126.76442},fail=null,search="",reverse=null}={}){
+function assertFreshOptions(options){
+ assert.equal(options.enableHighAccuracy,true);
+ assert.equal(options.timeout,12000);
+ assert.equal(options.maximumAge,0);
+}
+function boot({permission="prompt",initial={},pos={latitude:37.50122,longitude:126.76442},fail=null,search="",reverse=null,geo=null}={}){
   const store=new Map(Object.entries(initial).map(([k,v])=>[k,typeof v==="string"?v:JSON.stringify(v)]));
   const localStorage={
     getItem:k=>store.has(k)?store.get(k):null,
@@ -27,7 +32,7 @@ function boot({permission="prompt",initial={},pos={latitude:37.50122,longitude:1
     };
     nodes.set(id,el);return el;
   }
-  const callbacks=new Map(),events=[],calls={geo:0,permission:0};
+  const callbacks=new Map(),events=[],calls={geo:0,permission:0,options:[]};
   const window={
     WeatherLocationCore:core,WeatherReverseGeocoder:reverse,isSecureContext:true,
     addEventListener(type,fn){callbacks.set(type,fn);},
@@ -46,7 +51,7 @@ function boot({permission="prompt",initial={},pos={latitude:37.50122,longitude:1
     addEventListener(){}
   };
   const navigator={
-    geolocation:{getCurrentPosition(ok,bad){calls.geo++;if(fail)bad(fail);else ok({coords:pos});}},
+    geolocation:{getCurrentPosition(ok,bad,options){calls.geo++;calls.options.push(options);if(geo)geo(ok,bad,options,calls.geo);else if(fail)bad(fail);else ok({coords:pos});}},
     permissions:{query:async()=>{calls.permission++;return{state:permission};}}
   };
   class CustomEvent{constructor(type,opts){this.type=type;this.detail=opts.detail;}}
@@ -66,6 +71,7 @@ test("first visit: shows opt-in sheet and does NOT trigger browser prompt before
  assert.equal(t.events.at(-1).detail.lat,37.501);
  assert.equal(t.node("weatherLocationWelcome").open,false);
  assert.equal(t.localStorage.getItem("weatherhannun_geo_intro_v1"),"done");
+ assertFreshOptions(t.calls.options.at(-1));
 });
 test("permission denied: user can opt for manual region without repeated prompting",async()=>{
  const t=boot({permission:"denied"});
@@ -85,6 +91,24 @@ test("manual selection is respected even when GPS permission is granted",async()
  const t=boot({permission:"granted",initial:{weatherhannun_location:{...SEOSAN,source:"manual"}}});
  await t.settle();
  assert.equal(t.calls.geo,0);
+});
+test("현위치 버튼은 자동 위치 확인과 겹쳐도 최신 좌표를 다시 적용한다",async()=>{
+ let completeAuto;
+ const t=boot({permission:"granted",initial:{weatherhannun_location:{name:"이전 GPS",lat:35,lon:127,source:"gps"}},geo(ok,_bad,_options,count){
+  if(count===1){completeAuto=()=>ok({coords:{latitude:35.1,longitude:127.1}});return;}
+  ok({coords:{latitude:37.50122,longitude:126.76442}});
+ }});
+ await t.settle();
+ assert.equal(t.calls.geo,1);
+ const explicit=t.window.WeatherLocationManager.requestCurrentPosition(true);
+ assert.equal(t.calls.geo,1);
+ completeAuto();
+ assert.equal(await explicit,true);
+ await t.settle();
+ assert.equal(t.calls.geo,2);
+ assertFreshOptions(t.calls.options[1]);
+ assert.equal(t.events.at(-1).detail.lat,37.501);
+ assert.equal(t.events.at(-1).detail.lon,126.764);
 });
 test("GPS location can be saved, renamed, deleted and undone",async()=>{
  const t=boot();
