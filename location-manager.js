@@ -14,6 +14,7 @@
   const ACTIVE="weatherhannun_location";
   const DEFAULT={name:"서산",lat:36.7845,lon:126.4503,source:"manual"};
   let active=null,places=[],deleted=null,busy=false,editId=null,initialized=false,reverseVersion=0;
+  let currentPositionRequest=null,currentRequestExplicit=false,queuedExplicitRequest=null;
   const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const stored=(k)=>{try{return JSON.parse(localStorage.getItem(k)||"null");}catch(_){return null;}};
   const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(_){return false;}};
@@ -201,15 +202,29 @@
     status("현재 위치의 추정 주소: "+found.address+" · 지도 데이터 기준이므로 실제 주소와 차이가 있을 수 있습니다.");
   }
   function requestCurrentPosition(explicit=true){
-    if(busy||!canUse())return Promise.resolve(false);
+    if(!canUse())return Promise.resolve(false);
+    if(currentPositionRequest){
+      if(!explicit)return currentPositionRequest;
+      if(currentRequestExplicit){
+        status("최신 현재 위치를 확인하고 있습니다…");
+        return currentPositionRequest;
+      }
+      if(!queuedExplicitRequest){
+        status("자동 위치 확인이 끝나면 최신 현재 위치를 다시 확인합니다…");
+        queuedExplicitRequest=currentPositionRequest.then(
+          ()=>requestCurrentPosition(true),
+          ()=>requestCurrentPosition(true)
+        ).finally(()=>{queuedExplicitRequest=null;});
+      }
+      return queuedExplicitRequest;
+    }
     // 자동 확인은 저장 지역 화면을 그대로 유지한 채 뒤에서 수행한다.
     const progressId=explicit?window.WeatherActionProgress?.begin("현재 위치를 확인하는 중…"):null;
+    currentRequestExplicit=explicit;
     setBusy(true);
     // Calling getCurrentPosition directly in this click handler preserves user activation.
-    return new Promise(resolve=>{
+    const request=new Promise(resolve=>{
       navigator.geolocation.getCurrentPosition(function(position){
-        window.WeatherActionProgress?.end(progressId);
-        setBusy(false);
         const la=position.coords?.latitude,lo=position.coords?.longitude;
         if(!Number.isFinite(la)||!Number.isFinite(lo)){status("좌표를 확인할 수 없습니다. 지역을 선택해 주세요.");return resolve(false);}
         // Weather does not require street-level precision: save approximate coordinates.
@@ -221,8 +236,6 @@
         resolveGPSAddress(loc).catch(()=>status("GPS 위치는 저장했지만 주변 주소를 확인하지 못했습니다."));
         resolve(true);
       },function(error){
-        window.WeatherActionProgress?.end(progressId);
-        setBusy(false);
         const code=error?.code;
         const description=code===1?"위치 권한이 거부되었습니다. 브라우저의 사이트 설정에서 위치 권한을 허용하거나 지역을 직접 선택해 주세요.":
           code===3?"위치 확인 시간이 초과되었습니다. 다시 시도하거나 지역을 검색해 주세요.":
@@ -230,8 +243,20 @@
         status(description);
         if(explicit&&$("weatherLocationWelcome")?.open) $("welcomeHelp").textContent=description;
         resolve(false);
-      },{enableHighAccuracy:false,timeout:explicit?8000:4500,maximumAge:explicit?300000:900000});
+      },explicit?
+        {enableHighAccuracy:true,timeout:12000,maximumAge:0}:
+        {enableHighAccuracy:false,timeout:4500,maximumAge:900000});
     });
+    const tracked=request.finally(()=>{
+      window.WeatherActionProgress?.end(progressId);
+      setBusy(false);
+      if(currentPositionRequest===tracked){
+        currentPositionRequest=null;
+        currentRequestExplicit=false;
+      }
+    });
+    currentPositionRequest=tracked;
+    return tracked;
   }
   async function initialPermissionFlow(){
     const param=new URLSearchParams(location.search);
