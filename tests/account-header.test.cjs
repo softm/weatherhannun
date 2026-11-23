@@ -65,6 +65,6 @@ test("DOMContentLoaded alignment is safe for missing or older hosts", () => {
 
 test("offline shell includes the account header integration", () => {
   const worker=read("sw.js");
-  assert.match(worker,/weatherhannun-shell-v109-automatic-place-sync/);
+  assert.match(worker,/weatherhannun-shell-v110-first-install-hydration/);
   assert.match(worker,/account-header\.js\?v=9/);
 });
