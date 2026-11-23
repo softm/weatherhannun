@@ -1,5 +1,5 @@
 "use strict";
-const CACHE="weatherhannun-shell-v109-automatic-place-sync";
+const CACHE="weatherhannun-shell-v110-first-install-hydration";
 const BASE=self.registration.scope;
 const SHELL=[
   "./hourly-explorer-core.js?v=2","./hourly-explorer.js?v=3","./mobile-experience.css?v=5",
@@ -9,7 +9,7 @@ const SHELL=[
   "./settings.css?v=38","./screen-weather-settings.css?v=34","./screen-weather-settings.js?v=41","./account-header.js?v=9",
   "./agriculture-planner.css?v=34","./agriculture-planner-core.js?v=34","./agriculture-planner.js?v=35",
   "./weather-icons.css?v=17","./weather-icons.js?v=17","./stitch-layout.js?v=18",
-  "./stitch-today.template.html?v=43","./stitch-today.js?v=45","./stitch-today.css?v=25",
+  "./stitch-today.template.html?v=43","./stitch-today.js?v=46","./stitch-today.css?v=25",
   "./stitch-today.utilities.css","./rain-decision-core.js?v=32","./rain-decision-ui.js?v=25",
   "./rain-decision.css?v=22","./outfit-decision-core.js?v=31","./outfit-decision-ui.js?v=26",
   "./outfit-decision.css?v=24","./daily-delta-core.js?v=27","./daily-delta-ui.js?v=29",
@@ -23,7 +23,7 @@ const SHELL=[
   "./data/korea-regions-202602.json","./region-search-core.js?v=16","./region-search-ui.js?v=19",
   "./region-search.css?v=17","./location-core.js?v=18","./reverse-geocode.js","./location-manager.js?v=25","./personal-sync.js?v=3",
   "./location-manager.css?v=24","./briefing-core.js?v=33","./briefing-highlights.js?v=20","./briefing-ui.js?v=22",
-  "./briefing-ui.css?v=23","./briefing-hub.css?v=3","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=56","./alert-rules-core.js?v=34",
+  "./briefing-ui.css?v=23","./briefing-hub.css?v=3","./briefing-hub-core.js?v=1","./briefing-hub.js?v=2","./briefing-highlights.css?v=20","./app.js?v=57","./alert-rules-core.js?v=34",
   "./forecast-insights.js?v=41","./forecast-insights.css?v=27","./manifest.webmanifest?v=18",
   "./dialog-inspired-theme.css?v=1","./icon.svg?v=18","./data-status.html","./official-rights.html"
 ].map(x=>new URL(x,BASE).href);

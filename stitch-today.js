@@ -113,6 +113,10 @@
   if(nodes.weatherVisual&&window.WeatherIcons)window.WeatherIcons.render(nodes.weatherVisual,null,1,'weather-glyph--hero');
   // Turn non-live original demo numbers into placeholders before displaying.
   [nodes.temperature,nodes.high,nodes.low,nodes.feels,nodes.updated].forEach(n=>put(n,'--'));
+  // The imported prototype also contains sample hourly values. Never expose
+  // those as real weather while the first forecast is still loading.
+  nodes.track?.replaceChildren();
+  put(nodes.hourlyBanner,'실제 시간별 예보를 불러오는 중');
   put(nodes.airText,'대기질 예측을 불러오는 중…');
   put(nodes.airAdvice,'PM10·PM2.5 정보를 확인하고 있습니다.');
   var openAir=function(){go('air');};

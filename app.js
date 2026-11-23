@@ -247,6 +247,12 @@
     renderAir();
     window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:{weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt,status:STATE.dataStatus,source:PROVIDER?PROVIDER.sourceRecord({payload:w,fetchedAt:STATE.fetchedAt,cached:STATE.dataStatus!=="live",fallbackReason:STATE.dataStatus==="cached-error"?"network_error":""}):null}}));
   }
+  // The Stitch template is fetched separately and can finish after a fast
+  // cache/API render. Re-emit the current validated state when that surface is
+  // ready so a first install never remains on template placeholders.
+  window.addEventListener("weatherhannun:stitch-ready",function(){
+    if(STATE.weather)renderAll();
+  });
   function renderHourly(){
     var h=STATE.hourly.slice(0,9);
     var preview=$("todayHourlyPreview");
