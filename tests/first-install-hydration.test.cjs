@@ -20,10 +20,11 @@ test('prototype hourly sample values are removed before first forecast render', 
   assert.match(today, /실제 시간별 예보를 불러오는 중/);
 });
 
-test('startup screen waits for forecast outcome and deployed versions stay aligned', () => {
-  assert.match(html, /addEventListener\('weatherhannun:data',f,\{once:true\}\)/);
+test('startup screen waits for forecast outcome, app styles and deployed versions', () => {
+  assert.match(html, /addEventListener\('weatherhannun:data',\(\)=>f\(\),\{once:true\}\)/);
   assert.match(html, /weatherhannun:forecast-result/);
-  assert.match(html, /setTimeout\(f,15000\)/);
+  assert.match(html, /link\[data-hannun-style\]/);
+  assert.match(html, /setTimeout\(\(\)=>f\(true\),15000\)/);
   assert.match(html, /app\.js\?v=58/);
   assert.match(html, /stitch-today\.js\?v=47/);
   assert.match(sw, /app\.js\?v=58/);
