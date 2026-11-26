@@ -261,10 +261,18 @@
    while(oldView.firstChild)old.appendChild(oldView.firstChild);
    oldView.append(host,old);view=host;setup(group);
    document.documentElement.dataset.stitchLive='true';
+   if(window.__weatherhannunLatestData){latest=window.__weatherhannunLatestData;render(latest);}
    window.dispatchEvent(new CustomEvent('weatherhannun:stitch-ready'));
    if(latest)render(latest);
   }).catch(err=>{console.error('Stitch today fallback to existing dashboard',err);});
  }
  window.addEventListener('weatherhannun:data',e=>{latest=e.detail;if(view)render(latest);});
+ window.addEventListener('weatherhannun:forecast-result',e=>{
+  if(e.detail?.ok!==false||latest||window.__weatherhannunLatestData||!nodes)return;
+  put(nodes.temperature,'--');put(nodes.sky,'예보 연결 실패');put(nodes.feels,'잠시 후 다시 시도해 주세요.');
+  put(nodes.updated,'연결 실패');put(nodes.hourlyBanner,'시간별 예보를 불러오지 못했습니다');
+  put(nodes.briefMessage,'예보 연결이 지연되고 있습니다. 새로고침하면 다시 조회합니다.');
+  put(nodes.airText,'대기질 연결 실패');put(nodes.airAdvice,'네트워크 상태를 확인해 주세요.');
+ });
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

@@ -75,7 +75,7 @@
   <script defer src="./national-weather-core.js?v=2"></script>
   <script defer src="./hourly-explorer-core.js?v=2"></script>
   <script defer src="./hourly-explorer.js?v=3"></script>
-  <script defer src="./app.js?v=57"></script>
+  <script defer src="./app.js?v=58"></script>
   <script defer src="./official-data-ui.js?v=44"></script>
   <script defer src="./official-warning-details.js?v=1"></script>
   <script defer src="./location-core.js?v=18"></script>
@@ -89,7 +89,7 @@
   <script defer src="./region-search-ui.js?v=19"></script>
   <script defer src="./rain-decision-core.js?v=32"></script>
   <script defer src="./outfit-decision-core.js?v=31"></script>
-  <script defer src="./stitch-today.js?v=46"></script>
+  <script defer src="./stitch-today.js?v=47"></script>
   <script defer src="./rain-decision-ui.js?v=25"></script>
   <script defer src="./outfit-decision-ui.js?v=26"></script>
   <script defer src="./screen-weather-settings.js?v=41"></script>
@@ -100,7 +100,7 @@
   <style id="hannunStartupStyle">.hannun-startup{position:fixed;z-index:2147483000;inset:0;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#f7fbf9,#e6f1ec 52%,#dbeae3);font-family:"Noto Sans KR",system-ui,sans-serif;color:#173f35;opacity:1;visibility:visible;transition:opacity .28s ease,visibility .28s ease}.hannun-startup.is-ready{opacity:0;visibility:hidden;pointer-events:none}.hannun-startup__card{text-align:center}.hannun-startup__mark{display:grid;place-items:center;width:72px;height:72px;margin:0 auto 16px;border-radius:22px;background:#17695b;box-shadow:0 14px 34px #173f3530}.hannun-startup__mark svg{width:44px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.hannun-startup strong{display:block;font-size:25px;letter-spacing:-.05em}.hannun-startup p{margin:10px 0 15px;color:#637970;font-size:13px;font-weight:600}.hannun-startup__track{display:block;width:180px;height:6px;overflow:hidden;border-radius:999px;background:#17695b20}.hannun-startup__track i{display:block;width:42%;height:100%;border-radius:inherit;background:#17695b;animation:hannun-startup-progress 1.15s ease-in-out infinite}@keyframes hannun-startup-progress{0%{transform:translateX(-110%)}100%{transform:translateX(340%)}}@media(prefers-reduced-motion:reduce){.hannun-startup{transition:none}.hannun-startup__track i{animation-duration:2.4s}}</style>
 </head>
 <body>
-  <div class="hannun-startup" id="hannunStartup" role="status" aria-live="polite" aria-label="날씨한눈 시작 화면"><div class="hannun-startup__card"><span class="hannun-startup__mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="m6 13 14-7 14 7-14 7Z"/><path d="m6 20 14 7 14-7M6 27l14 7 14-7"/></svg></span><strong>날씨한눈</strong><p>서비스를 준비하고 있어요</p><span class="hannun-startup__track" aria-hidden="true"><i></i></span></div></div><script>(()=>{const e=document.getElementById('hannunStartup'),s=performance.now();let d=false;const f=()=>{if(d)return;d=true;setTimeout(()=>{e.classList.add('is-ready');setTimeout(()=>e.remove(),320)},Math.max(0,360-(performance.now()-s)))};addEventListener('weatherhannun:data',f,{once:true});addEventListener('weatherhannun:forecast-result',event=>{if(event.detail?.ok===false)f()});setTimeout(f,8000)})();</script>
+  <div class="hannun-startup" id="hannunStartup" role="status" aria-live="polite" aria-label="날씨한눈 시작 화면"><div class="hannun-startup__card"><span class="hannun-startup__mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="m6 13 14-7 14 7-14 7Z"/><path d="m6 20 14 7 14-7M6 27l14 7 14-7"/></svg></span><strong>날씨한눈</strong><p>서비스를 준비하고 있어요</p><span class="hannun-startup__track" aria-hidden="true"><i></i></span></div></div><script>(()=>{const e=document.getElementById('hannunStartup'),s=performance.now();let d=false;const f=()=>{if(d)return;d=true;setTimeout(()=>{e.classList.add('is-ready');setTimeout(()=>e.remove(),320)},Math.max(0,360-(performance.now()-s)))};addEventListener('weatherhannun:data',f,{once:true});addEventListener('weatherhannun:forecast-result',event=>{if(event.detail?.ok===false)f()});setTimeout(f,15000)})();</script>
   <div class="app-shell">
     <header class="topbar">
       <div class="top-inner">

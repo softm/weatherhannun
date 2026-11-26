@@ -245,7 +245,11 @@
     renderDecisions();
     renderActivity();
     renderAir();
-    window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:{weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt,status:STATE.dataStatus,source:PROVIDER?PROVIDER.sourceRecord({payload:w,fetchedAt:STATE.fetchedAt,cached:STATE.dataStatus!=="live",fallbackReason:STATE.dataStatus==="cached-error"?"network_error":""}):null}}));
+    var detail={weather:w,loc:STATE.loc,air:STATE.air,at:STATE.fetchedAt,status:STATE.dataStatus,source:PROVIDER?PROVIDER.sourceRecord({payload:w,fetchedAt:STATE.fetchedAt,cached:STATE.dataStatus!=="live",fallbackReason:STATE.dataStatus==="cached-error"?"network_error":""}):null};
+    // CustomEvent is transient. Keep the last validated snapshot as a replay
+    // value so an asynchronously mounted home surface cannot miss hydration.
+    window.__weatherhannunLatestData=detail;
+    window.dispatchEvent(new CustomEvent("weatherhannun:data",{detail:detail}));
   }
   // The Stitch template is fetched separately and can finish after a fast
   // cache/API render. Re-emit the current validated state when that surface is
