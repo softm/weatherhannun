@@ -25,9 +25,9 @@ test('startup screen waits for forecast outcome, app styles and deployed version
   assert.match(html, /weatherhannun:forecast-result/);
   assert.match(html, /link\[data-hannun-style\]/);
   assert.match(html, /setTimeout\(\(\)=>f\(true\),15000\)/);
-  assert.match(html, /app\.js\?v=58/);
+  assert.match(html, /app\.js\?v=59/);
   assert.match(html, /stitch-today\.js\?v=47/);
-  assert.match(sw, /app\.js\?v=58/);
+  assert.match(sw, /app\.js\?v=59/);
   assert.match(sw, /stitch-today\.js\?v=47/);
 });
 

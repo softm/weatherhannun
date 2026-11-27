@@ -4,6 +4,7 @@ const fs=require("node:fs");
 const vm=require("node:vm");
 const path=require("node:path");
 const source=fs.readFileSync(path.join(__dirname,"../region-search-ui.js"),"utf8");
+const app=fs.readFileSync(path.join(__dirname,"../app.js"),"utf8");
 const page=fs.readFileSync(path.join(__dirname,"../index.html"),"utf8");
 const styles=fs.readFileSync(path.join(__dirname,"../region-search.css"),"utf8");
 const data=JSON.parse(fs.readFileSync(path.join(__dirname,"../data/korea-regions-202602.json"),"utf8"));
@@ -13,6 +14,11 @@ test("지역 검색 화면은 내부 데이터 출처와 장황한 후보 설명
  assert.doesNotMatch(page,/regionSearchSource|전국 법정동·읍·면·리 자료 준비 중/);
  assert.doesNotMatch(page,/regionSearchHelp|가장 알맞은 주소 단계|가장 알맞은 주소/);
  assert.doesNotMatch(source,/가장 알맞은 주소|가장 적합/);
+});
+test("지역 관리 화면은 검색창 대신 닫기 버튼에 초점을 둔다",()=>{
+ const openDialog=app.match(/function searchDialogOpen\(\)\{([\s\S]*?)\n  \}/)?.[1]||"";
+ assert.match(openDialog,/\$\("dialogClose"\)\.focus\(\{preventScroll:true\}\)/);
+ assert.doesNotMatch(openDialog,/\$\("locationSearch"\)\.focus/);
 });
 function createHarness(){
   const nodes=new Map(),events=[],requests=[];
