@@ -87,7 +87,10 @@ test('visible narrator, 10/30-second modes, saved region and temporary map selec
 
 test('address search, GPS, refresh loading, custom dates and details links',async({page,context})=>{
  await context.grantPermissions(['geolocation']);await context.setGeolocation({latitude:37.5665,longitude:126.978});await start(page);
- await page.locator('[data-location-manage]').click();await page.locator('#locationSearch').fill('옥길동');
+ await page.locator('[data-location-manage]').click();
+ await expect(page.locator('#dialogClose')).toBeFocused();
+ await expect(page.locator('#locationSearch')).not.toBeFocused();
+ await page.locator('#locationSearch').fill('옥길동');
  await expect(page.locator('[data-region-choice]').first()).toBeVisible();await page.locator('[data-region-choice]').first().click();
  await expect(page.locator('.header-current-button strong')).toContainText('옥길');
  await page.locator('#dialogClose').click();await page.locator('[data-geo-quick]').click();await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('weatherhannun_location')).source)).toBe('gps');
