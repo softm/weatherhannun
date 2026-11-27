@@ -612,7 +612,7 @@
   }
   function searchDialogOpen(){
     $("locationDialog").showModal();
-    $("locationSearch").focus();
+    $("dialogClose").focus({preventScroll:true});
   }
   function renderPresets(){
     $("presetCities").innerHTML=CITY_LIST.map(function(c,i){return '<button data-preset="'+i+'">'+safe(c.name)+'</button>';}).join("");
